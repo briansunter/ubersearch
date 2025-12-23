@@ -7,10 +7,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { EngineConfig } from "../../../src/config/types";
-import { container } from "../../../src/core/container";
-import { ProviderFactory } from "../../../src/core/provider/ProviderFactory";
-import { PluginRegistry } from "../../../src/plugin";
+import type { EngineConfig } from "../../../../src/config/types";
+import { container } from "../../../../src/core/container";
+import { ProviderFactory } from "../../../../src/core/provider/ProviderFactory";
+import { PluginRegistry } from "../../../../src/plugin";
 
 describe("ProviderFactory", () => {
   beforeEach(() => {

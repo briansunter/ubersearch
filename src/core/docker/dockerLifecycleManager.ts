@@ -71,8 +71,27 @@ export class DockerLifecycleManager {
       return;
     }
 
-    this.initPromise = this.performInit();
+    this.initPromise = this.performInit().catch((error) => {
+      log.error("Initialization failed:", error);
+      this.initialized = false;
+      throw error;
+    });
     return this.initPromise;
+  }
+
+  /**
+   * Wrap a promise with a timeout
+   */
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    operation: string,
+  ): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]);
   }
 
   private async performInit(): Promise<void> {
@@ -80,16 +99,20 @@ export class DockerLifecycleManager {
       return;
     }
 
-    // Check if Docker is available
-    const dockerAvailable = await DockerComposeHelper.isDockerAvailable();
+    // Check if Docker is available (with timeout)
+    const dockerAvailable = await this.withTimeout(
+      DockerComposeHelper.isDockerAvailable(),
+      10000,
+      "Docker availability check",
+    );
     if (!dockerAvailable) {
       log.warn("Docker is not available. Cannot auto-start container.");
       this.initialized = true;
       return;
     }
 
-    // Check if container is already running
-    const isRunning = await this.healthcheck();
+    // Check if container is already running (with timeout)
+    const isRunning = await this.withTimeout(this.healthcheck(), 5000, "Initial health check");
     if (isRunning) {
       log.info("Container is already running.");
       this.initialized = true;
@@ -144,7 +167,7 @@ export class DockerLifecycleManager {
     if (this.config.healthEndpoint) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
 
         const response = await fetch(this.config.healthEndpoint, {
           signal: controller.signal,

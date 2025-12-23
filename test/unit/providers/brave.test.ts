@@ -5,9 +5,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type { SearchQuery } from "../../src/core/types";
-import { SearchError } from "../../src/core/types";
-import { BraveProvider } from "../../src/providers/brave";
+import type { SearchQuery } from "../../../src/core/types";
+import { SearchError } from "../../../src/core/types";
+import { BraveProvider } from "../../../src/providers/brave";
 
 // Store original process state
 const originalProcess = process;

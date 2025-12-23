@@ -30,7 +30,7 @@ export class DockerComposeHelper {
   ): Promise<string> {
     const cmd = `docker compose -f "${this.composeFile}" ${args.join(" ")}`;
     const cwd = options.cwd || this.getComposeDir();
-    const timeout = options.timeout || 60000;
+    const timeout = options.timeout || 30000;
 
     try {
       const { stdout, stderr } = await execAsync(cmd, {
@@ -46,11 +46,21 @@ export class DockerComposeHelper {
       return stdout;
     } catch (error: unknown) {
       const err = error as { message?: string; stdout?: string; stderr?: string };
-      throw new Error(
-        `Docker Compose command failed: ${err.message ?? "Unknown error"}\nCommand: ${cmd}\n` +
-          (err.stdout ? `Output: ${err.stdout}\n` : "") +
-          (err.stderr ? `Error: ${err.stderr}\n` : ""),
-      );
+      const errorMessage = err.message ?? "Unknown error";
+      const timedOut = errorMessage.includes("timed out") || errorMessage.includes("ETIMEDOUT");
+
+      const errorDetails = [
+        `Docker Compose command ${timedOut ? "timed out" : "failed"}: ${errorMessage}`,
+        `Command: ${cmd}`,
+      ];
+      if (err.stdout) {
+        errorDetails.push(`Output: ${err.stdout}`);
+      }
+      if (err.stderr) {
+        errorDetails.push(`Error: ${err.stderr}`);
+      }
+
+      throw new Error(errorDetails.join("\n"));
     }
   }
 

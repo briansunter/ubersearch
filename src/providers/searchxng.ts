@@ -30,9 +30,7 @@ export class SearchxngProvider
     const initTimeoutMs = config.initTimeoutMs ?? 60000;
 
     const projectRoot = require("node:path").dirname(
-      require("node:path").dirname(
-        require("node:path").dirname(require.main?.filename || __filename),
-      ),
+      require("node:path").dirname(require.main?.filename || __filename),
     );
     this.lifecycleManager = new DockerLifecycleManager({
       containerName: config.containerName,
@@ -70,31 +68,16 @@ export class SearchxngProvider
   }
 
   async search(query: SearchQuery): Promise<SearchResponse> {
-    // Verify health before making request
-    let isHealthy = await this.healthcheck();
-    if (!isHealthy) {
-      // Attempt to auto-start the container if not healthy
-      console.log(`[SearXNG] Container not healthy, attempting auto-start...`);
-      try {
-        await this.init();
-        // Wait a bit for the container to fully start
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        // Check health again
-        isHealthy = await this.healthcheck();
-      } catch (initError) {
-        console.error(`[SearXNG] Failed to auto-start container:`, initError);
-      }
+    const isHealthy = await this.healthcheck();
 
-      if (!isHealthy) {
-        throw new SearchError(
-          this.id,
-          "provider_unavailable",
-          "SearXNG container is not healthy. Check logs with: docker compose logs -f searxng",
-        );
-      }
+    if (!isHealthy) {
+      throw new SearchError(
+        this.id,
+        "provider_unavailable",
+        "SearXNG container is not healthy. Check logs with: docker compose logs -f searxng",
+      );
     }
 
-    // Build URL with parameters
     const limit = query.limit ?? this.defaultLimit;
     const url = buildUrl(this.config.endpoint, {
       q: query.query,
@@ -104,7 +87,6 @@ export class SearchxngProvider
       safesearch: 0,
     });
 
-    // Make request with error handling
     const { data: json, tookMs } = await fetchWithErrorHandling<SearxngApiResponse>(
       this.id,
       url,
@@ -124,7 +106,6 @@ export class SearchxngProvider
 
     this.validateResults(results, "SearXNG");
 
-    // Map to normalized format
     const items: SearchResultItem[] = results.map((r: SearxngSearchResult) => ({
       title: r.title ?? r.url ?? "#",
       url: r.url ?? "#",
@@ -133,7 +114,6 @@ export class SearchxngProvider
       sourceEngine: r.engine ?? this.id,
     }));
 
-    // Apply limit
     const limitedItems = items.slice(0, limit);
 
     return {
@@ -166,6 +146,6 @@ export class SearchxngProvider
   }
 
   isLifecycleManaged(): boolean {
-    return true; // This provider manages lifecycle
+    return true;
   }
 }

@@ -16,7 +16,7 @@ const {
   MultiSearchConfigSchema,
   EngineConfigSchema,
   CliInputSchema,
-} = require("../../src/config/validation.ts");
+} = require("../../../src/config/validation.ts");
 
 describe("Configuration Validation Tests", () => {
   describe("EngineConfigBaseSchema", () => {

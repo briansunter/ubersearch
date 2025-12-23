@@ -10,7 +10,11 @@ import { beforeEach, describe, expect, mock, test } from "bun:test";
 import type { MultiSearchConfig } from "../../../src/config/types";
 import type { CreditManager } from "../../../src/core/credits";
 import { MultiSearchOrchestrator } from "../../../src/core/orchestrator";
-import type { ProviderMetadata, ProviderRegistry, SearchProvider } from "../../../src/core/provider";
+import type {
+  ProviderMetadata,
+  ProviderRegistry,
+  SearchProvider,
+} from "../../../src/core/provider";
 import type { SearchQuery, SearchResponse } from "../../../src/core/types";
 
 // Create a fake provider for testing

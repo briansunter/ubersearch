@@ -81,6 +81,7 @@ export async function bootstrapContainer(
   // Register provider registry
   container.singleton(ServiceKeys.PROVIDER_REGISTRY, () => {
     const registry = new ProviderRegistry();
+    const failedProviders: string[] = [];
 
     // Register all enabled providers
     for (const engineConfig of config.engines) {
@@ -91,18 +92,24 @@ export async function bootstrapContainer(
       try {
         const provider = createProvider(engineConfig);
         registry.register(provider);
+        log.info(`Registered provider: ${engineConfig.id}`);
       } catch (error) {
-        log.warn(
-          `Failed to register provider ${engineConfig.id}: ${error instanceof Error ? error.message : String(error)}`,
-        );
-        // Continue with other providers
+        const errorMsg = error instanceof Error ? error.message : String(error);
+        log.warn(`Failed to register provider ${engineConfig.id}: ${errorMsg}`);
+        failedProviders.push(engineConfig.id);
       }
     }
 
-    if (registry.list().length === 0) {
+    const availableProviders = registry.list();
+    if (availableProviders.length === 0) {
       throw new Error(
-        "No providers could be registered. Check your configuration and environment variables.",
+        `No providers could be registered. Failed providers: ${failedProviders.join(", ")}. ` +
+          "Check your configuration and environment variables.",
       );
+    }
+
+    if (failedProviders.length > 0) {
+      log.warn(`Some providers failed to initialize: ${failedProviders.join(", ")}`);
     }
 
     return registry;

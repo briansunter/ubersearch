@@ -7,7 +7,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
-import { DockerComposeHelper } from "../../../src/core/docker/dockerComposeHelper";
+import { DockerComposeHelper } from "../../../../src/core/docker/dockerComposeHelper";
 
 describe("DockerComposeHelper", () => {
   const composeFile = "./docker-compose.yml";

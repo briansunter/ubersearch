@@ -5,10 +5,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import type { TavilyConfig } from "../../src/config/types";
-import type { SearchQuery } from "../../src/core/types";
-import { SearchError } from "../../src/core/types";
-import { TavilyProvider } from "../../src/providers/tavily";
+import type { TavilyConfig } from "../../../src/config/types";
+import type { SearchQuery } from "../../../src/core/types";
+import { SearchError } from "../../../src/core/types";
+import { TavilyProvider } from "../../../src/providers/tavily";
 
 // Store original process state
 const originalProcess = process;

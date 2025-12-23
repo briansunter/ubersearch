@@ -4,13 +4,13 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { EngineConfig } from "../../../src/config/types";
-import { CreditManager } from "../../../src/core/credits/CreditManager";
+import type { EngineConfig } from "../../../../src/config/types";
+import { CreditManager } from "../../../../src/core/credits/CreditManager";
 import type {
   CreditState,
   CreditStateProvider,
-} from "../../../src/core/credits/CreditStateProvider";
-import type { EngineId } from "../../../src/core/types";
+} from "../../../../src/core/credits/CreditStateProvider";
+import type { EngineId } from "../../../../src/core/types";
 
 // Mock CreditStateProvider for testing
 class MockCreditStateProvider implements CreditStateProvider {

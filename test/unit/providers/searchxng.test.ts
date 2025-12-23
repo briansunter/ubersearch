@@ -16,7 +16,7 @@ import {
   createTestSearchxngConfig,
   setupMockFetch,
   setupTestEnv,
-} from "../__helpers__/docker-mocks";
+} from "../../__helpers__/docker-mocks";
 
 // Store original process state
 const originalEnv = { ...process.env };

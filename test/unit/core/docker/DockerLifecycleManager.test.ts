@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import {
   type DockerLifecycleConfig,
   DockerLifecycleManager,
-} from "../../../src/core/docker/dockerLifecycleManager";
-import { setupMockFetch } from "../../__helpers__/docker-mocks";
+} from "../../../../src/core/docker/dockerLifecycleManager";
+import { setupMockFetch } from "../../../__helpers__/docker-mocks";
 
 // Store original fetch
 const originalFetch = global.fetch;

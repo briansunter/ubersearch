@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { CreditState } from "../../../src/core/credits/CreditStateProvider";
-import { FileCreditStateProvider } from "../../../src/core/credits/FileCreditStateProvider";
+import type { CreditState } from "../../../../src/core/credits/CreditStateProvider";
+import { FileCreditStateProvider } from "../../../../src/core/credits/FileCreditStateProvider";
 
 describe("FileCreditStateProvider", () => {
   let tempDir: string;
