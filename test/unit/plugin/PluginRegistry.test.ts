@@ -4,10 +4,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import type { EngineConfigBase } from "../../src/config/types";
-import type { ProviderMetadata, SearchProvider } from "../../src/core/provider";
-import type { EngineId, SearchQuery, SearchResponse } from "../../src/core/types";
-import { getPluginRegistry, type PluginDefinition, PluginRegistry } from "../../src/plugin";
+import type { EngineConfigBase } from "../../../src/config/types";
+import type { ProviderMetadata, SearchProvider } from "../../../src/core/provider";
+import type { EngineId, SearchQuery, SearchResponse } from "../../../src/core/types";
+import { getPluginRegistry, type PluginDefinition, PluginRegistry } from "../../../src/plugin";
 
 // Mock provider for testing
 class MockProvider implements SearchProvider {

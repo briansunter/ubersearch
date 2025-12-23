@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { configExists, getConfigPaths, loadConfig } from "../../src/config/load";
-import type { MultiSearchConfig } from "../../src/config/types";
-import { PluginRegistry } from "../../src/plugin";
+import { configExists, getConfigPaths, loadConfig } from "../../../src/config/load";
+import type { MultiSearchConfig } from "../../../src/config/types";
+import { PluginRegistry } from "../../../src/plugin";
 
 describe("Config Loader", () => {
   let testDir: string;

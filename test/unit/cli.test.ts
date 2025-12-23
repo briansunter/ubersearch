@@ -99,8 +99,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -122,8 +122,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -139,8 +139,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -156,8 +156,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -229,8 +229,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -251,8 +251,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -269,8 +269,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -287,8 +287,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -304,8 +304,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -323,8 +323,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -340,8 +340,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -357,8 +357,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
@@ -375,8 +375,8 @@ describe("CLI Tests", () => {
 
       try {
         // Delete the module from cache to force re-import
-        delete require.cache[require.resolve("../src/cli.ts")];
-        await import("../src/cli.ts");
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
       } catch (error: unknown) {
         // Expected to fail due to process.exit simulation
         if (!(error instanceof Error) || !error.message.includes("Process.exit")) {

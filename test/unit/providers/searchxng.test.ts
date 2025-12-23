@@ -8,9 +8,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
-import type { SearchQuery } from "../../src/core/types";
-import { SearchError } from "../../src/core/types";
-import { SearchxngProvider } from "../../src/providers/searchxng";
+import type { SearchQuery } from "../../../src/core/types";
+import { SearchError } from "../../../src/core/types";
+import { SearchxngProvider } from "../../../src/providers/searchxng";
 import {
   createMockSearxngResponse,
   createTestSearchxngConfig,

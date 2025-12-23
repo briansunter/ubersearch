@@ -3,9 +3,9 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import type { ILifecycleProvider, ProviderMetadata, SearchProvider } from "../../src/core/provider";
-import type { EngineId, SearchQuery, SearchResponse } from "../../src/core/types";
-import { hasLifecycleManagement, isLifecycleProvider } from "../../src/plugin/types";
+import type { ILifecycleProvider, ProviderMetadata, SearchProvider } from "../../../src/core/provider";
+import type { EngineId, SearchQuery, SearchResponse } from "../../../src/core/types";
+import { hasLifecycleManagement, isLifecycleProvider } from "../../../src/plugin/types";
 
 // Mock basic provider (no lifecycle)
 class BasicProvider implements SearchProvider {

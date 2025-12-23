@@ -14,7 +14,7 @@ import {
   registerBuiltInPlugins,
   searchxngPlugin,
   tavilyPlugin,
-} from "../../src/plugin";
+} from "../../../src/plugin";
 
 describe("Built-in Plugins", () => {
   let registry: PluginRegistry;

@@ -4,7 +4,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { Container } from "../../src/core/container";
+import { Container } from "../../../src/core/container";
 
 // Test interfaces and implementations
 interface IService {
