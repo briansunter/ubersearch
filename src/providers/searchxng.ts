@@ -4,6 +4,7 @@
  * Integrates SearXNG with auto-start Docker container management
  */
 
+import { dirname } from "node:path";
 import type { SearchxngConfig as BaseSearchxngConfig } from "../config/types";
 import { DockerLifecycleManager } from "../core/docker/dockerLifecycleManager";
 import type { ILifecycleProvider, ProviderMetadata } from "../core/provider";
@@ -27,11 +28,10 @@ export class SearchxngProvider
 
     const autoStart = config.autoStart ?? true;
     const autoStop = config.autoStop ?? true;
-    const initTimeoutMs = config.initTimeoutMs ?? 60000;
+    const initTimeoutMs = config.initTimeoutMs ?? PROVIDER_DEFAULTS.SEARXNG_INIT_TIMEOUT_MS;
 
-    const projectRoot = require("node:path").dirname(
-      require("node:path").dirname(require.main?.filename || __filename),
-    );
+    const projectRoot = config.composeFile ? dirname(config.composeFile) : process.cwd();
+
     this.lifecycleManager = new DockerLifecycleManager({
       containerName: config.containerName,
       composeFile: config.composeFile,

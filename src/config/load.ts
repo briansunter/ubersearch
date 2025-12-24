@@ -11,13 +11,30 @@
  * 3. XDG config ($XDG_CONFIG_HOME/multi-search/config.{ts,json})
  */
 
+import { dirname, join } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PluginRegistry, registerBuiltInPlugins } from "../plugin";
 import type { ConfigFactory, ExtendedSearchConfig } from "./defineConfig";
-import type { MultiSearchConfig } from "./types";
 import { formatValidationErrors, validateConfigSafe } from "./validation";
+
+/**
+ * Get package root directory
+ * Handles both development (src/) and bundled (dist/) environments
+ */
+function getPackageRoot(): string {
+  const currentFile = fileURLToPath(import.meta.url);
+  const currentDir = dirname(currentFile);
+
+  // Check if we're in dist/ or src/
+  if (currentDir.includes("/dist")) {
+    // Bundled: dist/cli.js -> go up 1 level
+    return dirname(currentDir);
+  }
+  // Development: src/config/load.ts -> go up 2 levels
+  return dirname(dirname(currentDir));
+}
 
 /** Supported config file extensions */
 const CONFIG_EXTENSIONS = [".ts", ".json"] as const;
@@ -71,8 +88,8 @@ export function getConfigPaths(explicitPath?: string): string[] {
 /**
  * Check if a path is a TypeScript config
  */
-function isTypeScriptConfig(path: string): boolean {
-  return path.endsWith(".ts");
+function isTypeScriptConfig(filePath: string): boolean {
+  return filePath.endsWith(".ts");
 }
 
 /**
@@ -146,6 +163,39 @@ export interface LoadConfigOptions {
  * const config = await loadConfig(undefined, { skipValidation: true });
  * ```
  */
+/**
+ * Get default configuration when no config file is found
+ * Uses SearXNG as a sensible default (no API key required)
+ */
+function getDefaultConfig(): ExtendedSearchConfig {
+  const packageRoot = getPackageRoot();
+  const composeFile = join(packageRoot, "providers", "searxng", "docker-compose.yml");
+
+  return {
+    defaultEngineOrder: ["searchxng"],
+    engines: [
+      {
+        id: "searchxng",
+        type: "searchxng",
+        enabled: true,
+        displayName: "SearXNG (Local)",
+        apiKeyEnv: "SEARXNG_API_KEY",
+        endpoint: "http://localhost:8888/search",
+        composeFile,
+        containerName: "searxng",
+        healthEndpoint: "http://localhost:8888/healthz",
+        defaultLimit: 10,
+        monthlyQuota: 10000,
+        creditCostPerSearch: 0,
+        lowCreditThresholdPercent: 80,
+        autoStart: true,
+        autoStop: true,
+        initTimeoutMs: 60000,
+      },
+    ],
+  };
+}
+
 export async function loadConfig(
   explicitPath?: string,
   options: LoadConfigOptions = {},
@@ -201,38 +251,19 @@ export async function loadConfig(
     }
   }
 
-  // Build helpful error message with example paths
-  const localPaths = getLocalConfigPaths();
-  const xdgPaths = getXdgConfigPaths();
+  // No config file found - use default configuration
+  console.warn("No config file found. Using default configuration (SearXNG).");
+  console.warn("Create a config file for custom providers: multi-search.config.json");
 
-  throw new Error(
-    `No config file found. Looked in: ${paths.join(", ")}\n\n` +
-      `Create a config file at one of these locations:\n` +
-      `  TypeScript (recommended):\n` +
-      `    - ${localPaths[0]}\n` +
-      `    - ${xdgPaths[0]}\n` +
-      `  JSON:\n` +
-      `    - ${localPaths[1]}\n` +
-      `    - ${xdgPaths[1]}\n` +
-      `\nExample TypeScript config (multi-search.config.ts):\n` +
-      `import { defineConfig, defineTavily } from 'multi-search';\n\n` +
-      `export default defineConfig({\n` +
-      `  defaultEngineOrder: ['tavily'],\n` +
-      `  engines: [\n` +
-      `    defineTavily({\n` +
-      `      id: 'tavily',\n` +
-      `      enabled: true,\n` +
-      `      displayName: 'Tavily Search',\n` +
-      `      apiKeyEnv: 'TAVILY_API_KEY',\n` +
-      `      endpoint: 'https://api.tavily.com/search',\n` +
-      `      searchDepth: 'basic',\n` +
-      `      monthlyQuota: 1000,\n` +
-      `      creditCostPerSearch: 1,\n` +
-      `      lowCreditThresholdPercent: 80,\n` +
-      `    }),\n` +
-      `  ],\n` +
-      `});\n`,
-  );
+  const defaultConfig = getDefaultConfig();
+
+  // Register plugins for default config
+  const pluginRegistry = registry ?? PluginRegistry.getInstance();
+  if (!skipBuiltInPlugins) {
+    await registerBuiltInPlugins(pluginRegistry);
+  }
+
+  return defaultConfig;
 }
 
 /**
@@ -278,7 +309,9 @@ export function loadConfigSync(
     }
   }
 
-  throw new Error(`No JSON config file found. Use loadConfig() for TypeScript support.`);
+  console.warn("No config file found. Using default configuration (SearXNG).");
+  console.warn("Create a config file for custom providers: multi-search.config.json");
+  return getDefaultConfig();
 }
 
 /**

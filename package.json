@@ -37,6 +37,8 @@
     "test:verbose": "DEBUG_TESTS=1 SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts test/",
     "test:docker": "SKIP_DOCKER_TESTS=false bun test --preload ./test/setup.ts test/integration/",
     "mcp": "bun run mcp-server.ts",
-    "mcp:test": "bun run scripts/test-mcp.ts"
+    "mcp:test": "bun run scripts/test-mcp.ts",
+    "build": "bun run scripts/build.ts",
+    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/multi-search"
   }
 }
