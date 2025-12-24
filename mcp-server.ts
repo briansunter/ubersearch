@@ -45,6 +45,14 @@ interface HealthResult {
   message?: string;
 }
 
+// Helper function with timeout
+async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
 // MCP Server entry point for Claude Desktop
 export async function serve() {
   const tools: MCPTool[] = [
@@ -157,16 +165,20 @@ export async function serve() {
           const engines = args.engines
             ? args.engines.split(",").map((e: string) => e.trim())
             : undefined;
-          result = await multiSearch({
-            query: args.query,
-            limit: args.limit,
-            engines,
-            strategy: args.strategy,
-          });
+          result = await withTimeout(
+            multiSearch({
+              query: args.query,
+              limit: args.limit,
+              engines,
+              strategy: args.strategy,
+            }),
+            60000,
+            "multiSearch",
+          );
         } else if (name === "multi_search_credits") {
-          result = await getCreditStatus();
+          result = await withTimeout(getCreditStatus(), 10000, "getCreditStatus");
         } else if (name === "multi_search_health") {
-          const container = await bootstrapContainer();
+          const container = await withTimeout(bootstrapContainer(), 30000, "bootstrapContainer");
           const registry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
           const providers = registry.list();
 
@@ -174,7 +186,7 @@ export async function serve() {
           for (const provider of providers) {
             if (isLifecycleProvider(provider)) {
               try {
-                await provider.healthcheck();
+                await withTimeout(provider.healthcheck(), 5000, `healthcheck ${provider.id}`);
                 results.push({ engineId: provider.id, status: "healthy" });
               } catch (error) {
                 results.push({

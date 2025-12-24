@@ -71,6 +71,18 @@ export class SearchxngProvider
     const isHealthy = await this.healthcheck();
 
     if (!isHealthy) {
+      const isInitializing = !!(await (this.lifecycleManager as any).initPromise);
+      if (!isInitializing) {
+        try {
+          console.log(`[SearXNG] Container not healthy, attempting auto-start...`);
+          await this.init();
+        } catch (initError) {
+          console.error(`[SearXNG] Failed to auto-start container:`, initError);
+        }
+      }
+    }
+
+    if (!isHealthy) {
       throw new SearchError(
         this.id,
         "provider_unavailable",
