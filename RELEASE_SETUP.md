@@ -1,6 +1,18 @@
 # Semantic Release Setup Guide
 
-This document describes the automated release setup for the `ubersearch` package using semantic-release with GitHub Actions and OIDC.
+This document describes the automated release setup for the `ubersearch` package using semantic-release with GitHub Actions.
+
+## ⚠️ Important Note on OIDC/Trusted Publisher
+
+**Current Status**: Using npm token authentication
+- semantic-release's npm plugin **does not yet fully support** OIDC/Trusted Publisher
+- Tracking issue: [npm/cli#8525](https://github.com/npm/cli/issues/8525)
+- Using traditional npm token with provenance enabled for security
+
+**To use OIDC in the future** (when semantic-release supports it):
+- Revert workflow to use OIDC token setup
+- Remove `NPM_TOKEN` from workflow
+- Ensure Trusted Publisher is configured in npm package settings
 
 ## Overview
 
@@ -31,32 +43,31 @@ The release workflow automatically:
 
 ## GitHub Repository Configuration
 
-### Required Permissions
+### Required Setup
 
-The workflow requires the following GitHub Actions permissions:
+**1. Create npm automation token** (Required for now):
+   - Go to: https://www.npmjs.com/settings/your-name/tokens
+   - Click "Create New Token"
+   - Select "Automation" token type
+   - Copy the token
 
-1. Go to: **Settings** → **Actions** → **General**
-2. Under **Workflow permissions**, select:
-   - ✅ **Read and write permissions**
-   - ✅ **Allow GitHub Actions to create and approve pull requests** (if needed)
-3. Click **Save**
+**2. Add token to GitHub Secrets**:
+   - Go to: **Settings** → **Secrets and variables** → **Actions**
+   - Click "New repository secret"
+   - Name: `NPM_TOKEN`
+   - Paste your npm automation token
+   - Click "Add secret"
+
+**3. GitHub Actions permissions**:
+   - Go to: **Settings** → **Actions** → **General**
+   - Under **Workflow permissions**, select:
+     - ✅ **Read and write permissions**
+   - Click **Save**
 
 These permissions allow the workflow to:
 - Create git tags for version releases
 - Push commits that update package.json
 - Create GitHub releases with release notes
-
-### OIDC Setup
-
-The workflow uses GitHub's OIDC (OpenID Connect) to authenticate with npm without storing long-lived tokens.
-
-**How it works**:
-1. GitHub Actions generates an OIDC token (`id-token: write` permission)
-2. The workflow passes this token to semantic-release
-3. semantic-release uses it with `NPM_CONFIG_PROVENANCE: true`
-4. npm validates the token and publishes with provenance
-
-**No additional setup required** - GitHub and npm handle OIDC automatically for public packages!
 
 ## Conventional Commit Format
 
