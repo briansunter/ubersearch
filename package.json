@@ -1,10 +1,10 @@
 {
-  "name": "ai-search",
+  "name": "ubersearch",
+  "version": "0.0.0-development",
   "module": "src/index.ts",
   "type": "module",
-  "private": true,
   "bin": {
-    "ai-search": "src/cli.ts"
+    "ubersearch": "src/cli.ts"
   },
   "exports": {
     ".": {
@@ -14,9 +14,22 @@
     "./config": "./src/config/defineConfig.ts",
     "./types": "./src/app/index.ts"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "devDependencies": {
     "@biomejs/biome": "^2.3.8",
-    "@types/bun": "latest"
+    "@semantic-release/commit-analyzer": "^13.0.0",
+    "@semantic-release/github": "^11.0.1",
+    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/release-notes-generator": "^14.0.1",
+    "@types/bun": "latest",
+    "semantic-release": "^24.2.0"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -39,6 +52,25 @@
     "mcp": "bun run mcp-server.ts",
     "mcp:test": "bun run scripts/test-mcp.ts",
     "build": "bun run scripts/build.ts",
-    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ai-search"
-  }
+    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ubersearch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/briansunter/ubersearch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/briansunter/ubersearch/issues"
+  },
+  "homepage": "https://github.com/briansunter/ubersearch#readme",
+  "keywords": [
+    "search",
+    "ai",
+    "search-api",
+    "search-engine",
+    "tavily",
+    "brave",
+    "searxng"
+  ],
+  "author": "Brian Sunter",
+  "license": "MIT"
 }

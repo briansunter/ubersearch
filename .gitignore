@@ -60,7 +60,7 @@ providers/searxng/config/settings.yml
 credis.json
 
 # === Multi-Search Cache ===
-~/.local/state/ai-search/
+~/.local/state/ubersearch/
 credit-state.json
 *.state.json
 

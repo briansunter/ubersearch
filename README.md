@@ -15,7 +15,7 @@ Unified, Bun-first search interface across multiple providers with credit tracki
 ## Install & Run (Bun)
 
 ```bash
-cd /path/to/ai-search
+cd /path/to/ubersearch
 bun install
 
 # CLI (direct)
@@ -23,7 +23,7 @@ bun run src/cli.ts "best TypeScript ORM 2025"
 
 # Or use bun link (works from any directory)
 bun link
-ai-search "llm observability" --json
+ubersearch "llm observability" --json
 ```
 
 ## Usage
@@ -31,13 +31,13 @@ ai-search "llm observability" --json
 ### Basic Search
 
 ```bash
-ai-search "your search query"
+ubersearch "your search query"
 ```
 
 ### Options
 
 ```bash
-ai-search "query" [options]
+ubersearch "query" [options]
 
 Options:
   --json                        Output results as JSON
@@ -53,46 +53,46 @@ Options:
 
 ```bash
 # Search with specific engines
-ai-search "hawaii dev meetups" --engines tavily,brave --json
+ubersearch "hawaii dev meetups" --engines tavily,brave --json
 
 # Use first-success strategy (stop after first working provider)
-ai-search "emerging web frameworks" --strategy first-success
+ubersearch "emerging web frameworks" --strategy first-success
 
 # Limit results per provider
-ai-search "rust async patterns" --limit 3
+ubersearch "rust async patterns" --limit 3
 
 # Check credit status
-ai-search credits
+ubersearch credits
 ```
 
 ## Configuration
 
 Resolution order (first wins):
 1. Explicit path passed to CLI/API (`--config /path/to/config.json`)
-2. `./ai-search.config.(ts|json)` (current directory)
-3. `$XDG_CONFIG_HOME/ai-search/config.(ts|json)` (default: `~/.config/ai-search/`)
+2. `./ubersearch.config.(ts|json)` (current directory)
+3. `$XDG_CONFIG_HOME/ubersearch/config.(ts|json)` (default: `~/.config/ubersearch/`)
 
 ### XDG Directory Structure
 
 ```
-~/.config/ai-search/
+~/.config/ubersearch/
 ├── config.json              # Main configuration
 └── searxng/
     └── config/
         └── settings.yml     # SearXNG settings (auto-copied on first run)
 
-~/.local/share/ai-search/
+~/.local/share/ubersearch/
 └── searxng/
     └── data/                # SearXNG cache (auto-created)
 ```
 
-- Example config: see `docs/config/ai-search.config.json`
+- Example config: see `docs/config/ubersearch.config.json`
 - Schema: `docs/config/config.schema.json` (generated from Zod)
 - TS helper: `defineConfig`, `defineTavily`, `defineBrave`, `defineLinkup`, `defineSearchxng`
 
 ### SearXNG Configuration
 
-SearXNG uses Docker with volumes mounted to XDG directories. On first run, the default `settings.yml` is copied to `~/.config/ai-search/searxng/config/`. You can customize this file to:
+SearXNG uses Docker with volumes mounted to XDG directories. On first run, the default `settings.yml` is copied to `~/.config/ubersearch/searxng/config/`. You can customize this file to:
 - Enable/disable search engines
 - Adjust rate limiting
 - Configure output formats
@@ -104,8 +104,8 @@ Add your own search providers using the plugin system.
 ### TypeScript Config with Custom Provider
 
 ```typescript
-// ~/.config/ai-search/config.ts
-import { defineConfig, definePlugin } from "ai-search/config";
+// ~/.config/ubersearch/config.ts
+import { defineConfig, definePlugin } from "ubersearch/config";
 
 // 1. Define your provider class
 class PerplexityProvider {
@@ -264,7 +264,7 @@ tavily (10 results)
 Queries all configured/enabled providers and combines results.
 
 ```bash
-ai-search "topic" --strategy all
+ubersearch "topic" --strategy all
 ```
 
 - Pro: Gets maximum coverage, see different perspectives
@@ -276,7 +276,7 @@ ai-search "topic" --strategy all
 Stops after the first provider returns results.
 
 ```bash
-ai-search "topic" --strategy first-success
+ubersearch "topic" --strategy first-success
 ```
 
 - Pro: Saves credits, faster
@@ -330,10 +330,10 @@ See `docs/testing/README.md` for suite layout.
 
 ## Troubleshooting
 
-- **Missing config**: Copy `docs/config/ai-search.config.json` to `~/.config/ai-search/config.json`
+- **Missing config**: Copy `docs/config/ubersearch.config.json` to `~/.config/ubersearch/config.json`
 - **Missing API key**: Set `TAVILY_API_KEY`, `BRAVE_API_KEY`, `LINKUP_API_KEY` environment variables
-- **SearXNG not healthy**: Ensure Docker is running. Check `~/.config/ai-search/searxng/config/settings.yml` exists
-- **SearXNG settings missing**: Run `ai-search health` once to bootstrap default config to XDG directory
+- **SearXNG not healthy**: Ensure Docker is running. Check `~/.config/ubersearch/searxng/config/settings.yml` exists
+- **SearXNG settings missing**: Run `ubersearch health` once to bootstrap default config to XDG directory
 - **Path issues after bun link**: The CLI resolves paths relative to XDG directories, not the working directory
 
 ## Providers

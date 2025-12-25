@@ -1,0 +1,67 @@
+# Dependencies
+node_modules/
+.bun/
+
+# Build output (we publish source, not built files)
+dist/
+*.tgz
+
+# Tests
+test/
+*.test.ts
+*.test.js
+**/__tests__/
+**/__helpers__/
+test-results/
+coverage/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# CI/CD
+.github/
+.git/
+
+# Config files
+.gitignore
+.npmignore
+.editorconfig
+*bun.lock
+package-lock.json
+yarn.lock
+
+# Linting/Formatting
+.biome*
+.eslintrc*
+.prettierrc*
+
+# Environment
+.env*
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Provider-specific
+providers/
+ubersearch.config.json
+
+# Scripts
+scripts/
+
+# MCP server (not published)
+mcp-server.ts
+
+# Temporary files
+tmp/
+temp/
+*.log

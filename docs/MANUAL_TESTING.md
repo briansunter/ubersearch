@@ -11,8 +11,8 @@ This document provides step-by-step instructions for manually testing the SearXN
 docker version
 # Should show Docker version info
 
-# Ensure you're in the ai-search directory
-cd /Users/briansunter/.dotfiles/bun-scripts/ai-search
+# Ensure you're in the ubersearch directory
+cd /Users/briansunter/.dotfiles/bun-scripts/ubersearch
 
 # Ensure dependencies are installed
 bun install
@@ -48,11 +48,11 @@ bun run tsc --noEmit
 
 ```bash
 # Check that SearXNG is highest priority in config
-cat ai-search.config.json | grep -A 2 '"defaultEngineOrder"'
+cat ubersearch.config.json | grep -A 2 '"defaultEngineOrder"'
 # Expected output should show: "searxng", "tavily", "brave", "linkup"
 
 # Check SearXNG configuration
-cat ai-search.config.json | grep -A 15 '"id": "searxng"'
+cat ubersearch.config.json | grep -A 15 '"id": "searxng"'
 # Should show:
 # - enabled: true
 # - autoStart: true
@@ -92,8 +92,8 @@ docker compose ps
 **Test that SearXNG container automatically starts on first search:**
 
 ```bash
-# From ai-search directory
-cd /Users/briansunter/.dotfiles/bun-scripts/ai-search
+# From ubersearch directory
+cd /Users/briansunter/.dotfiles/bun-scripts/ubersearch
 
 # Create environment file
 echo "SEARXNG_API_KEY=test-key-12345" > providers/searxng/.env
@@ -292,7 +292,7 @@ Test valid config:
 
 ```bash
 # Use valid config
-bun run src/cli.ts "valid config test" --config ai-search.config.json
+bun run src/cli.ts "valid config test" --config ubersearch.config.json
 # Should work without errors
 ```
 

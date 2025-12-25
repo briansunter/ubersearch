@@ -1,5 +1,5 @@
 {
-  "$schema": "./docs/config/config.schema.json",
+  "$schema": "./config.schema.json",
   "defaultEngineOrder": ["searxng", "tavily", "brave", "linkup"],
   "engines": [
     {
@@ -57,6 +57,6 @@
     }
   ],
   "storage": {
-    "creditStatePath": "~/.local/state/ai-search/credits.json"
+    "creditStatePath": "~/.local/state/ubersearch/credits.json"
   }
 }

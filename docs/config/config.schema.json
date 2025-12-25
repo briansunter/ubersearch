@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ai-search configuration",
+  "title": "ubersearch configuration",
   "type": "object",
   "required": ["defaultEngineOrder", "engines"],
   "properties": {

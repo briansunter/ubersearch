@@ -8,7 +8,7 @@
 import { describe, expect, test } from "bun:test";
 import type { SearchProvider } from "../../src/core/provider";
 import { AllProvidersStrategy } from "../../src/core/strategy/AllProvidersStrategy";
-import type { AiSearchOptions, StrategyContext } from "../../src/core/strategy/ISearchStrategy";
+import type { UberSearchOptions, StrategyContext } from "../../src/core/strategy/ISearchStrategy";
 import type { EngineId, SearchQuery, SearchResultItem } from "../../src/core/types";
 import { createFakeProvider, FakeErrorProvider } from "../__helpers__";
 
@@ -65,7 +65,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     // Set up fake providers with different results
     const provider1 = createFakeProvider("google", [
@@ -149,7 +149,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     // Set up providers - one working, one error
     const provider1 = createFakeProvider("working", [
@@ -257,7 +257,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {
+    const options: UberSearchOptions = {
       limit: 3,
     };
 
@@ -305,7 +305,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     // Set up providers but no credits
     const provider1 = createFakeProvider("google", [
@@ -359,7 +359,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     // Don't set up any providers, so they'll be missing
 
@@ -402,7 +402,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     // Act
     const result = await strategy.execute("test query", [], options, context);
@@ -460,7 +460,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: AiSearchOptions = {
+    const options: UberSearchOptions = {
       limit: 5,
       includeRaw: true,
     };

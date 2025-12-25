@@ -13,7 +13,7 @@ const {
   TavilyConfigSchema,
   BraveConfigSchema,
   LinkupConfigSchema,
-  AiSearchConfigSchema,
+  UberSearchConfigSchema,
   EngineConfigSchema,
   CliInputSchema,
 } = require("../../../src/config/validation.ts");
@@ -447,7 +447,7 @@ describe("Configuration Validation Tests", () => {
     });
   });
 
-  describe("AiSearchConfigSchema", () => {
+  describe("UberSearchConfigSchema", () => {
     test("should validate valid SearchXNG config", () => {
       const validConfig = {
         type: "searchxng",
@@ -608,7 +608,7 @@ describe("Configuration Validation Tests", () => {
     });
   });
 
-  describe("AiSearchConfigSchema", () => {
+  describe("UberSearchConfigSchema", () => {
     test("should validate valid main config", () => {
       const validConfig = {
         defaultEngineOrder: ["tavily", "brave"],
@@ -643,7 +643,7 @@ describe("Configuration Validation Tests", () => {
         },
       };
 
-      const result = AiSearchConfigSchema.safeParse(validConfig);
+      const result = UberSearchConfigSchema.safeParse(validConfig);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.defaultEngineOrder).toEqual(["tavily", "brave"]);
@@ -671,7 +671,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      const result = AiSearchConfigSchema.safeParse(validConfig);
+      const result = UberSearchConfigSchema.safeParse(validConfig);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.storage).toBeUndefined();
@@ -697,7 +697,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      const result = AiSearchConfigSchema.safeParse(invalidConfig);
+      const result = UberSearchConfigSchema.safeParse(invalidConfig);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toEqual(["defaultEngineOrder"]);
@@ -713,7 +713,7 @@ describe("Configuration Validation Tests", () => {
         engines: [],
       };
 
-      const result = AiSearchConfigSchema.safeParse(invalidConfig);
+      const result = UberSearchConfigSchema.safeParse(invalidConfig);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toEqual(["engines"]);
@@ -748,7 +748,7 @@ describe("Configuration Validation Tests", () => {
         ],
       };
 
-      const result = AiSearchConfigSchema.safeParse(invalidConfig);
+      const result = UberSearchConfigSchema.safeParse(invalidConfig);
       expect(result.success).toBe(false);
     });
   });
@@ -1044,11 +1044,11 @@ describe("Configuration Validation Tests", () => {
           },
         ],
         storage: {
-          creditStatePath: "/var/lib/ai-search/credits.json",
+          creditStatePath: "/var/lib/ubersearch/credits.json",
         },
       };
 
-      const result = AiSearchConfigSchema.safeParse(complexConfig);
+      const result = UberSearchConfigSchema.safeParse(complexConfig);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.engines).toHaveLength(4);

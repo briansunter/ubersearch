@@ -63,7 +63,7 @@ export const EngineConfigSchema = z.discriminatedUnion("type", [
 ]);
 
 // Main configuration schema (uses passthrough to preserve extra fields)
-export const AiSearchConfigSchema = z
+export const UberSearchConfigSchema = z
   .object({
     defaultEngineOrder: z.array(z.string()).min(1),
     engines: z.array(EngineConfigSchema).min(1),
@@ -86,7 +86,7 @@ export const CliInputSchema = z.object({
 });
 
 // Export inferred types from schemas
-export type ValidatedAiSearchConfig = z.infer<typeof AiSearchConfigSchema>;
+export type ValidatedUberSearchConfig = z.infer<typeof UberSearchConfigSchema>;
 export type ValidatedEngineConfig = z.infer<typeof EngineConfigSchema>;
 export type ValidatedTavilyConfig = z.infer<typeof TavilyConfigSchema>;
 export type ValidatedBraveConfig = z.infer<typeof BraveConfigSchema>;
@@ -100,8 +100,8 @@ export type ValidatedCliInput = z.infer<typeof CliInputSchema>;
  * @returns Validated configuration
  * @throws ZodError if validation fails
  */
-export function validateConfig(config: unknown): ValidatedAiSearchConfig {
-  return AiSearchConfigSchema.parse(config);
+export function validateConfig(config: unknown): ValidatedUberSearchConfig {
+  return UberSearchConfigSchema.parse(config);
 }
 
 /**
@@ -112,13 +112,13 @@ export function validateConfig(config: unknown): ValidatedAiSearchConfig {
 export function validateConfigSafe(config: unknown):
   | {
       success: true;
-      data: ValidatedAiSearchConfig;
+      data: ValidatedUberSearchConfig;
     }
   | {
       success: false;
       error: z.ZodError;
     } {
-  const result = AiSearchConfigSchema.safeParse(config);
+  const result = UberSearchConfigSchema.safeParse(config);
   if (result.success) {
     return { success: true, data: result.data };
   }

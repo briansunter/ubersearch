@@ -1,8 +1,8 @@
 /**
- * Input and output interfaces for the ai-search tool
+ * Input and output interfaces for the ubersearch tool
  */
 
-export interface AiSearchInput {
+export interface UberSearchInput {
   /** Search query string */
   query: string;
 
@@ -26,7 +26,7 @@ export interface AiSearchInput {
   parallel?: boolean;
 }
 
-export interface AiSearchEngineAttempt {
+export interface UberSearchEngineAttempt {
   /** Provider/engine ID that was attempted */
   engineId: string;
 
@@ -37,7 +37,7 @@ export interface AiSearchEngineAttempt {
   reason?: string;
 }
 
-export interface AiSearchOutputItem {
+export interface UberSearchOutputItem {
   /** Result title */
   title: string;
 
@@ -56,15 +56,15 @@ export interface AiSearchOutputItem {
 
 import type { CreditSnapshot } from "../core/credits";
 
-export interface AiSearchOutput {
+export interface UberSearchOutput {
   /** Original query */
   query: string;
 
   /** Combined search results from all successful providers */
-  items: AiSearchOutputItem[];
+  items: UberSearchOutputItem[];
 
   /** Metadata about which engines were tried and their outcomes */
-  enginesTried: AiSearchEngineAttempt[];
+  enginesTried: UberSearchEngineAttempt[];
 
   /** Credit snapshots for each engine after the search */
   credits?: CreditSnapshot[];

@@ -12,7 +12,7 @@ import { AllProvidersStrategy } from "../../src/core/strategy/AllProvidersStrate
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
 import type {
   ISearchStrategy,
-  AiSearchOptions,
+  UberSearchOptions,
   StrategyContext,
 } from "../../src/core/strategy/ISearchStrategy";
 import type { StrategyOptions } from "../../src/core/strategy/StrategyFactory";
@@ -188,7 +188,7 @@ describe("AllProvidersStrategy", () => {
       const provider1 = new MockSearchProvider("engine1");
       const provider2 = new MockSearchProvider("engine2");
       const context = createTestContext([provider1, provider2]);
-      const options: AiSearchOptions = { limit: 5 };
+      const options: UberSearchOptions = { limit: 5 };
 
       const result = await strategy.execute("test query", ["engine1", "engine2"], options, context);
 
@@ -202,7 +202,7 @@ describe("AllProvidersStrategy", () => {
 
     test("should handle provider not found", async () => {
       const context = createTestContext([]);
-      const options: AiSearchOptions = {};
+      const options: UberSearchOptions = {};
 
       const result = await strategy.execute("test query", ["nonexistent"], options, context);
 
@@ -324,7 +324,7 @@ describe("AllProvidersStrategy", () => {
       });
 
       const context = createTestContext([provider]);
-      const options: AiSearchOptions = { limit: 2 };
+      const options: UberSearchOptions = { limit: 2 };
 
       const result = await strategy.execute("test query", ["engine1"], options, context);
 
@@ -335,7 +335,7 @@ describe("AllProvidersStrategy", () => {
       const provider = new MockSearchProvider("engine1");
       const searchSpy = vi.spyOn(provider, "search");
       const context = createTestContext([provider]);
-      const options: AiSearchOptions = { includeRaw: true };
+      const options: UberSearchOptions = { includeRaw: true };
 
       await strategy.execute("test query", ["engine1"], options, context);
 
@@ -647,7 +647,7 @@ describe("StrategyFactory", () => {
         async execute(
           _query: string,
           _engineIds: string[],
-          _options: AiSearchOptions,
+          _options: UberSearchOptions,
           _context: StrategyContext,
         ): Promise<{ results: unknown[]; attempts: unknown[] }> {
           return { results: [], attempts: [] };
@@ -664,7 +664,7 @@ describe("StrategyFactory", () => {
         async execute(
           _query: string,
           _engineIds: string[],
-          _options: AiSearchOptions,
+          _options: UberSearchOptions,
           _context: StrategyContext,
         ): Promise<{ results: unknown[]; attempts: unknown[] }> {
           return { results: [], attempts: [] };
@@ -691,7 +691,7 @@ describe("StrategyFactory", () => {
         async execute(
           _query: string,
           _engineIds: string[],
-          _options: AiSearchOptions,
+          _options: UberSearchOptions,
           _context: StrategyContext,
         ): Promise<{ results: unknown[]; attempts: unknown[] }> {
           return { results: [], attempts: [] };
@@ -719,7 +719,7 @@ describe("StrategyFactory", () => {
         async execute(
           _query: string,
           _engineIds: string[],
-          _options: AiSearchOptions,
+          _options: UberSearchOptions,
           _context: StrategyContext,
         ): Promise<any> {
           return { results: [], attempts: [] };
@@ -758,7 +758,7 @@ describe("Strategy Integration", () => {
 
     const allStrategy = new AllProvidersStrategy();
     const firstSuccessStrategy = new FirstSuccessStrategy();
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     const allResult = await allStrategy.execute("integration query", ["engine1"], options, context);
     const firstSuccessResult = await firstSuccessStrategy.execute(
@@ -794,7 +794,7 @@ describe("Strategy Integration", () => {
     const registry = new ProviderRegistry();
     registry.register(provider);
     const context: StrategyContext = { providerRegistry: registry, creditManager };
-    const options: AiSearchOptions = {};
+    const options: UberSearchOptions = {};
 
     const allStrategy = StrategyFactory.createStrategy("all");
     const firstSuccessStrategy = StrategyFactory.createStrategy("first-success");

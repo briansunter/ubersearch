@@ -1,6 +1,6 @@
 # Example: Adding a Local Embedding Provider
 
-This guide shows step-by-step how to add a local Docker-based embedding provider to ai-search using the improved abstraction.
+This guide shows step-by-step how to add a local Docker-based embedding provider to ubersearch using the improved abstraction.
 
 ## Overview
 
@@ -16,7 +16,7 @@ version: "3.8"
 services:
   embedding-service:
     image: ghcr.io/anthropics/embedding-service:latest
-    container_name: ai-search-embedding
+    container_name: ubersearch-embedding
     ports:
       - "8000:8000"
     environment:
@@ -64,7 +64,7 @@ export class LocalEmbeddingProvider extends DockerProvider {
       throw new SearchError(
         this.id,
         "provider_unavailable",
-        "Embedding service is not healthy. Run: ai-search providers init",
+        "Embedding service is not healthy. Run: ubersearch providers init",
       );
     }
 
@@ -204,7 +204,7 @@ export type EngineConfig =
       "serviceType": "embedding",
       "enabled": true,
       "displayName": "Local Embeddings",
-      "containerName": "ai-search-embedding",
+      "containerName": "ubersearch-embedding",
       "composeFile": "./providers/local/embedding/docker-compose.yml",
       "healthEndpoint": "http://localhost:8000/health",
       "apiUrl": "http://localhost:8000",
@@ -248,7 +248,7 @@ version: '3.8'
 services:
   embedding-service:
     image: ghcr.io/anthropics/embedding-service:latest
-    container_name: ai-search-embedding
+    container_name: ubersearch-embedding
     ports:
       - "8000:8000"
     healthcheck:
@@ -262,8 +262,8 @@ EOF
 
 echo "Docker Compose file created: providers/local/embedding/docker-compose.yml"
 echo ""
-echo "Install with: ai-search providers init"
-echo "Search with: ai-search 'your query'"
+echo "Install with: ubersearch providers init"
+echo "Search with: ubersearch 'your query'"
 ```
 
 ## Step 7: Test the Implementation
@@ -275,7 +275,7 @@ bun run src/cli.ts providers init
 
 # Expected output:
 # Initializing local-embeddings...
-# Starting Docker container: ai-search-embedding
+# Starting Docker container: ubersearch-embedding
 # Container started successfully
 ```
 
@@ -332,7 +332,7 @@ bun run src/cli.ts credits
 bun run src/cli.ts providers stop
 
 # Expected output:
-# Stopping Docker container: ai-search-embedding
+# Stopping Docker container: ubersearch-embedding
 ```
 
 ## Step 8: Add Tests
@@ -408,7 +408,7 @@ describe("LocalEmbeddingProvider", () => {
       "serviceType": "embedding",
       "enabled": true,
       "displayName": "Local MiniLM",
-      "containerName": "ai-search-minilm",
+      "containerName": "ubersearch-minilm",
       "composeFile": "./providers/local/minilm/docker-compose.yml",
       "healthEndpoint": "http://localhost:8001/health",
       "apiUrl": "http://localhost:8001",
@@ -424,7 +424,7 @@ describe("LocalEmbeddingProvider", () => {
       "serviceType": "embedding",
       "enabled": true,
       "displayName": "Local E5",
-      "containerName": "ai-search-e5",
+      "containerName": "ubersearch-e5",
       "composeFile": "./providers/local/e5/docker-compose.yml",
       "healthEndpoint": "http://localhost:8002/health",
       "apiUrl": "http://localhost:8002",
@@ -442,13 +442,13 @@ describe("LocalEmbeddingProvider", () => {
 
 ```bash
 # Search with MiniLM (faster, smaller)
-ai-search "query" --engines local-minilm
+ubersearch "query" --engines local-minilm
 
 # Search with E5 (better quality, slower)
-ai-search "query" --engines local-e5
+ubersearch "query" --engines local-e5
 
 # Compare both
-ai-search "query" --engines local-minilm,local-e5 --json
+ubersearch "query" --engines local-minilm,local-e5 --json
 ```
 
 ## Troubleshooting
@@ -463,7 +463,7 @@ docker version
 docker compose -f providers/local/embedding/docker-compose.yml config
 
 # Check logs
-ai-search providers logs embedding-service
+ubersearch providers logs embedding-service
 
 # Or manually
 docker compose -f providers/local/embedding/docker-compose.yml logs
@@ -473,10 +473,10 @@ docker compose -f providers/local/embedding/docker-compose.yml logs
 
 ```bash
 # Check if container is running
-docker ps | grep ai-search-embedding
+docker ps | grep ubersearch-embedding
 
 # Check health
-ai-search providers health
+ubersearch providers health
 
 # Test endpoint manually
 curl http://localhost:8000/health
@@ -489,7 +489,7 @@ netstat -an | grep 8000
 
 ```bash
 # Check provider health
-ai-search providers health
+ubersearch providers health
 
 # Verify API is accessible
 curl -X POST http://localhost:8000/search \
@@ -497,7 +497,7 @@ curl -X POST http://localhost:8000/search \
   -d '{"query": "test", "limit": 3}'
 
 # Check configuration
-ai-search providers validate local-embeddings
+ubersearch providers validate local-embeddings
 ```
 
 ## Best Practices

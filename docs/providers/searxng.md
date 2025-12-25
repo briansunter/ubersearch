@@ -32,7 +32,7 @@ curl -X GET "http://localhost:8888/search?q=test&format=json"
 
 ## Multi-Search Configuration
 
-The SearXNG provider is already configured in `ai-search.config.json`.
+The SearXNG provider is already configured in `ubersearch.config.json`.
 
 Default settings:
 
@@ -290,7 +290,7 @@ cd providers/searxng
 docker compose down -v  # Removes containers and volumes
 ```
 
-Then remove the SearXNG entry from `ai-search.config.json`.
+Then remove the SearXNG entry from `ubersearch.config.json`.
 
 ## Additional Resources
 

@@ -10,7 +10,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const APP_NAME = "ai-search";
+const APP_NAME = "ubersearch";
 
 /**
  * Get XDG config home directory
@@ -38,7 +38,7 @@ export function getXdgStateHome(): string {
 
 /**
  * Get app config directory
- * ~/.config/ai-search
+ * ~/.config/ubersearch
  */
 export function getAppConfigDir(): string {
   return join(getXdgConfigHome(), APP_NAME);
@@ -46,7 +46,7 @@ export function getAppConfigDir(): string {
 
 /**
  * Get app data directory
- * ~/.local/share/ai-search
+ * ~/.local/share/ubersearch
  */
 export function getAppDataDir(): string {
   return join(getXdgDataHome(), APP_NAME);
@@ -54,7 +54,7 @@ export function getAppDataDir(): string {
 
 /**
  * Get SearXNG config directory
- * ~/.config/ai-search/searxng/config
+ * ~/.config/ubersearch/searxng/config
  */
 export function getSearxngConfigDir(): string {
   return join(getAppConfigDir(), "searxng", "config");
@@ -62,7 +62,7 @@ export function getSearxngConfigDir(): string {
 
 /**
  * Get SearXNG data directory
- * ~/.local/share/ai-search/searxng/data
+ * ~/.local/share/ubersearch/searxng/data
  */
 export function getSearxngDataDir(): string {
   return join(getAppDataDir(), "searxng", "data");

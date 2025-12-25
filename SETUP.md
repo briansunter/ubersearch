@@ -1,6 +1,6 @@
 # Multi-Search Setup Guide
 
-This guide explains how to set up ai-search for global use, MCP integration, and testing.
+This guide explains how to set up ubersearch for global use, MCP integration, and testing.
 
 ## Overview
 
@@ -12,7 +12,7 @@ Multi-Search provides:
 ## Installation
 
 ```bash
-cd /Volumes/Storage/code/ai-search
+cd /Volumes/Storage/code/ubersearch
 bun install
 ```
 
@@ -20,7 +20,7 @@ bun install
 
 ### 1. Create Config File
 
-The sample config is already at `ai-search.config.json`. It includes:
+The sample config is already at `ubersearch.config.json`. It includes:
 - SearXNG (local Docker)
 - Tavily (cloud)
 - Brave Search (cloud)
@@ -45,7 +45,7 @@ Get API keys:
 
 ### 3. Disable SearXNG (Optional)
 
-If you don't want to use local SearXNG, edit `ai-search.config.json`:
+If you don't want to use local SearXNG, edit `ubersearch.config.json`:
 
 ```json
 {
@@ -66,8 +66,8 @@ bun run src/cli.ts "search query" --json
 
 Link for global access:
 ```bash
-ln -s $(pwd)/src/cli.ts ~/.local/bin/ai-search
-ai-search "search query" --json
+ln -s $(pwd)/src/cli.ts ~/.local/bin/ubersearch
+ubersearch "search query" --json
 ```
 
 CLI options:
@@ -93,11 +93,11 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 ```json
 {
   "mcpServers": {
-    "ai-search": {
+    "ubersearch": {
       "command": "bun",
       "args": [
         "run",
-        "/Volumes/Storage/code/ai-search/mcp-server.ts"
+        "/Volumes/Storage/code/ubersearch/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "your_key",
@@ -114,7 +114,7 @@ Restart Claude Desktop. You'll see `multi_search`, `multi_search_credits`, and `
 ### Method 3: Programmatic API
 
 ```typescript
-import { multiSearch, getCreditStatus } from 'ai-search';
+import { multiSearch, getCreditStatus } from 'ubersearch';
 
 const results = await multiSearch({
   query: "TypeScript best practices",
@@ -162,7 +162,7 @@ export LINKUP_API_KEY="linkup-..."
 
 ### SearXNG 403 Forbidden
 
-Disable SearXNG in `ai-search.config.json`:
+Disable SearXNG in `ubersearch.config.json`:
 ```json
 {"id": "searxng", "enabled": false}
 ```
@@ -184,7 +184,7 @@ Check:
 ## File Structure
 
 ```
-ai-search/
+ubersearch/
 ├── mcp-server.ts          # MCP server entry point
 ├── scripts/test-mcp.ts     # MCP test script
 ├── src/
@@ -195,8 +195,8 @@ ai-search/
 ├── docs/
 │   ├── MCP_SERVER.md      # MCP documentation
 │   └── config/
-│       └── ai-search.config.json  # Sample config
-└── ai-search.config.json  # Active config
+│       └── ubersearch.config.json  # Sample config
+└── ubersearch.config.json  # Active config
 ```
 
 ## Next Steps

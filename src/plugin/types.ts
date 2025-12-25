@@ -1,7 +1,7 @@
 /**
  * Plugin System Types
  *
- * Defines the interfaces and types for the ai-search plugin system.
+ * Defines the interfaces and types for the ubersearch plugin system.
  * Plugins allow adding new search providers without modifying core code.
  */
 

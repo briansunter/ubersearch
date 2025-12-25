@@ -1,5 +1,5 @@
 /**
- * Configuration types for ai-search
+ * Configuration types for ubersearch
  */
 
 import type { EngineId } from "../core/types";
@@ -71,7 +71,7 @@ export interface SearchxngConfig extends EngineConfigBase, DockerConfigurable {
 
 export type EngineConfig = TavilyConfig | BraveConfig | LinkupConfig | SearchxngConfig;
 
-export interface AiSearchConfig {
+export interface UberSearchConfig {
   /** Default order to try engines (can be overridden per query) */
   defaultEngineOrder: EngineId[];
 
@@ -80,7 +80,7 @@ export interface AiSearchConfig {
 
   /** Storage settings */
   storage?: {
-    /** Path to store credit state (defaults to ~/.local/state/ai-search/credits.json) */
+    /** Path to store credit state (defaults to ~/.local/state/ubersearch/credits.json) */
     creditStatePath?: string;
   };
 }

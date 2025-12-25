@@ -12,7 +12,7 @@ import { SearchError } from "../types";
 import type {
   EngineAttempt,
   ISearchStrategy,
-  AiSearchOptions,
+  UberSearchOptions,
   StrategyContext,
   StrategyResult,
 } from "./ISearchStrategy";
@@ -39,7 +39,7 @@ export class FirstSuccessStrategy implements ISearchStrategy {
   async execute(
     query: string,
     engineIds: EngineId[],
-    options: AiSearchOptions,
+    options: UberSearchOptions,
     context: StrategyContext,
   ): Promise<StrategyResult> {
     const attempts: EngineAttempt[] = [];

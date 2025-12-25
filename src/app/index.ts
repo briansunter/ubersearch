@@ -16,15 +16,15 @@ export type {
   BraveConfig,
   EngineConfig,
   LinkupConfig,
-  AiSearchConfig,
+  UberSearchConfig,
   SearchxngConfig,
   TavilyConfig,
 } from "../config/types";
 export type { EngineId, SearchQuery, SearchResponse, SearchResultItem } from "../core/types";
 // Types
-export type { AiSearchInput, AiSearchOutput, AiSearchOutputItem } from "../tool/interface";
+export type { UberSearchInput, UberSearchOutput, UberSearchOutputItem } from "../tool/interface";
 export type {
   GetCreditStatusOptions,
-  AiSearchOptions as ToolAiSearchOptions,
+  UberSearchOptions as ToolUberSearchOptions,
 } from "../tool/multiSearchTool";
 export { getCreditStatus, multiSearch } from "../tool/multiSearchTool";

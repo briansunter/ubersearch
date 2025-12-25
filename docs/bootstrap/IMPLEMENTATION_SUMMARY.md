@@ -2,7 +2,7 @@
 
 ## Overview
 
-The bootstrap module implements a comprehensive dependency injection (DI) container for the ai-search application. It provides centralized service registration, lifecycle management, and clean separation of concerns.
+The bootstrap module implements a comprehensive dependency injection (DI) container for the ubersearch application. It provides centralized service registration, lifecycle management, and clean separation of concerns.
 
 ## Architecture
 
@@ -51,10 +51,10 @@ The bootstrap process follows a strict registration order to ensure proper depen
 
 ```typescript
 // Register services
-container.singleton('orchestrator', () => new AiSearchOrchestrator(...));
+container.singleton('orchestrator', () => new UberSearchOrchestrator(...));
 
 // Get services with full type safety
-const orchestrator = await container.get<AiSearchOrchestrator>('orchestrator');
+const orchestrator = await container.get<UberSearchOrchestrator>('orchestrator');
 ```
 
 ### 2. Async Service Initialization
@@ -230,7 +230,7 @@ await creditManager.initialize();
 const registry = new ProviderRegistry();
 // ... manual provider registration
 
-const orchestrator = new AiSearchOrchestrator(
+const orchestrator = new UberSearchOrchestrator(
   config,
   creditManager,
   registry,
@@ -262,7 +262,7 @@ const orchestrator = await container.get("orchestrator");
 
 ## Conclusion
 
-The bootstrap module successfully implements a clean, testable, and maintainable dependency injection system for the ai-search application. It provides:
+The bootstrap module successfully implements a clean, testable, and maintainable dependency injection system for the ubersearch application. It provides:
 
 - ✅ Single source of truth for dependency wiring
 - ✅ Easy to understand dependency graph

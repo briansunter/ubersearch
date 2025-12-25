@@ -23,7 +23,7 @@ export interface StrategyContext {
 /**
  * Options for configuring search strategy behavior
  */
-export interface AiSearchOptions {
+export interface UberSearchOptions {
   /** Override the default engine order */
   engineOrderOverride?: EngineId[];
 
@@ -88,7 +88,7 @@ export interface ISearchStrategy {
   execute(
     query: string,
     engineIds: EngineId[],
-    options: AiSearchOptions,
+    options: UberSearchOptions,
     context: StrategyContext,
   ): Promise<StrategyResult>;
 }

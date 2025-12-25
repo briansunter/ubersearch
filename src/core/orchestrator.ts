@@ -4,14 +4,14 @@
  * Coordinates multiple search providers and implements different search strategies
  */
 
-import type { AiSearchConfig } from "../config/types";
+import type { UberSearchConfig } from "../config/types";
 import type { CreditManager, CreditSnapshot } from "./credits";
 import type { ProviderRegistry } from "./provider";
 import type { StrategyContext } from "./strategy/ISearchStrategy";
 import { StrategyFactory } from "./strategy/StrategyFactory";
 import type { EngineId, SearchResultItem } from "./types";
 
-export interface AiSearchOptions {
+export interface UberSearchOptions {
   /** Override the default engine order */
   engineOrderOverride?: EngineId[];
 
@@ -45,9 +45,9 @@ export interface OrchestratorResult {
   credits: CreditSnapshot[];
 }
 
-export class AiSearchOrchestrator {
+export class UberSearchOrchestrator {
   constructor(
-    private config: AiSearchConfig,
+    private config: UberSearchConfig,
     private credits: CreditManager,
     private registry: ProviderRegistry,
   ) {}
@@ -63,9 +63,9 @@ export class AiSearchOrchestrator {
   }
 
   /**
-   * Run a ai-search with the specified options
+   * Run a ubersearch with the specified options
    */
-  async run(query: string, options: AiSearchOptions = {}): Promise<OrchestratorResult> {
+  async run(query: string, options: UberSearchOptions = {}): Promise<OrchestratorResult> {
     const order = this.getEngineOrder(options.engineOrderOverride);
     const strategyName = options.strategy ?? "all";
 

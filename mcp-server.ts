@@ -2,7 +2,7 @@
 /**
  * Multi-Search MCP Server
  *
- * Exposes ai-search functionality as an MCP (Model Context Protocol) server
+ * Exposes ubersearch functionality as an MCP (Model Context Protocol) server
  * for use with Claude Desktop and other MCP-compatible tools.
  */
 
@@ -132,7 +132,7 @@ export async function serve() {
             tools: {},
           },
           serverInfo: {
-            name: "ai-search",
+            name: "ubersearch",
             version: "1.0.0",
           },
         },
