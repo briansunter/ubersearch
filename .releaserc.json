@@ -36,7 +36,7 @@
     [
       "@semantic-release/npm",
       {
-        "npmPublish": true
+        "npmPublish": false  // TODO: Set to true when enabling actual publishing
       }
     ],
     [
