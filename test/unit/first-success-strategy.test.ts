@@ -8,7 +8,7 @@
 import { describe, expect, test } from "bun:test";
 import type { SearchProvider } from "../../src/core/provider";
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
-import type { UberSearchOptions, StrategyContext } from "../../src/core/strategy/ISearchStrategy";
+import type { StrategyContext, UberSearchOptions } from "../../src/core/strategy/ISearchStrategy";
 import type { EngineId, SearchQuery } from "../../src/core/types";
 import { createFakeProvider, FakeErrorProvider } from "../__helpers__";
 

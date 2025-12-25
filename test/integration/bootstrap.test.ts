@@ -229,14 +229,14 @@ describe("Container Service Resolution", () => {
   });
 
   test("should resolve singleton services correctly", async () => {
-    const config1 = await container!.get<UberSearchConfig>("config");
-    const config2 = await container!.get<UberSearchConfig>("config");
+    const config1 = await container?.get<UberSearchConfig>("config");
+    const config2 = await container?.get<UberSearchConfig>("config");
 
     expect(config1).toBe(config2); // Same instance
   });
 
   test("should resolve credit manager state correctly", async () => {
-    const creditManager = await container!.get<any>("creditManager");
+    const creditManager = await container?.get<any>("creditManager");
     const snapshots = creditManager.listSnapshots();
 
     expect(snapshots).toHaveLength(2); // Only enabled engines
@@ -250,7 +250,7 @@ describe("Container Service Resolution", () => {
   });
 
   test("should provide working orchestrator", async () => {
-    const orchestrator = await container!.get<any>("orchestrator");
+    const orchestrator = await container?.get<any>("orchestrator");
 
     // Mock the search to avoid actual API calls
     const _mockResults = {

@@ -16,9 +16,9 @@ export type {
   BraveConfig,
   EngineConfig,
   LinkupConfig,
-  UberSearchConfig,
   SearchxngConfig,
   TavilyConfig,
+  UberSearchConfig,
 } from "../config/types";
 export type { EngineId, SearchQuery, SearchResponse, SearchResultItem } from "../core/types";
 // Types

@@ -12,9 +12,9 @@ import { SearchError } from "../types";
 import type {
   EngineAttempt,
   ISearchStrategy,
-  UberSearchOptions,
   StrategyContext,
   StrategyResult,
+  UberSearchOptions,
 } from "./ISearchStrategy";
 
 const log = createLogger("FirstSuccess");

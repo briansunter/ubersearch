@@ -12,9 +12,9 @@ import type {
   EngineConfig,
   EngineConfigBase,
   LinkupConfig,
-  UberSearchConfig,
   SearchxngConfig,
   TavilyConfig,
+  UberSearchConfig,
 } from "./types";
 
 /**

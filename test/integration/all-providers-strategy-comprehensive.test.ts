@@ -7,8 +7,8 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { AllProvidersStrategy } from "../../src/core/strategy/AllProvidersStrategy";
 import type {
   ISearchStrategy,
-  UberSearchOptions,
   StrategyContext,
+  UberSearchOptions,
 } from "../../src/core/strategy/ISearchStrategy";
 import type {
   EngineId,

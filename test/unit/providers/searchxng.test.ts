@@ -300,9 +300,9 @@ describe("SearchxngProvider", () => {
       // SearXNG doesn't require API key, it uses local authentication
       spyOn(provider, "healthcheck").mockResolvedValue(true);
 
-      let capturedUrl = "";
+      let _capturedUrl = "";
       global.fetch = mock(async (url) => {
-        capturedUrl = url as string;
+        _capturedUrl = url as string;
         return {
           ok: true,
           json: async () => ({

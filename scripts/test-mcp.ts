@@ -7,7 +7,7 @@
 
 export {};
 
-const { spawn } = await import("child_process");
+const { spawn } = await import("node:child_process");
 
 async function testMCPServer() {
   console.log("Starting MCP Server...\n");
@@ -62,64 +62,60 @@ async function testMCPServer() {
 
   // Test 1: List tools
   console.log("Test 1: Listing tools...");
-  const listRequest =
-    JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "tools/list",
-    }) + "\n";
+  const listRequest = `${JSON.stringify({
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/list",
+  })}\n`;
 
   serverProcess.stdin.write(listRequest);
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Test 2: Search (will fail without API keys, but tests the tool interface)
   console.log("Test 2: Calling multi_search...");
-  const searchRequest =
-    JSON.stringify({
-      jsonrpc: "2.0",
-      id: 2,
-      method: "tools/call",
-      params: {
-        name: "multi_search",
-        arguments: {
-          query: "test query",
-          limit: 5,
-          strategy: "all",
-        },
+  const searchRequest = `${JSON.stringify({
+    jsonrpc: "2.0",
+    id: 2,
+    method: "tools/call",
+    params: {
+      name: "multi_search",
+      arguments: {
+        query: "test query",
+        limit: 5,
+        strategy: "all",
       },
-    }) + "\n";
+    },
+  })}\n`;
 
   serverProcess.stdin.write(searchRequest);
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Test 3: Credits
   console.log("Test 3: Calling multi_search_credits...");
-  const creditsRequest =
-    JSON.stringify({
-      jsonrpc: "2.0",
-      id: 3,
-      method: "tools/call",
-      params: {
-        name: "multi_search_credits",
-        arguments: {},
-      },
-    }) + "\n";
+  const creditsRequest = `${JSON.stringify({
+    jsonrpc: "2.0",
+    id: 3,
+    method: "tools/call",
+    params: {
+      name: "multi_search_credits",
+      arguments: {},
+    },
+  })}\n`;
 
   serverProcess.stdin.write(creditsRequest);
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Test 4: Health
   console.log("Test 4: Calling multi_search_health...");
-  const healthRequest =
-    JSON.stringify({
-      jsonrpc: "2.0",
-      id: 4,
-      method: "tools/call",
-      params: {
-        name: "multi_search_health",
-        arguments: {},
-      },
-    }) + "\n";
+  const healthRequest = `${JSON.stringify({
+    jsonrpc: "2.0",
+    id: 4,
+    method: "tools/call",
+    params: {
+      name: "multi_search_health",
+      arguments: {},
+    },
+  })}\n`;
 
   serverProcess.stdin.write(healthRequest);
   await new Promise((resolve) => setTimeout(resolve, 1000));

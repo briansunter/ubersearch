@@ -12,8 +12,8 @@ import { AllProvidersStrategy } from "../../src/core/strategy/AllProvidersStrate
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
 import type {
   ISearchStrategy,
-  UberSearchOptions,
   StrategyContext,
+  UberSearchOptions,
 } from "../../src/core/strategy/ISearchStrategy";
 import type { StrategyOptions } from "../../src/core/strategy/StrategyFactory";
 import { StrategyFactory } from "../../src/core/strategy/StrategyFactory";

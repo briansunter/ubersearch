@@ -12,7 +12,7 @@ import type { UberSearchOutput } from "./tool/interface";
 import { getCreditStatus, multiSearch } from "./tool/multiSearchTool";
 
 // Parse command line arguments
-let args = process.argv.slice(2);
+const args = process.argv.slice(2);
 
 // Parse --config first and remove from args (global option that can appear anywhere)
 const configIdx = args.indexOf("--config");
