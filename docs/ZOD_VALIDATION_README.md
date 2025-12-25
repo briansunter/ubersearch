@@ -2,7 +2,7 @@
 
 ## Overview
 
-The multi-search tool now uses **Zod** for runtime configuration validation, ensuring:
+The ai-search tool now uses **Zod** for runtime configuration validation, ensuring:
 
 - Type safety at runtime
 - Clear error messages for invalid configuration

@@ -8,7 +8,7 @@
 import { describe, expect, test } from "bun:test";
 import type { SearchProvider } from "../../src/core/provider";
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
-import type { MultiSearchOptions, StrategyContext } from "../../src/core/strategy/ISearchStrategy";
+import type { AiSearchOptions, StrategyContext } from "../../src/core/strategy/ISearchStrategy";
 import type { EngineId, SearchQuery } from "../../src/core/types";
 import { createFakeProvider, FakeErrorProvider } from "../__helpers__";
 
@@ -65,7 +65,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Set up fake providers - first one will succeed
     const provider1 = createFakeProvider("google", [
@@ -146,7 +146,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Set up providers - first fails, second succeeds
     const provider1 = new FakeErrorProvider("failing", "Connection failed");
@@ -202,7 +202,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Set up providers - both fail
     const provider1 = new FakeErrorProvider("failing1", "Connection failed");
@@ -281,7 +281,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {
+    const options: AiSearchOptions = {
       limit: 1,
     };
 
@@ -328,7 +328,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Set up providers but no credits
     const provider1 = createFakeProvider("google", [
@@ -382,7 +382,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Don't set up any providers, so they'll be missing
 
@@ -425,7 +425,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {};
+    const options: AiSearchOptions = {};
 
     // Act
     const result = await strategy.execute("test query", [], options, context);
@@ -483,7 +483,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     const context = buildContext(registry, creditManager);
 
-    const options: MultiSearchOptions = {
+    const options: AiSearchOptions = {
       limit: 5,
       includeRaw: true,
     };

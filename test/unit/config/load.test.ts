@@ -3,7 +3,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { configExists, getConfigPaths, loadConfig } from "../../../src/config/load";
-import type { MultiSearchConfig } from "../../../src/config/types";
+import type { AiSearchConfig } from "../../../src/config/types";
 import { PluginRegistry } from "../../../src/plugin";
 
 describe("Config Loader", () => {
@@ -13,7 +13,7 @@ describe("Config Loader", () => {
 
   beforeEach(() => {
     // Create a temporary test directory
-    testDir = join(tmpdir(), `multi-search-test-${Date.now()}`);
+    testDir = join(tmpdir(), `ai-search-test-${Date.now()}`);
     mkdirSync(testDir, { recursive: true });
 
     // Save original state
@@ -58,18 +58,18 @@ describe("Config Loader", () => {
       const paths = getConfigPaths();
 
       // First path should be .ts variant (preferred)
-      expect(paths[0]).toContain("multi-search.config.ts");
-      expect(paths[0]).toBe(join(process.cwd(), "multi-search.config.ts"));
+      expect(paths[0]).toContain("ai-search.config.ts");
+      expect(paths[0]).toBe(join(process.cwd(), "ai-search.config.ts"));
       // Second should be .json variant
-      expect(paths[1]).toContain("multi-search.config.json");
+      expect(paths[1]).toContain("ai-search.config.json");
     });
 
     it("should include XDG config paths", () => {
       const paths = getConfigPaths();
 
       // Should have both TS and JSON variants for XDG
-      const xdgTsPath = paths.find((p) => p.includes(".config/multi-search/config.ts"));
-      const xdgJsonPath = paths.find((p) => p.includes(".config/multi-search/config.json"));
+      const xdgTsPath = paths.find((p) => p.includes(".config/ai-search/config.ts"));
+      const xdgJsonPath = paths.find((p) => p.includes(".config/ai-search/config.json"));
       expect(xdgTsPath).toBeDefined();
       expect(xdgJsonPath).toBeDefined();
     });
@@ -83,8 +83,8 @@ describe("Config Loader", () => {
 
       expect(xdgPath).toBeDefined();
       // Should contain both ts and json variants
-      expect(paths.some((p) => p.includes("custom-config/multi-search/config.ts"))).toBe(true);
-      expect(paths.some((p) => p.includes("custom-config/multi-search/config.json"))).toBe(true);
+      expect(paths.some((p) => p.includes("custom-config/ai-search/config.ts"))).toBe(true);
+      expect(paths.some((p) => p.includes("custom-config/ai-search/config.json"))).toBe(true);
     });
 
     it("should filter out undefined paths", () => {
@@ -95,7 +95,7 @@ describe("Config Loader", () => {
   });
 
   describe("loadConfig", () => {
-    const validConfig: MultiSearchConfig = {
+    const validConfig: AiSearchConfig = {
       defaultEngineOrder: ["tavily", "brave"],
       engines: [
         {
@@ -112,12 +112,12 @@ describe("Config Loader", () => {
         },
       ],
       storage: {
-        creditStatePath: "~/.local/state/multi-search/credits.json",
+        creditStatePath: "~/.local/state/ai-search/credits.json",
       },
     };
 
     it("should load config from local directory", async () => {
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(validConfig));
 
       const config = await loadConfig();
@@ -136,7 +136,7 @@ describe("Config Loader", () => {
     });
 
     it("should load config from XDG config directory", async () => {
-      const xdgDir = join(testDir, ".config", "multi-search");
+      const xdgDir = join(testDir, ".config", "ai-search");
       mkdirSync(xdgDir, { recursive: true });
 
       const configPath = join(xdgDir, "config.json");
@@ -151,14 +151,14 @@ describe("Config Loader", () => {
 
     it("should prioritize local config over XDG config", async () => {
       // Create XDG config
-      const xdgDir = join(testDir, ".config", "multi-search");
+      const xdgDir = join(testDir, ".config", "ai-search");
       mkdirSync(xdgDir, { recursive: true });
       const xdgConfig = { ...validConfig, defaultEngineOrder: ["xdg"] };
       writeFileSync(join(xdgDir, "config.json"), JSON.stringify(xdgConfig));
 
       // Create local config
       const localConfig = { ...validConfig, defaultEngineOrder: ["local"] };
-      writeFileSync(join(testDir, "multi-search.config.json"), JSON.stringify(localConfig));
+      writeFileSync(join(testDir, "ai-search.config.json"), JSON.stringify(localConfig));
 
       process.env.XDG_CONFIG_HOME = join(testDir, ".config");
 
@@ -169,7 +169,7 @@ describe("Config Loader", () => {
 
     it("should load config when file exists", async () => {
       // Create a valid config file
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(validConfig));
 
       const config = await loadConfig();
@@ -177,14 +177,14 @@ describe("Config Loader", () => {
     });
 
     it("should throw error when config file has invalid JSON", async () => {
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, "{ invalid json }");
 
       await expect(loadConfig()).rejects.toThrow("Failed to load config file");
     });
 
     it("should include file path in parse error message", async () => {
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, "{ invalid: }");
 
       try {
@@ -197,7 +197,7 @@ describe("Config Loader", () => {
     });
 
     it("should handle empty config file", async () => {
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, "{}");
 
       // Empty config doesn't pass validation, so skip validation for this edge case test
@@ -212,7 +212,7 @@ describe("Config Loader", () => {
         engines: [],
       };
 
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(minimalConfig));
 
       // Minimal config doesn't pass validation (requires at least 1 engine), so skip validation
@@ -229,7 +229,7 @@ describe("Config Loader", () => {
         nested: { extra: "data" },
       };
 
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(configWithExtras));
 
       const config = await loadConfig();
@@ -246,21 +246,21 @@ describe("Config Loader", () => {
     });
 
     it("should return true when local config exists", () => {
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, "{}");
 
       expect(configExists()).toBe(true);
     });
 
     it("should return true when local TS config exists", () => {
-      const configPath = join(testDir, "multi-search.config.ts");
+      const configPath = join(testDir, "ai-search.config.ts");
       writeFileSync(configPath, "export default {}");
 
       expect(configExists()).toBe(true);
     });
 
     it("should return true when XDG config exists", () => {
-      const xdgDir = join(testDir, ".config", "multi-search");
+      const xdgDir = join(testDir, ".config", "ai-search");
       mkdirSync(xdgDir, { recursive: true });
       writeFileSync(join(xdgDir, "config.json"), "{}");
 
@@ -270,7 +270,7 @@ describe("Config Loader", () => {
     });
 
     it("should return true if any config path exists", () => {
-      const xdgDir = join(testDir, ".config", "multi-search");
+      const xdgDir = join(testDir, ".config", "ai-search");
       mkdirSync(xdgDir, { recursive: true });
       writeFileSync(join(xdgDir, "config.json"), "{}");
 
@@ -282,7 +282,7 @@ describe("Config Loader", () => {
 
   describe("Edge Cases", () => {
     it("should handle config file with UTF-8 characters", async () => {
-      const configWithUtf8: MultiSearchConfig = {
+      const configWithUtf8: AiSearchConfig = {
         defaultEngineOrder: ["tavily"],
         engines: [
           {
@@ -300,7 +300,7 @@ describe("Config Loader", () => {
         ],
       };
 
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(configWithUtf8), "utf8");
 
       const config = await loadConfig();
@@ -309,7 +309,7 @@ describe("Config Loader", () => {
     });
 
     it("should handle very large config files", async () => {
-      const largeConfig: MultiSearchConfig = {
+      const largeConfig: AiSearchConfig = {
         defaultEngineOrder: Array.from({ length: 100 }, (_, i) => `engine${i}`),
         engines: Array.from({ length: 100 }, (_, i) => ({
           id: `engine${i}`,
@@ -325,7 +325,7 @@ describe("Config Loader", () => {
         })),
       };
 
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(largeConfig));
 
       const config = await loadConfig();
@@ -360,7 +360,7 @@ describe("Config Loader", () => {
         ],
       };
 
-      const configPath = join(testDir, "multi-search.config.json");
+      const configPath = join(testDir, "ai-search.config.json");
       writeFileSync(configPath, JSON.stringify(nestedConfig));
 
       const config = await loadConfig();

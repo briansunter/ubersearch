@@ -1,19 +1,19 @@
 /**
- * Main multi-search tool function
+ * Main ai-search tool function
  *
  * This is the single public interface that orchestrates the entire search process
  */
 
 import { bootstrapContainer } from "../bootstrap/container";
 import type { CreditManager } from "../core/credits";
-import type { MultiSearchOrchestrator } from "../core/orchestrator";
+import type { AiSearchOrchestrator } from "../core/orchestrator";
 import { ServiceKeys } from "../core/serviceKeys";
-import type { MultiSearchInput, MultiSearchOutput } from "./interface";
+import type { AiSearchInput, AiSearchOutput } from "./interface";
 
 /**
  * Options for multiSearch function
  */
-export interface MultiSearchOptions {
+export interface AiSearchOptions {
   /** Explicit config file path */
   configPath?: string;
   /** Container override for testing (dependency injection) */
@@ -23,7 +23,7 @@ export interface MultiSearchOptions {
 }
 
 /**
- * Execute a multi-search across configured providers
+ * Execute a ai-search across configured providers
  *
  * This function:
  * 1. Bootstraps the DI container (or uses provided override)
@@ -36,18 +36,18 @@ export interface MultiSearchOptions {
  * @returns Search results with metadata
  */
 export async function multiSearch(
-  input: MultiSearchInput,
-  options?: string | MultiSearchOptions,
-): Promise<MultiSearchOutput> {
+  input: AiSearchInput,
+  options?: string | AiSearchOptions,
+): Promise<AiSearchOutput> {
   // Handle backwards compatibility: string arg is config path
-  const opts: MultiSearchOptions =
+  const opts: AiSearchOptions =
     typeof options === "string" ? { configPath: options } : (options ?? {});
 
   // Bootstrap the DI container or use override
   const container = opts.containerOverride ?? (await bootstrapContainer(opts.configPath));
 
   // Resolve orchestrator from container
-  const orchestrator = container.get<MultiSearchOrchestrator>(ServiceKeys.ORCHESTRATOR);
+  const orchestrator = container.get<AiSearchOrchestrator>(ServiceKeys.ORCHESTRATOR);
 
   // Execute search
   const result = await orchestrator.run(input.query, {
@@ -97,7 +97,7 @@ export interface GetCreditStatusOptions {
  */
 export async function getCreditStatus(
   options?: string | GetCreditStatusOptions,
-): Promise<MultiSearchOutput["credits"]> {
+): Promise<AiSearchOutput["credits"]> {
   // Handle backwards compatibility: string arg is config path
   const opts: GetCreditStatusOptions =
     typeof options === "string" ? { configPath: options } : (options ?? {});

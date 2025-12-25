@@ -1,7 +1,7 @@
 /**
  * Configuration Helper Functions
  *
- * Provides type-safe helpers for defining multi-search configurations.
+ * Provides type-safe helpers for defining ai-search configurations.
  * Inspired by Vite's defineConfig pattern.
  */
 
@@ -12,7 +12,7 @@ import type {
   EngineConfig,
   EngineConfigBase,
   LinkupConfig,
-  MultiSearchConfig,
+  AiSearchConfig,
   SearchxngConfig,
   TavilyConfig,
 } from "./types";
@@ -20,7 +20,7 @@ import type {
 /**
  * Extended configuration that supports plugins
  */
-export interface ExtendedSearchConfig extends MultiSearchConfig {
+export interface ExtendedSearchConfig extends AiSearchConfig {
   /**
    * Custom plugins to register
    * These will be registered before creating providers
@@ -35,15 +35,15 @@ export interface ExtendedSearchConfig extends MultiSearchConfig {
 export type ConfigFactory = () => ExtendedSearchConfig | Promise<ExtendedSearchConfig>;
 
 /**
- * Define a multi-search configuration with full type safety
+ * Define a ai-search configuration with full type safety
  *
  * @param config - Configuration object or factory function
  * @returns The configuration (passthrough with type inference)
  *
  * @example
  * ```typescript
- * // multi-search.config.ts
- * import { defineConfig } from 'multi-search';
+ * // ai-search.config.ts
+ * import { defineConfig } from 'ai-search';
  *
  * export default defineConfig({
  *   defaultEngineOrder: ['tavily', 'brave'],

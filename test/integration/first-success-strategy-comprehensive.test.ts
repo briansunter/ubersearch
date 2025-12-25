@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
 import type {
   ISearchStrategy,
-  MultiSearchOptions,
+  AiSearchOptions,
   StrategyContext,
 } from "../../src/core/strategy/ISearchStrategy";
 import type { EngineId, SearchFailureReason, SearchResultItem } from "../../src/core/types";
@@ -175,7 +175,7 @@ describe("FirstSuccessStrategy", () => {
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
       providerRegistry.set("brave" as EngineId, new MockSearchProvider("Brave", mockResults.brave));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing", "brave"] as EngineId[],
@@ -199,7 +199,7 @@ describe("FirstSuccessStrategy", () => {
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
       providerRegistry.set("brave" as EngineId, new MockSearchProvider("Brave", mockResults.brave));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing", "brave"] as EngineId[],
@@ -228,7 +228,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", mockResults.google),
       );
 
-      const options: MultiSearchOptions = { limit: 1, includeRaw: false };
+      const options: AiSearchOptions = { limit: 1, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google"] as EngineId[],
@@ -244,7 +244,7 @@ describe("FirstSuccessStrategy", () => {
       providerRegistry.set("google" as EngineId, new MockSearchProvider("Google", []));
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -266,7 +266,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", mockResults.google),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google"] as EngineId[],
@@ -294,7 +294,7 @@ describe("FirstSuccessStrategy", () => {
       // Exhaust google credits
       creditManager.exhaustEngine("google" as EngineId);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -323,7 +323,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", mockResults.google),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       await strategy.execute("test query", ["google"] as EngineId[], options, context);
 
       expect(creditManager.getUsage("google" as EngineId)).toBe(1);
@@ -335,7 +335,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", [], true, "mock_error"),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       await strategy.execute("test query", ["google"] as EngineId[], options, context);
 
       expect(creditManager.getUsage("google" as EngineId)).toBe(0);
@@ -350,7 +350,7 @@ describe("FirstSuccessStrategy", () => {
       // Exhaust google credits
       creditManager.exhaustEngine("google" as EngineId);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       await strategy.execute("test query", ["google"] as EngineId[], options, context);
 
       expect(creditManager.getUsage("google" as EngineId)).toBe(0);
@@ -363,7 +363,7 @@ describe("FirstSuccessStrategy", () => {
       );
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       await strategy.execute("test query", ["google", "bing"] as EngineId[], options, context);
 
       // Only google should be charged (first success stops execution)
@@ -380,7 +380,7 @@ describe("FirstSuccessStrategy", () => {
       );
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -406,7 +406,7 @@ describe("FirstSuccessStrategy", () => {
     test("should handle unknown provider errors", async () => {
       providerRegistry.set("google" as EngineId, new MockSearchProvider("Google", [], true));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google"] as EngineId[],
@@ -421,7 +421,7 @@ describe("FirstSuccessStrategy", () => {
     });
 
     test("should handle missing providers", async () => {
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["nonexistent"] as EngineId[],
@@ -445,7 +445,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Bing", [], true, "network_error"),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -480,7 +480,7 @@ describe("FirstSuccessStrategy", () => {
       creditManager.exhaustEngine("google" as EngineId);
       creditManager.exhaustEngine("bing" as EngineId);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -496,7 +496,7 @@ describe("FirstSuccessStrategy", () => {
 
   describe("empty and edge cases", () => {
     test("should handle empty engine list", async () => {
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute("test query", [] as EngineId[], options, context);
 
       expect(result.results).toHaveLength(0);
@@ -507,7 +507,7 @@ describe("FirstSuccessStrategy", () => {
       providerRegistry.set("google" as EngineId, new MockSearchProvider("Google", []));
       providerRegistry.set("bing" as EngineId, new MockSearchProvider("Bing", mockResults.bing));
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute(
         "test query",
         ["google", "bing"] as EngineId[],
@@ -538,7 +538,7 @@ describe("FirstSuccessStrategy", () => {
       };
       providerRegistry.set("google" as EngineId, googleProvider);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: true };
+      const options: AiSearchOptions = { limit: 10, includeRaw: true };
       await strategy.execute("test query", ["google"] as EngineId[], options, context);
 
       expect(searchCalls).toHaveLength(1);
@@ -562,7 +562,7 @@ describe("FirstSuccessStrategy", () => {
       };
       providerRegistry.set("google" as EngineId, googleProvider);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       await strategy.execute("specific query", ["google"] as EngineId[], options, context);
 
       expect(searchCalls).toHaveLength(1);
@@ -589,7 +589,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", mockResults.google),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategyWithEmptyOptions.execute(
         "test query",
         ["google"] as EngineId[],
@@ -609,7 +609,7 @@ describe("FirstSuccessStrategy", () => {
         new MockSearchProvider("Google", mockResults.google),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategyWithUndefinedOptions.execute(
         "test query",
         ["google"] as EngineId[],
@@ -649,7 +649,7 @@ describe("FirstSuccessStrategy", () => {
       providerRegistry.set("slow" as EngineId, slowProvider);
       providerRegistry.set("fast" as EngineId, fastProvider);
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const startTime = Date.now();
       const result = await strategy.execute(
         "test query",
@@ -694,7 +694,7 @@ describe("FirstSuccessStrategy", () => {
         i === engineCount - 1 ? (`success-${i}` as EngineId) : (`failing-${i}` as EngineId),
       );
 
-      const options: MultiSearchOptions = { limit: 10, includeRaw: false };
+      const options: AiSearchOptions = { limit: 10, includeRaw: false };
       const result = await strategy.execute("test query", engineIds, options, context);
 
       expect(result.results).toHaveLength(2); // Results from last provider

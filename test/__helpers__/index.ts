@@ -1,10 +1,10 @@
 /**
  * Consolidated Test Utilities and Helpers
  *
- * Common utilities for creating mocks, fakes, and test data for multi-search tests.
+ * Common utilities for creating mocks, fakes, and test data for ai-search tests.
  */
 
-import type { EngineConfig, MultiSearchConfig } from "../../src/config/types";
+import type { EngineConfig, AiSearchConfig } from "../../src/config/types";
 import type { CreditManager, CreditState, CreditStateProvider } from "../../src/core/credits";
 import type { ProviderMetadata, ProviderRegistry, SearchProvider } from "../../src/core/provider";
 import type { EngineId, SearchQuery, SearchResponse, SearchResultItem } from "../../src/core/types";
@@ -167,7 +167,7 @@ export function createTestEngineConfig(
 /**
  * Create a minimal test configuration
  */
-export function createTestConfig(overrides: Partial<MultiSearchConfig> = {}): MultiSearchConfig {
+export function createTestConfig(overrides: Partial<AiSearchConfig> = {}): AiSearchConfig {
   return {
     engines: [],
     defaultEngineOrder: [],
@@ -265,7 +265,7 @@ export type {
   SearchResponse,
   SearchResultItem,
   EngineId,
-  MultiSearchConfig,
+  AiSearchConfig,
   EngineConfig,
   CreditManager,
   CreditStateProvider,

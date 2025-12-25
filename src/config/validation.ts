@@ -63,7 +63,7 @@ export const EngineConfigSchema = z.discriminatedUnion("type", [
 ]);
 
 // Main configuration schema (uses passthrough to preserve extra fields)
-export const MultiSearchConfigSchema = z
+export const AiSearchConfigSchema = z
   .object({
     defaultEngineOrder: z.array(z.string()).min(1),
     engines: z.array(EngineConfigSchema).min(1),
@@ -86,7 +86,7 @@ export const CliInputSchema = z.object({
 });
 
 // Export inferred types from schemas
-export type ValidatedMultiSearchConfig = z.infer<typeof MultiSearchConfigSchema>;
+export type ValidatedAiSearchConfig = z.infer<typeof AiSearchConfigSchema>;
 export type ValidatedEngineConfig = z.infer<typeof EngineConfigSchema>;
 export type ValidatedTavilyConfig = z.infer<typeof TavilyConfigSchema>;
 export type ValidatedBraveConfig = z.infer<typeof BraveConfigSchema>;
@@ -100,8 +100,8 @@ export type ValidatedCliInput = z.infer<typeof CliInputSchema>;
  * @returns Validated configuration
  * @throws ZodError if validation fails
  */
-export function validateConfig(config: unknown): ValidatedMultiSearchConfig {
-  return MultiSearchConfigSchema.parse(config);
+export function validateConfig(config: unknown): ValidatedAiSearchConfig {
+  return AiSearchConfigSchema.parse(config);
 }
 
 /**
@@ -112,13 +112,13 @@ export function validateConfig(config: unknown): ValidatedMultiSearchConfig {
 export function validateConfigSafe(config: unknown):
   | {
       success: true;
-      data: ValidatedMultiSearchConfig;
+      data: ValidatedAiSearchConfig;
     }
   | {
       success: false;
       error: z.ZodError;
     } {
-  const result = MultiSearchConfigSchema.safeParse(config);
+  const result = AiSearchConfigSchema.safeParse(config);
   if (result.success) {
     return { success: true, data: result.data };
   }

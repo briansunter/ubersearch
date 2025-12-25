@@ -1,10 +1,10 @@
 {
-  "name": "multi-search",
+  "name": "ai-search",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
   "bin": {
-    "multi-search": "src/cli.ts"
+    "ai-search": "src/cli.ts"
   },
   "exports": {
     ".": {
@@ -39,6 +39,6 @@
     "mcp": "bun run mcp-server.ts",
     "mcp:test": "bun run scripts/test-mcp.ts",
     "build": "bun run scripts/build.ts",
-    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/multi-search"
+    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ai-search"
   }
 }

@@ -10,7 +10,7 @@ import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const APP_NAME = "multi-search";
+const APP_NAME = "ai-search";
 
 /**
  * Get XDG config home directory
@@ -38,7 +38,7 @@ export function getXdgStateHome(): string {
 
 /**
  * Get app config directory
- * ~/.config/multi-search
+ * ~/.config/ai-search
  */
 export function getAppConfigDir(): string {
   return join(getXdgConfigHome(), APP_NAME);
@@ -46,7 +46,7 @@ export function getAppConfigDir(): string {
 
 /**
  * Get app data directory
- * ~/.local/share/multi-search
+ * ~/.local/share/ai-search
  */
 export function getAppDataDir(): string {
   return join(getXdgDataHome(), APP_NAME);
@@ -54,7 +54,7 @@ export function getAppDataDir(): string {
 
 /**
  * Get SearXNG config directory
- * ~/.config/multi-search/searxng/config
+ * ~/.config/ai-search/searxng/config
  */
 export function getSearxngConfigDir(): string {
   return join(getAppConfigDir(), "searxng", "config");
@@ -62,7 +62,7 @@ export function getSearxngConfigDir(): string {
 
 /**
  * Get SearXNG data directory
- * ~/.local/share/multi-search/searxng/data
+ * ~/.local/share/ai-search/searxng/data
  */
 export function getSearxngDataDir(): string {
   return join(getAppDataDir(), "searxng", "data");

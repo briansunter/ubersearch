@@ -2,7 +2,7 @@
 
 ## Overview
 
-The multi-search tool now supports **automatic Docker container management** for local providers like SearXNG.
+The ai-search tool now supports **automatic Docker container management** for local providers like SearXNG.
 
 ### Key Features
 
@@ -195,7 +195,7 @@ version: "3.8"
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: multi-search-ollama
+    container_name: ai-search-ollama
     ports:
       - "11434:11434"
     healthcheck:
@@ -260,7 +260,7 @@ export class OllamaProvider extends DockerProvider {
 ```
 ┌─────────────────┐          ┌──────────────────┐          ┌────────────────┐
 │   CLI Command   │          │     Provider     │          │ Docker Compose │
-│  "multi-search" │─────────▶│   Searchxng      │─────────▶│   Container    │
+│  "ai-search" │─────────▶│   Searchxng      │─────────▶│   Container    │
 └─────────────────┘          └────────┬─────────┘          └───────┬────────┘
                                       │                           │
                                       │ init()                    │
@@ -422,7 +422,7 @@ curl http://localhost:8888/healthz
 
 ```bash
 # Verify config is loaded
-cat multi-search.config.json | grep -A 10 searxng
+cat ai-search.config.json | grep -A 10 searxng
 
 # Check autoStart is true
 # Should see: "autoStart": true

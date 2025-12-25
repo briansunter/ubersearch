@@ -1,6 +1,6 @@
 # Multi-Search MCP Server
 
-This document describes how to use multi-search as an MCP (Model Context Protocol) server.
+This document describes how to use ai-search as an MCP (Model Context Protocol) server.
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ bun install
 Copy the sample config to your project root or XDG config directory:
 
 ```bash
-cp docs/config/multi-search.config.json multi-search.config.json
+cp docs/config/ai-search.config.json ai-search.config.json
 ```
 
 Edit the config to enable/disable engines as needed.
@@ -93,11 +93,11 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ```json
 {
   "mcpServers": {
-    "multi-search": {
+    "ai-search": {
       "command": "bun",
       "args": [
         "run",
-        "/path/to/multi-search/mcp-server.ts"
+        "/path/to/ai-search/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "your_key_here",
@@ -113,11 +113,11 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ```json
 {
   "mcpServers": {
-    "multi-search": {
+    "ai-search": {
       "command": "bun",
       "args": [
         "run",
-        "/Volumes/Storage/code/multi-search/mcp-server.ts"
+        "/Volumes/Storage/code/ai-search/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "tvly-...",
@@ -135,7 +135,7 @@ Restart Claude Desktop after updating the config.
 ## Using in Code
 
 ```typescript
-import { multiSearch, getCreditStatus } from 'multi-search';
+import { multiSearch, getCreditStatus } from 'ai-search';
 
 // Search
 const results = await multiSearch({
@@ -160,21 +160,21 @@ The CLI is also available and can be linked globally:
 bun run src/cli.ts "search query"
 
 # Link for global access
-ln -s $(pwd)/src/cli.ts ~/.local/bin/multi-search
-multi-search "search query" --json
+ln -s $(pwd)/src/cli.ts ~/.local/bin/ai-search
+ai-search "search query" --json
 ```
 
 ## Configuration
 
 Config files are searched in this order:
 
-1. `./multi-search.config.ts` or `./multi-search.config.json`
-2. `$XDG_CONFIG_HOME/multi-search/config.(ts|json)` (or `~/.config/multi-search/...`)
+1. `./ai-search.config.ts` or `./ai-search.config.json`
+2. `$XDG_CONFIG_HOME/ai-search/config.(ts|json)` (or `~/.config/ai-search/...`)
 
 ### TypeScript Config (Recommended)
 
 ```typescript
-import { defineConfig, defineTavily, defineBrave } from 'multi-search';
+import { defineConfig, defineTavily, defineBrave } from 'ai-search';
 
 export default defineConfig({
   defaultEngineOrder: ['tavily', 'brave'],

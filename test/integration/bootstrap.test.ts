@@ -4,12 +4,12 @@
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { bootstrapContainer } from "../../src/bootstrap/container";
-import type { MultiSearchConfig } from "../../src/config/types";
+import type { AiSearchConfig } from "../../src/config/types";
 import type { Container } from "../../src/core/container";
 import { ProviderFactory } from "../../src/core/provider/ProviderFactory";
 import { PluginRegistry } from "../../src/plugin";
 
-const mockConfig: MultiSearchConfig = {
+const mockConfig: AiSearchConfig = {
   defaultEngineOrder: ["tavily-test", "brave-test"],
   engines: [
     {
@@ -91,7 +91,7 @@ describe("bootstrapContainer", () => {
 
   test("should register configuration correctly", async () => {
     container = await bootstrapContainer(mockConfig);
-    const config = await container.get<MultiSearchConfig>("config");
+    const config = await container.get<AiSearchConfig>("config");
 
     expect(config).toBe(mockConfig);
     expect(config.defaultEngineOrder).toEqual(["tavily-test", "brave-test"]);
@@ -229,8 +229,8 @@ describe("Container Service Resolution", () => {
   });
 
   test("should resolve singleton services correctly", async () => {
-    const config1 = await container!.get<MultiSearchConfig>("config");
-    const config2 = await container!.get<MultiSearchConfig>("config");
+    const config1 = await container!.get<AiSearchConfig>("config");
+    const config2 = await container!.get<AiSearchConfig>("config");
 
     expect(config1).toBe(config2); // Same instance
   });

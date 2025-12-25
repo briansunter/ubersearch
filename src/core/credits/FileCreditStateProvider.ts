@@ -16,8 +16,8 @@ const log = createLogger("CreditState");
  *
  * @remarks
  * This provider stores credit state as JSON in the following locations:
- * - Default: ~/.local/state/multi-search/credits.json
- * - With XDG_STATE_HOME: $XDG_STATE_HOME/multi-search/credits.json
+ * - Default: ~/.local/state/ai-search/credits.json
+ * - With XDG_STATE_HOME: $XDG_STATE_HOME/ai-search/credits.json
  *
  * Uses Bun's async file APIs for non-blocking I/O operations.
  * The provider handles directory creation automatically and never throws errors,
@@ -38,7 +38,7 @@ export class FileCreditStateProvider implements CreditStateProvider {
    *
    * @param statePath - Optional custom path for the state file.
    *                   If not provided, uses the default location based on
-   *                   XDG_STATE_HOME or ~/.local/state/multi-search/credits.json
+   *                   XDG_STATE_HOME or ~/.local/state/ai-search/credits.json
    */
   constructor(statePath?: string) {
     this.statePath = statePath ?? this.getDefaultStatePath();
@@ -52,7 +52,7 @@ export class FileCreditStateProvider implements CreditStateProvider {
    */
   private getDefaultStatePath(): string {
     const base = process.env.XDG_STATE_HOME ?? join(homedir(), ".local", "state");
-    return join(base, "multi-search", "credits.json");
+    return join(base, "ai-search", "credits.json");
   }
 
   /**

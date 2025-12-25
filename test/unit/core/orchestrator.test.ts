@@ -1,15 +1,15 @@
 /**
  * Orchestrator Tests
  *
- * Tests for MultiSearchOrchestrator
+ * Tests for AiSearchOrchestrator
  *
  * Note: These tests use real strategy implementations to avoid module pollution.
  */
 
 import { beforeEach, describe, expect, mock, test } from "bun:test";
-import type { MultiSearchConfig } from "../../../src/config/types";
+import type { AiSearchConfig } from "../../../src/config/types";
 import type { CreditManager } from "../../../src/core/credits";
-import { MultiSearchOrchestrator } from "../../../src/core/orchestrator";
+import { AiSearchOrchestrator } from "../../../src/core/orchestrator";
 import type {
   ProviderMetadata,
   ProviderRegistry,
@@ -42,11 +42,11 @@ class FakeProvider implements SearchProvider {
   }
 }
 
-describe("MultiSearchOrchestrator", () => {
-  let orchestrator: MultiSearchOrchestrator;
+describe("AiSearchOrchestrator", () => {
+  let orchestrator: AiSearchOrchestrator;
   let mockCreditManager: CreditManager;
   let mockRegistry: ProviderRegistry;
-  let mockConfig: MultiSearchConfig;
+  let mockConfig: AiSearchConfig;
 
   beforeEach(() => {
     // Create mock dependencies
@@ -83,7 +83,7 @@ describe("MultiSearchOrchestrator", () => {
       defaultEngineOrder: ["test"],
     };
 
-    orchestrator = new MultiSearchOrchestrator(mockConfig, mockCreditManager, mockRegistry);
+    orchestrator = new AiSearchOrchestrator(mockConfig, mockCreditManager, mockRegistry);
   });
 
   describe("Constructor", () => {
@@ -103,7 +103,7 @@ describe("MultiSearchOrchestrator", () => {
 
     test("should throw error for empty engine list", async () => {
       const emptyConfig = { ...mockConfig, defaultEngineOrder: [] };
-      const emptyOrchestrator = new MultiSearchOrchestrator(
+      const emptyOrchestrator = new AiSearchOrchestrator(
         emptyConfig,
         mockCreditManager,
         mockRegistry,

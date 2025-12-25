@@ -1,5 +1,5 @@
 /**
- * Configuration types for multi-search
+ * Configuration types for ai-search
  */
 
 import type { EngineId } from "../core/types";
@@ -71,7 +71,7 @@ export interface SearchxngConfig extends EngineConfigBase, DockerConfigurable {
 
 export type EngineConfig = TavilyConfig | BraveConfig | LinkupConfig | SearchxngConfig;
 
-export interface MultiSearchConfig {
+export interface AiSearchConfig {
   /** Default order to try engines (can be overridden per query) */
   defaultEngineOrder: EngineId[];
 
@@ -80,7 +80,7 @@ export interface MultiSearchConfig {
 
   /** Storage settings */
   storage?: {
-    /** Path to store credit state (defaults to ~/.local/state/multi-search/credits.json) */
+    /** Path to store credit state (defaults to ~/.local/state/ai-search/credits.json) */
     creditStatePath?: string;
   };
 }

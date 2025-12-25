@@ -57,6 +57,6 @@
     }
   ],
   "storage": {
-    "creditStatePath": "~/.local/state/multi-search/credits.json"
+    "creditStatePath": "~/.local/state/ai-search/credits.json"
   }
 }

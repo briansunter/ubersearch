@@ -2,13 +2,13 @@
  * Configuration loader with multi-path resolution and validation
  *
  * Supports multiple config formats:
- * - JSON: multi-search.config.json
- * - TypeScript: multi-search.config.ts (with defineConfig helper)
+ * - JSON: ai-search.config.json
+ * - TypeScript: ai-search.config.ts (with defineConfig helper)
  *
  * Config resolution order:
  * 1. Explicit path (if provided)
- * 2. Local directory (./multi-search.config.{ts,json})
- * 3. XDG config ($XDG_CONFIG_HOME/multi-search/config.{ts,json})
+ * 2. Local directory (./ai-search.config.{ts,json})
+ * 3. XDG config ($XDG_CONFIG_HOME/ai-search/config.{ts,json})
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -41,7 +41,7 @@ const CONFIG_EXTENSIONS = [".ts", ".json"] as const;
 
 /** Config file base names */
 const CONFIG_BASENAMES = {
-  local: "multi-search.config",
+  local: "ai-search.config",
   xdg: "config",
 } as const;
 
@@ -55,12 +55,12 @@ function getLocalConfigPaths(): string[] {
 }
 
 /**
- * Get XDG config paths ($XDG_CONFIG_HOME/multi-search/config.{ts,json})
+ * Get XDG config paths ($XDG_CONFIG_HOME/ai-search/config.{ts,json})
  */
 function getXdgConfigPaths(): string[] {
   const xdg = process.env.XDG_CONFIG_HOME;
   const baseDir = xdg ?? join(homedir(), ".config");
-  const base = join(baseDir, "multi-search", CONFIG_BASENAMES.xdg);
+  const base = join(baseDir, "ai-search", CONFIG_BASENAMES.xdg);
   return CONFIG_EXTENSIONS.map((ext) => `${base}${ext}`);
 }
 
@@ -295,7 +295,7 @@ export async function loadConfig(
 
   // No config file found - use default configuration
   console.warn("No config file found. Using default configuration (SearXNG).");
-  console.warn("Create a config file for custom providers: multi-search.config.json");
+  console.warn("Create a config file for custom providers: ai-search.config.json");
 
   const defaultConfig = getDefaultConfig();
 
@@ -355,7 +355,7 @@ export function loadConfigSync(
   }
 
   console.warn("No config file found. Using default configuration (SearXNG).");
-  console.warn("Create a config file for custom providers: multi-search.config.json");
+  console.warn("Create a config file for custom providers: ai-search.config.json");
   return getDefaultConfig();
 }
 

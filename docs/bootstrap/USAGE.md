@@ -1,6 +1,6 @@
 # Bootstrap Module Usage Guide
 
-The bootstrap module provides a centralized dependency injection container for the multi-search application. This replaces manual service instantiation with a clean, testable DI pattern.
+The bootstrap module provides a centralized dependency injection container for the ai-search application. This replaces manual service instantiation with a clean, testable DI pattern.
 
 ## Quick Start
 
@@ -86,7 +86,7 @@ container.singleton("strategyFactory", () => StrategyFactory);
 container.singleton(
   "orchestrator",
   () =>
-    new MultiSearchOrchestrator(
+    new AiSearchOrchestrator(
       container.get("config"),
       container.get("creditManager"),
       container.get("providerRegistry"),
@@ -201,7 +201,7 @@ const tavilyProvider = new TavilyProvider(
 registry.register(tavilyProvider);
 // ... register other providers
 
-const orchestrator = new MultiSearchOrchestrator(
+const orchestrator = new AiSearchOrchestrator(
   config,
   creditManager,
   registry,

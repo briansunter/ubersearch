@@ -111,7 +111,7 @@ describe("CLI Tests", () => {
       expect(process.exit).toHaveBeenCalledWith(0);
       expect(captured.log.length).toBeGreaterThan(0);
       const output = captured.log.join("\n");
-      expect(output).toContain("multi-search — Unified search across multiple providers");
+      expect(output).toContain("ai-search — Unified search across multiple providers");
       expect(output).toContain("USAGE:");
       expect(output).toContain("ARGUMENTS:");
       expect(output).toContain("OPTIONS:");
@@ -166,8 +166,8 @@ describe("CLI Tests", () => {
       }
 
       const output = captured.log.join("\n");
-      expect(output).toContain("multi-search <query> [options]");
-      expect(output).toContain("multi-search credits");
+      expect(output).toContain("ai-search <query> [options]");
+      expect(output).toContain("ai-search credits");
       expect(output).toContain("--json");
       expect(output).toContain("--engines");
       expect(output).toContain("--strategy");
@@ -184,7 +184,7 @@ describe("CLI Tests", () => {
 
     beforeEach(() => {
       // Create temp directory and config file for credits test
-      testDir = join(tmpdir(), `multi-search-cli-test-${Date.now()}`);
+      testDir = join(tmpdir(), `ai-search-cli-test-${Date.now()}`);
       mkdirSync(testDir, { recursive: true });
 
       // Create a valid config file
@@ -205,7 +205,7 @@ describe("CLI Tests", () => {
           },
         ],
       };
-      writeFileSync(join(testDir, "multi-search.config.json"), JSON.stringify(validConfig));
+      writeFileSync(join(testDir, "ai-search.config.json"), JSON.stringify(validConfig));
 
       // Save and change cwd so config is found
       originalCwd = process.cwd();

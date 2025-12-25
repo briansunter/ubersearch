@@ -12,7 +12,7 @@
  * container.singleton(ServiceKeys.CONFIG, () => config);
  *
  * // Resolve service
- * const config = container.get<MultiSearchConfig>(ServiceKeys.CONFIG);
+ * const config = container.get<AiSearchConfig>(ServiceKeys.CONFIG);
  * ```
  */
 

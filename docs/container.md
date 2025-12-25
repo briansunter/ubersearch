@@ -1,6 +1,6 @@
 # Dependency Injection Container
 
-The multi-search project includes a comprehensive Dependency Injection (DI) Container that manages service registration and resolution. This eliminates manual instantiation throughout the codebase and provides a clean, testable architecture.
+The ai-search project includes a comprehensive Dependency Injection (DI) Container that manages service registration and resolution. This eliminates manual instantiation throughout the codebase and provides a clean, testable architecture.
 
 ## Overview
 
@@ -199,7 +199,7 @@ container.singleton(
 container.singleton(
   "orchestrator",
   (c) =>
-    new MultiSearchOrchestrator(
+    new AiSearchOrchestrator(
       c.get("config"),
       c.get("creditManager"),
       c.get("providerRegistry"),
@@ -234,7 +234,7 @@ describe("MyService", () => {
 
 ## Integration with Multi-Search
 
-The container integrates seamlessly with the existing multi-search architecture:
+The container integrates seamlessly with the existing ai-search architecture:
 
 ### Service Registration
 
@@ -273,7 +273,7 @@ export function registerServices(): void {
     const config = await c.get("config");
     const creditManager = await c.get("creditManager");
     const providerRegistry = c.get("providerRegistry");
-    return new MultiSearchOrchestrator(config, creditManager, providerRegistry);
+    return new AiSearchOrchestrator(config, creditManager, providerRegistry);
   });
 }
 ```
@@ -286,7 +286,7 @@ registerServices();
 
 // Get orchestrator from container
 const orchestrator =
-  await container.get<MultiSearchOrchestrator>("orchestrator");
+  await container.get<AiSearchOrchestrator>("orchestrator");
 
 // Use normally
 const results = await orchestrator.run("typescript DI container");
@@ -369,7 +369,7 @@ const creditManager = new CreditManager(config.engines, provider);
 await creditManager.initialize();
 const registry = new ProviderRegistry();
 registry.register("brave", new BraveProvider());
-const orchestrator = new MultiSearchOrchestrator(
+const orchestrator = new AiSearchOrchestrator(
   config,
   creditManager,
   registry,
@@ -381,7 +381,7 @@ const orchestrator = new MultiSearchOrchestrator(
 ```typescript
 registerServices();
 const orchestrator =
-  await container.get<MultiSearchOrchestrator>("orchestrator");
+  await container.get<AiSearchOrchestrator>("orchestrator");
 ```
 
 ## Testing
@@ -404,4 +404,4 @@ bun test src/core/container.test.ts
 
 ## Conclusion
 
-The Dependency Injection Container provides a clean, testable architecture for the multi-search project. It eliminates manual dependency management, supports both singleton and transient lifetimes, detects circular dependencies, and provides excellent error messages. The container is lightweight, performant, and fully integrated with the existing codebase.\n\nFor more examples, see `src/core/container-usage-example.ts`.
+The Dependency Injection Container provides a clean, testable architecture for the ai-search project. It eliminates manual dependency management, supports both singleton and transient lifetimes, detects circular dependencies, and provides excellent error messages. The container is lightweight, performant, and fully integrated with the existing codebase.\n\nFor more examples, see `src/core/container-usage-example.ts`.

@@ -1,8 +1,8 @@
 /**
- * Input and output interfaces for the multi-search tool
+ * Input and output interfaces for the ai-search tool
  */
 
-export interface MultiSearchInput {
+export interface AiSearchInput {
   /** Search query string */
   query: string;
 
@@ -26,7 +26,7 @@ export interface MultiSearchInput {
   parallel?: boolean;
 }
 
-export interface MultiSearchEngineAttempt {
+export interface AiSearchEngineAttempt {
   /** Provider/engine ID that was attempted */
   engineId: string;
 
@@ -37,7 +37,7 @@ export interface MultiSearchEngineAttempt {
   reason?: string;
 }
 
-export interface MultiSearchOutputItem {
+export interface AiSearchOutputItem {
   /** Result title */
   title: string;
 
@@ -56,15 +56,15 @@ export interface MultiSearchOutputItem {
 
 import type { CreditSnapshot } from "../core/credits";
 
-export interface MultiSearchOutput {
+export interface AiSearchOutput {
   /** Original query */
   query: string;
 
   /** Combined search results from all successful providers */
-  items: MultiSearchOutputItem[];
+  items: AiSearchOutputItem[];
 
   /** Metadata about which engines were tried and their outcomes */
-  enginesTried: MultiSearchEngineAttempt[];
+  enginesTried: AiSearchEngineAttempt[];
 
   /** Credit snapshots for each engine after the search */
   credits?: CreditSnapshot[];

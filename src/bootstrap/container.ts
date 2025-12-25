@@ -5,12 +5,12 @@
  */
 
 import { loadConfig } from "../config/load";
-import type { EngineConfig, MultiSearchConfig } from "../config/types";
+import type { EngineConfig, AiSearchConfig } from "../config/types";
 import { type Container, container } from "../core/container";
 import { CreditManager } from "../core/credits";
 import { FileCreditStateProvider } from "../core/credits/FileCreditStateProvider";
 import { createLogger } from "../core/logger";
-import { MultiSearchOrchestrator } from "../core/orchestrator";
+import { AiSearchOrchestrator } from "../core/orchestrator";
 import type { ILifecycleProvider, SearchProvider } from "../core/provider";
 import { ProviderRegistry } from "../core/provider";
 import { ProviderFactory } from "../core/provider/ProviderFactory";
@@ -37,7 +37,7 @@ export interface BootstrapOptions {
  * @param options - Bootstrap options (or legacy creditStatePath string)
  */
 export async function bootstrapContainer(
-  configOrPath?: string | MultiSearchConfig,
+  configOrPath?: string | AiSearchConfig,
   options?: BootstrapOptions | string,
 ): Promise<Container> {
   // Clear existing registrations (useful for testing)
@@ -48,7 +48,7 @@ export async function bootstrapContainer(
     typeof options === "string" ? { creditStatePath: options } : (options ?? {});
 
   // Load or use provided configuration
-  let config: MultiSearchConfig;
+  let config: AiSearchConfig;
   if (typeof configOrPath === "object" && configOrPath !== null) {
     // Config object provided directly (useful for testing)
     config = configOrPath;
@@ -122,7 +122,7 @@ export async function bootstrapContainer(
   container.singleton(ServiceKeys.ORCHESTRATOR, () => {
     const creditManager = container.get<CreditManager>(ServiceKeys.CREDIT_MANAGER);
     const providerRegistry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
-    return new MultiSearchOrchestrator(config, creditManager, providerRegistry);
+    return new AiSearchOrchestrator(config, creditManager, providerRegistry);
   });
 
   // Initialize services that need async setup

@@ -16,7 +16,7 @@
 
 ### Changed
 
-- MultiSearchOrchestrator refactored to use StrategyFactory (64% smaller)
+- AiSearchOrchestrator refactored to use StrategyFactory (64% smaller)
 - CreditManager now injects CreditStateProvider (no file I/O in business logic)
 - LinkupProvider and SearchxngProvider refactored to use composition (LSP compliance)
 - CLI refactored to use DI container instead of manual instantiation

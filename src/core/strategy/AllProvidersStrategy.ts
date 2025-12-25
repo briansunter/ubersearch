@@ -14,7 +14,7 @@ import { SearchError } from "../types";
 import type {
   EngineAttempt,
   ISearchStrategy,
-  MultiSearchOptions,
+  AiSearchOptions,
   StrategyContext,
   StrategyResult,
 } from "./ISearchStrategy";
@@ -50,7 +50,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
   async execute(
     query: string,
     engineIds: EngineId[],
-    options: MultiSearchOptions,
+    options: AiSearchOptions,
     context: StrategyContext,
   ): Promise<StrategyResult> {
     // Choose execution mode based on options
@@ -66,7 +66,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
   private async executeSequential(
     query: string,
     engineIds: EngineId[],
-    options: MultiSearchOptions,
+    options: AiSearchOptions,
     context: StrategyContext,
   ): Promise<StrategyResult> {
     const results: SearchResultItem[] = [];
@@ -142,7 +142,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
   private async executeParallel(
     query: string,
     engineIds: EngineId[],
-    options: MultiSearchOptions,
+    options: AiSearchOptions,
     context: StrategyContext,
   ): Promise<StrategyResult> {
     const results: SearchResultItem[] = [];

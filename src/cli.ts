@@ -8,7 +8,7 @@
 import { bootstrapContainer, isLifecycleProvider } from "./bootstrap/container";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
-import type { MultiSearchOutput } from "./tool/interface";
+import type { AiSearchOutput } from "./tool/interface";
 import { getCreditStatus, multiSearch } from "./tool/multiSearchTool";
 
 // Parse command line arguments
@@ -29,11 +29,11 @@ if (configIdx !== -1) {
 // Show help
 if (args.length === 0 || args.includes("--help") || args.includes("-h")) {
   console.log(`
-multi-search — Unified search across multiple providers
+ai-search — Unified search across multiple providers
 
 USAGE:
-    multi-search <query> [options]
-    multi-search credits
+    ai-search <query> [options]
+    ai-search credits
 
 ARGUMENTS:
     <query>     Search query (required, unless using 'credits' command)
@@ -50,19 +50,19 @@ OPTIONS:
     --help, -h                  Show this help message
 
 EXAMPLES:
-    multi-search "best TypeScript ORM 2025"
-    multi-search "llm observability" --engines tavily,brave --json
-    multi-search "hawaii dev meetups" --strategy first-success
-    multi-search credits
-    multi-search health
-    multi-search --config /path/to/config.json credits
-    multi-search "query" --config /path/to/config.json
+    ai-search "best TypeScript ORM 2025"
+    ai-search "llm observability" --engines tavily,brave --json
+    ai-search "hawaii dev meetups" --strategy first-success
+    ai-search credits
+    ai-search health
+    ai-search --config /path/to/config.json credits
+    ai-search "query" --config /path/to/config.json
 
 CONFIGURATION:
     Config files are searched in order:
-    1. ./multi-search.config.json
-    2. $XDG_CONFIG_HOME/multi-search/config.json
-    3. ~/.config/multi-search/config.json
+    1. ./ai-search.config.json
+    2. $XDG_CONFIG_HOME/ai-search/config.json
+    3. ~/.config/ai-search/config.json
 
 ENVIRONMENT:
     Set API keys in environment variables:
@@ -187,7 +187,7 @@ async function main() {
 /**
  * Print results in human-readable format
  */
-function printHumanReadable(result: MultiSearchOutput) {
+function printHumanReadable(result: AiSearchOutput) {
   console.log(`\nQuery: "${result.query}"`);
   console.log(`Found ${result.items.length} results\n`);
 

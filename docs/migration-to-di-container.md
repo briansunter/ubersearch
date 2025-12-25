@@ -1,6 +1,6 @@
 # Migration Guide: Manual Instantiation to DI Container
 
-This guide helps you migrate the multi-search codebase from manual instantiation to using the Dependency Injection Container.
+This guide helps you migrate the ai-search codebase from manual instantiation to using the Dependency Injection Container.
 
 ## Current State Analysis
 
@@ -17,7 +17,7 @@ const creditManager = new CreditManager(config.engines, provider);
 await creditManager.initialize();
 const registry = new ProviderRegistry();
 // ... register providers manually
-const orchestrator = new MultiSearchOrchestrator(
+const orchestrator = new AiSearchOrchestrator(
   config,
   creditManager,
   registry,
@@ -51,7 +51,7 @@ Create `src/bootstrap/services.ts`:
 ```typescript
 import { container } from "../core/container";
 import { loadConfig } from "../config/load";
-import { MultiSearchOrchestrator } from "../core/orchestrator";
+import { AiSearchOrchestrator } from "../core/orchestrator";
 import { CreditManager } from "../core/credits/CreditManager";
 import { FileCreditStateProvider } from "../core/credits/FileCreditStateProvider";
 import { ProviderRegistry } from "../core/provider";
@@ -113,7 +113,7 @@ export async function registerServices(): Promise<void> {
     const creditManager = await c.get("creditManager");
     const providerRegistry = c.get("providerRegistry");
 
-    return new MultiSearchOrchestrator(config, creditManager, providerRegistry);
+    return new AiSearchOrchestrator(config, creditManager, providerRegistry);
   });
 }
 ```
@@ -133,7 +133,7 @@ async function main() {
 
     // Get orchestrator from container instead of manual instantiation
     const orchestrator =
-      await container.get<MultiSearchOrchestrator>("orchestrator");
+      await container.get<AiSearchOrchestrator>("orchestrator");
 
     // Use orchestrator normally
     const results = await orchestrator.run(query, options);
@@ -153,7 +153,7 @@ Update `src/tool/interface.ts` to use DI container:
 ```typescript
 import { container } from "../core/container";
 
-export async function createMultiSearchTool() {
+export async function createAiSearchTool() {
   // Ensure services are registered
   if (!container.has("orchestrator")) {
     const { registerServices } = await import("../bootstrap/services");
@@ -161,7 +161,7 @@ export async function createMultiSearchTool() {
   }
 
   const orchestrator =
-    await container.get<MultiSearchOrchestrator>("orchestrator");
+    await container.get<AiSearchOrchestrator>("orchestrator");
 
   return {
     name: "multi_search",
@@ -223,7 +223,7 @@ export async function initializeApplication(): Promise<void> {
   console.log("Credit manager initialized");
 
   const orchestrator =
-    await container.get<MultiSearchOrchestrator>("orchestrator");
+    await container.get<AiSearchOrchestrator>("orchestrator");
   console.log("Orchestrator ready");
 }
 ```
@@ -348,8 +348,8 @@ describe("Service Registration", () => {
 
     // Test service resolution
     const orchestrator =
-      await container.get<MultiSearchOrchestrator>("orchestrator");
-    expect(orchestrator).toBeInstanceOf(MultiSearchOrchestrator);
+      await container.get<AiSearchOrchestrator>("orchestrator");
+    expect(orchestrator).toBeInstanceOf(AiSearchOrchestrator);
   });
 });
 ```
@@ -413,7 +413,7 @@ After migration, verify the following:
 
    ```typescript
    // Should not throw
-   await container.get<MultiSearchOrchestrator>("orchestrator");
+   await container.get<AiSearchOrchestrator>("orchestrator");
    ```
 
 3. **Services maintain correct lifetime:**
