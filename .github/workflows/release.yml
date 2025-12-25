@@ -52,19 +52,18 @@ jobs:
       - name: Build package
         run: bun run build
 
-      - name: Get OIDC token
-        id: oidc
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const token = await core.getIDToken('npm')
-            core.setOutput('token', token)
-            core.exportVariable('NPM_TOKEN', token)
+      - name: Create .npmrc for OIDC
+        run: |
+          # Create .npmrc that semantic-release will accept
+          # npm will use OIDC token automatically via provenance
+          echo "registry=https://registry.npmjs.org/" > .npmrc
+          # Add a placeholder that makes semantic-release's validation pass
+          # npm will ignore this and use OIDC instead
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN:--placeholder}" >> .npmrc
 
       - name: Publish to npm
         run: bunx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ env.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
