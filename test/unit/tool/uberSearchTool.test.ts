@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, mock, test } from "bun:test";
-import { getCreditStatus, multiSearch } from "../../../src/tool/multiSearchTool";
+import { getCreditStatus, multiSearch } from "../../../src/tool/uberSearchTool";
 
 // Create a mock container factory for testing
 function createMockContainer(

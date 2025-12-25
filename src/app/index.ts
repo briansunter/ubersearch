@@ -26,5 +26,5 @@ export type { UberSearchInput, UberSearchOutput, UberSearchOutputItem } from "..
 export type {
   GetCreditStatusOptions,
   UberSearchOptions as ToolUberSearchOptions,
-} from "../tool/multiSearchTool";
-export { getCreditStatus, multiSearch } from "../tool/multiSearchTool";
+} from "../tool/uberSearchTool";
+export { getCreditStatus, multiSearch } from "../tool/uberSearchTool";

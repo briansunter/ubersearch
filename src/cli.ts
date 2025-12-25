@@ -9,7 +9,7 @@ import { bootstrapContainer, isLifecycleProvider } from "./bootstrap/container";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
 import type { UberSearchOutput } from "./tool/interface";
-import { getCreditStatus, multiSearch } from "./tool/multiSearchTool";
+import { getCreditStatus, multiSearch } from "./tool/uberSearchTool";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
