@@ -52,10 +52,17 @@ jobs:
       - name: Build package
         run: bun run build
 
+      - name: Get NPM token from Bitwarden Secrets Manager
+        uses: bitwarden/sm-action@v2
+        with:
+          access_token: ${{ secrets.BWS_ACCESS_TOKEN }}
+          secrets: |
+            ${{ secrets.BWS_NPM_TOKEN_ID }} > NPM_TOKEN
+
       - name: Publish to npm
         run: bunx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ env.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 
