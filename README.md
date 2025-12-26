@@ -1,4 +1,4 @@
-# Multi-Search
+# UberSearch
 
 Unified, Bun-first search interface across multiple providers with credit tracking, pluggable strategies, and optional Docker-managed SearXNG.
 

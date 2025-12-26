@@ -1,14 +1,14 @@
 /**
  * Comprehensive Tool Module Tests
  *
- * Tests for src/tool/multiSearchTool.ts covering multiSearch and getCreditStatus functions
+ * Tests for src/tool/uberSearchTool.ts covering uberSearch and getCreditStatus functions
  *
  * Note: Uses dependency injection (containerOverride) instead of mock.module
  * to avoid polluting module state across test files.
  */
 
 import { describe, expect, mock, test } from "bun:test";
-import { getCreditStatus, multiSearch } from "../../../src/tool/uberSearchTool";
+import { getCreditStatus, uberSearch } from "../../../src/tool/uberSearchTool";
 
 // Create a mock container factory for testing
 function createMockContainer(
@@ -125,10 +125,10 @@ function createMockContainer(
 }
 
 describe("Tool Module Tests", () => {
-  describe("multiSearch Function", () => {
+  describe("uberSearch Function", () => {
     test("should execute search with default options", async () => {
       const container = createMockContainer();
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.query).toBe("test query");
       expect(result.items).toHaveLength(2);
@@ -156,7 +156,7 @@ describe("Tool Module Tests", () => {
 
     test("should execute search with custom engines", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "test query", engines: ["brave", "linkup"] },
         { containerOverride: container },
       );
@@ -169,7 +169,7 @@ describe("Tool Module Tests", () => {
 
     test("should execute search with first-success strategy", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "test query", strategy: "first-success" },
         { containerOverride: container },
       );
@@ -181,7 +181,7 @@ describe("Tool Module Tests", () => {
 
     test("should execute search with limit", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "test query", limit: 5 },
         { containerOverride: container },
       );
@@ -192,7 +192,7 @@ describe("Tool Module Tests", () => {
 
     test("should execute search with includeRaw", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "test query", includeRaw: true },
         { containerOverride: container },
       );
@@ -203,7 +203,7 @@ describe("Tool Module Tests", () => {
 
     test("should execute search with all options", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         {
           query: "complex test query",
           engines: ["brave"],
@@ -223,7 +223,7 @@ describe("Tool Module Tests", () => {
       // This tests the backwards compat - string arg is treated as config path
       // Since we can't easily test with real bootstrap, we verify the signature works
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "test query" },
         { containerOverride: container, configPath: "/path/to/config.json" },
       );
@@ -233,7 +233,7 @@ describe("Tool Module Tests", () => {
 
     test("should handle empty query", async () => {
       const container = createMockContainer();
-      const result = await multiSearch({ query: "" }, { containerOverride: container });
+      const result = await uberSearch({ query: "" }, { containerOverride: container });
 
       expect(result.query).toBe("");
       expect(result.items).toHaveLength(2);
@@ -242,7 +242,7 @@ describe("Tool Module Tests", () => {
     test("should handle very long query", async () => {
       const longQuery = "a".repeat(10000);
       const container = createMockContainer();
-      const result = await multiSearch({ query: longQuery }, { containerOverride: container });
+      const result = await uberSearch({ query: longQuery }, { containerOverride: container });
 
       expect(result.query).toBe(longQuery);
     });
@@ -250,7 +250,7 @@ describe("Tool Module Tests", () => {
     test("should handle special characters in query", async () => {
       const specialQuery = "test with special chars: @#$%^&*()[]{}|\\:;\"'<>?,./";
       const container = createMockContainer();
-      const result = await multiSearch({ query: specialQuery }, { containerOverride: container });
+      const result = await uberSearch({ query: specialQuery }, { containerOverride: container });
 
       expect(result.query).toBe(specialQuery);
     });
@@ -258,7 +258,7 @@ describe("Tool Module Tests", () => {
     test("should handle unicode characters in query", async () => {
       const unicodeQuery = "test with unicode: ñiño 日本 🚀";
       const container = createMockContainer();
-      const result = await multiSearch({ query: unicodeQuery }, { containerOverride: container });
+      const result = await uberSearch({ query: unicodeQuery }, { containerOverride: container });
 
       expect(result.query).toBe(unicodeQuery);
     });
@@ -269,7 +269,7 @@ describe("Tool Module Tests", () => {
       });
 
       await expect(
-        multiSearch({ query: "test query" }, { containerOverride: container }),
+        uberSearch({ query: "test query" }, { containerOverride: container }),
       ).rejects.toThrow("Search execution failed");
     });
 
@@ -295,7 +295,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0]).toEqual({
@@ -334,7 +334,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.items[0].score).toBeUndefined();
     });
@@ -353,7 +353,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.items).toHaveLength(0);
       expect(result.enginesTried).toHaveLength(1);
@@ -374,7 +374,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.enginesTried[0].reason).toBeUndefined();
     });
@@ -387,7 +387,7 @@ describe("Tool Module Tests", () => {
         credits: undefined,
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch({ query: "test query" }, { containerOverride: container });
+      const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.credits).toBeUndefined();
     });
@@ -459,9 +459,9 @@ describe("Tool Module Tests", () => {
   });
 
   describe("Integration Tests", () => {
-    test("should execute complete multiSearch workflow", async () => {
+    test("should execute complete uberSearch workflow", async () => {
       const container = createMockContainer();
-      const result = await multiSearch(
+      const result = await uberSearch(
         {
           query: "TypeScript ORM 2025",
           engines: ["tavily"],
@@ -495,12 +495,12 @@ describe("Tool Module Tests", () => {
       }
     });
 
-    test("should handle concurrent multiSearch calls", async () => {
+    test("should handle concurrent uberSearch calls", async () => {
       const container = createMockContainer();
       const promises = [
-        multiSearch({ query: "query 1" }, { containerOverride: container }),
-        multiSearch({ query: "query 2" }, { containerOverride: container }),
-        multiSearch({ query: "query 3" }, { containerOverride: container }),
+        uberSearch({ query: "query 1" }, { containerOverride: container }),
+        uberSearch({ query: "query 2" }, { containerOverride: container }),
+        uberSearch({ query: "query 3" }, { containerOverride: container }),
       ];
 
       const results = await Promise.all(promises);
@@ -531,9 +531,9 @@ describe("Tool Module Tests", () => {
     test("should handle mixed concurrent calls", async () => {
       const container = createMockContainer();
       const promises = [
-        multiSearch({ query: "search 1" }, { containerOverride: container }),
+        uberSearch({ query: "search 1" }, { containerOverride: container }),
         getCreditStatus({ containerOverride: container }),
-        multiSearch({ query: "search 2", engines: ["brave"] }, { containerOverride: container }),
+        uberSearch({ query: "search 2", engines: ["brave"] }, { containerOverride: container }),
         getCreditStatus({ containerOverride: container }),
       ];
 
@@ -568,7 +568,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "partial failure test" },
         { containerOverride: container },
       );
@@ -599,7 +599,7 @@ describe("Tool Module Tests", () => {
         credits: [],
       };
       const container = createMockContainer({ orchestratorResponse: customResponse });
-      const result = await multiSearch(
+      const result = await uberSearch(
         { query: "large dataset test" },
         { containerOverride: container },
       );

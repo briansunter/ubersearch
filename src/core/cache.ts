@@ -1,5 +1,5 @@
 /**
- * Request Cache for Multi-Search
+ * Request Cache for UberSearch
  *
  * Simple in-memory cache with TTL support for caching search results
  */

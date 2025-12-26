@@ -292,7 +292,7 @@ export class OllamaProvider extends DockerProvider {
 
 ```typescript
 // User search
-await multiSearch({ query: "test", engines: ["searxng"] });
+await uberSearch({ query: "test", engines: ["searxng"] });
 
 // In orchestrator
 const provider = registry.get("searxng");

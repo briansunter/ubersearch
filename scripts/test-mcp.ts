@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 /**
- * Test script for Multi-Search MCP Server
+ * Test script for UberSearch MCP Server
  *
  * Tests the MCP server functionality by sending requests and checking responses
  */
@@ -13,7 +13,7 @@ async function testMCPServer() {
   console.log("Starting MCP Server...\n");
 
   // Start the MCP server
-  const serverProcess = spawn("bun", ["run", "mcp-server.ts"], {
+  const serverProcess = spawn("bun", ["run", "src/mcp-server.ts"], {
     cwd: process.cwd(),
     stdio: ["pipe", "pipe", "inherit"],
   });
@@ -52,7 +52,23 @@ async function testMCPServer() {
     process.exit(1);
   });
 
-  // Wait a bit for server to start
+  // Wait a bit for server to start, then send initialize request
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Send initialize request (required by MCP protocol)
+  const initRequest = `${JSON.stringify({
+    jsonrpc: "2.0",
+    id: 0,
+    method: "initialize",
+    params: {
+      protocolVersion: "2024-11-05",
+      capabilities: {},
+      clientInfo: { name: "test-mcp", version: "1.0.0" },
+    },
+  })}\n`;
+  serverProcess.stdin.write(initRequest);
+
+  // Wait for initialize response
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   if (!serverReady) {
@@ -72,13 +88,13 @@ async function testMCPServer() {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Test 2: Search (will fail without API keys, but tests the tool interface)
-  console.log("Test 2: Calling multi_search...");
+  console.log("Test 2: Calling uber_search...");
   const searchRequest = `${JSON.stringify({
     jsonrpc: "2.0",
     id: 2,
     method: "tools/call",
     params: {
-      name: "multi_search",
+      name: "uber_search",
       arguments: {
         query: "test query",
         limit: 5,
@@ -91,13 +107,13 @@ async function testMCPServer() {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Test 3: Credits
-  console.log("Test 3: Calling multi_search_credits...");
+  console.log("Test 3: Calling uber_search_credits...");
   const creditsRequest = `${JSON.stringify({
     jsonrpc: "2.0",
     id: 3,
     method: "tools/call",
     params: {
-      name: "multi_search_credits",
+      name: "uber_search_credits",
       arguments: {},
     },
   })}\n`;
@@ -106,13 +122,13 @@ async function testMCPServer() {
   await new Promise((resolve) => setTimeout(resolve, 500));
 
   // Test 4: Health
-  console.log("Test 4: Calling multi_search_health...");
+  console.log("Test 4: Calling uber_search_health...");
   const healthRequest = `${JSON.stringify({
     jsonrpc: "2.0",
     id: 4,
     method: "tools/call",
     params: {
-      name: "multi_search_health",
+      name: "uber_search_health",
       arguments: {},
     },
   })}\n`;

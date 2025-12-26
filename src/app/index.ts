@@ -27,4 +27,5 @@ export type {
   GetCreditStatusOptions,
   UberSearchOptions as ToolUberSearchOptions,
 } from "../tool/uberSearchTool";
-export { getCreditStatus, multiSearch } from "../tool/uberSearchTool";
+// Backwards compatibility alias
+export { getCreditStatus, uberSearch, uberSearch as multiSearch } from "../tool/uberSearchTool";

@@ -10,7 +10,7 @@
 
 ### Runtime flows
 
-1) CLI → `src/cli.ts` → `multiSearch` → `bootstrapContainer` → orchestrator → strategy execution → combined results.  
+1) CLI → `src/cli.ts` → `uberSearch` → `bootstrapContainer` → orchestrator → strategy execution → combined results.  
 2) CLI `credits` → `getCreditStatus` → `CreditManager.listSnapshots()`.  
 3) CLI `health` → bootstraps providers; lifecycle providers run `init`/`healthcheck`.
 

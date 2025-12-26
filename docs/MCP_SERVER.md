@@ -1,4 +1,4 @@
-# Multi-Search MCP Server
+# UberSearch MCP Server
 
 This document describes how to use ubersearch as an MCP (Model Context Protocol) server.
 
@@ -49,12 +49,12 @@ bun run mcp:test
 ### Direct Execution
 
 ```bash
-bun run mcp-server.ts
+bun run src/mcp-server.ts
 ```
 
 ### Available MCP Tools
 
-#### `multi_search`
+#### `uber_search`
 
 Search across multiple search providers.
 
@@ -74,13 +74,13 @@ Search across multiple search providers.
 }
 ```
 
-#### `multi_search_credits`
+#### `uber_search_credits`
 
 Show credit status for all configured search engines.
 
 **Parameters:** None
 
-#### `multi_search_health`
+#### `uber_search_health`
 
 Run health checks on all configured search providers.
 
@@ -97,7 +97,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
       "command": "bun",
       "args": [
         "run",
-        "/path/to/ubersearch/mcp-server.ts"
+        "/path/to/ubersearch/src/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "your_key_here",
@@ -117,7 +117,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
       "command": "bun",
       "args": [
         "run",
-        "/Volumes/Storage/code/ubersearch/mcp-server.ts"
+        "/Volumes/Storage/code/ubersearch/src/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "tvly-...",
@@ -135,10 +135,10 @@ Restart Claude Desktop after updating the config.
 ## Using in Code
 
 ```typescript
-import { multiSearch, getCreditStatus } from 'ubersearch';
+import { uberSearch, getCreditStatus } from 'ubersearch';
 
 // Search
-const results = await multiSearch({
+const results = await uberSearch({
   query: "TypeScript best practices",
   limit: 10,
   strategy: "all"
@@ -226,7 +226,7 @@ The local SearXNG instance is not running. Either:
 
 ## Development
 
-- **MCP Server**: `mcp-server.ts`
+- **MCP Server**: `src/mcp-server.ts`
 - **Test Script**: `scripts/test-mcp.ts`
-- **Core Tool**: `src/tool/multiSearchTool.ts`
+- **Core Tool**: `src/tool/uberSearchTool.ts`
 - **CLI**: `src/cli.ts`

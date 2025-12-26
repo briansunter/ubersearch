@@ -59,7 +59,7 @@ ubersearch.config.json
 scripts/
 
 # MCP server (not published)
-mcp-server.ts
+src/mcp-server.ts
 
 # Temporary files
 tmp/

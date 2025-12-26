@@ -68,7 +68,7 @@ export class SearchxngProvider
   }
 
   async search(query: SearchQuery): Promise<SearchResponse> {
-    const isHealthy = await this.healthcheck();
+    let isHealthy = await this.healthcheck();
 
     if (!isHealthy) {
       const isInitializing = !!(await (this.lifecycleManager as any).initPromise);
@@ -76,6 +76,8 @@ export class SearchxngProvider
         try {
           console.log(`[SearXNG] Container not healthy, attempting auto-start...`);
           await this.init();
+          // Re-check health after init attempt
+          isHealthy = await this.healthcheck();
         } catch (initError) {
           console.error(`[SearXNG] Failed to auto-start container:`, initError);
         }

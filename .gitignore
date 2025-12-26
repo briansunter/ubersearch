@@ -59,7 +59,7 @@ providers/searxng/config/settings.yml
 !providers/searxng/config/settings.yml.template
 credis.json
 
-# === Multi-Search Cache ===
+# === UberSearch Cache ===
 ~/.local/state/ubersearch/
 credit-state.json
 *.state.json

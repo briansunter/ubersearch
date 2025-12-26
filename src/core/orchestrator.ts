@@ -1,5 +1,5 @@
 /**
- * Multi-Search Orchestrator
+ * UberSearch Orchestrator
  *
  * Coordinates multiple search providers and implements different search strategies
  */

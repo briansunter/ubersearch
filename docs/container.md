@@ -232,7 +232,7 @@ describe("MyService", () => {
 });
 ```
 
-## Integration with Multi-Search
+## Integration with UberSearch
 
 The container integrates seamlessly with the existing ubersearch architecture:
 

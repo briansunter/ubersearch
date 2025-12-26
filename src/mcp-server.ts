@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
 /**
- * Multi-Search MCP Server
+ * UberSearch MCP Server
  *
  * Exposes ubersearch functionality as an MCP (Model Context Protocol) server
  * for use with Claude Desktop and other MCP-compatible tools.
  */
 
-import { bootstrapContainer, getCreditStatus, multiSearch } from "./src/app/index";
-import { isLifecycleProvider } from "./src/bootstrap/container";
-import type { ProviderRegistry } from "./src/core/provider";
-import { ServiceKeys } from "./src/core/serviceKeys";
+import { bootstrapContainer, getCreditStatus, uberSearch } from "./app/index";
+import { isLifecycleProvider } from "./bootstrap/container";
+import type { ProviderRegistry } from "./core/provider";
+import { ServiceKeys } from "./core/serviceKeys";
 
 interface MCPRequest {
   jsonrpc: string;
@@ -57,7 +57,7 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string
 export async function serve() {
   const tools: MCPTool[] = [
     {
-      name: "multi_search",
+      name: "uber_search",
       description: "Unified search across multiple providers (Tavily, Brave, Linkup, SearXNG)",
       inputSchema: {
         type: "object",
@@ -87,7 +87,7 @@ export async function serve() {
       },
     },
     {
-      name: "multi_search_credits",
+      name: "uber_search_credits",
       description: "Show credit status for all configured search engines",
       inputSchema: {
         type: "object",
@@ -96,7 +96,7 @@ export async function serve() {
       },
     },
     {
-      name: "multi_search_health",
+      name: "uber_search_health",
       description: "Run health checks on all configured search providers",
       inputSchema: {
         type: "object",
@@ -161,23 +161,23 @@ export async function serve() {
 
       try {
         let result: any;
-        if (name === "multi_search") {
+        if (name === "uber_search") {
           const engines = args.engines
             ? args.engines.split(",").map((e: string) => e.trim())
             : undefined;
           result = await withTimeout(
-            multiSearch({
+            uberSearch({
               query: args.query,
               limit: args.limit,
               engines,
               strategy: args.strategy,
             }),
             60000,
-            "multiSearch",
+            "uberSearch",
           );
-        } else if (name === "multi_search_credits") {
+        } else if (name === "uber_search_credits") {
           result = await withTimeout(getCreditStatus(), 10000, "getCreditStatus");
-        } else if (name === "multi_search_health") {
+        } else if (name === "uber_search_health") {
           const container = await withTimeout(bootstrapContainer(), 30000, "bootstrapContainer");
           const registry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
           const providers = registry.list();

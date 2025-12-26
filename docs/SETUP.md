@@ -1,10 +1,10 @@
-# Multi-Search Setup Guide
+# UberSearch Setup Guide
 
 This guide explains how to set up ubersearch for global use, MCP integration, and testing.
 
 ## Overview
 
-Multi-Search provides:
+UberSearch provides:
 1. **CLI** - Command-line search tool
 2. **MCP Server** - For Claude Desktop and other MCP clients
 3. **API** - TypeScript library for programmatic use
@@ -97,7 +97,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
       "command": "bun",
       "args": [
         "run",
-        "/Volumes/Storage/code/ubersearch/mcp-server.ts"
+        "/Volumes/Storage/code/ubersearch/src/mcp-server.ts"
       ],
       "env": {
         "TAVILY_API_KEY": "your_key",
@@ -109,14 +109,14 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop. You'll see `multi_search`, `multi_search_credits`, and `multi_search_health` tools available.
+Restart Claude Desktop. You'll see `uber_search`, `uber_search_credits`, and `uber_search_health` tools available.
 
 ### Method 3: Programmatic API
 
 ```typescript
-import { multiSearch, getCreditStatus } from 'ubersearch';
+import { uberSearch, getCreditStatus } from 'ubersearch';
 
-const results = await multiSearch({
+const results = await uberSearch({
   query: "TypeScript best practices",
   limit: 10,
   strategy: "all",
@@ -185,13 +185,14 @@ Check:
 
 ```
 ubersearch/
-├── mcp-server.ts          # MCP server entry point
-├── scripts/test-mcp.ts     # MCP test script
 ├── src/
 │   ├── cli.ts             # CLI entry point
+│   ├── mcp-server.ts      # MCP server entry point
 │   ├── tool/
-│   │   └── multiSearchTool.ts  # Core search function
+│   │   └── uberSearchTool.ts  # Core search function
 │   └── app/index.ts       # Public API exports
+├── scripts/
+│   └── test-mcp.ts        # MCP test script
 ├── docs/
 │   ├── MCP_SERVER.md      # MCP documentation
 │   └── config/

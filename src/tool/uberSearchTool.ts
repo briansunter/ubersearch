@@ -11,7 +11,7 @@ import { ServiceKeys } from "../core/serviceKeys";
 import type { UberSearchInput, UberSearchOutput } from "./interface";
 
 /**
- * Options for multiSearch function
+ * Options for uberSearch function
  */
 export interface UberSearchOptions {
   /** Explicit config file path */
@@ -35,7 +35,7 @@ export interface UberSearchOptions {
  * @param options Optional config path or options object
  * @returns Search results with metadata
  */
-export async function multiSearch(
+export async function uberSearch(
   input: UberSearchInput,
   options?: string | UberSearchOptions,
 ): Promise<UberSearchOutput> {

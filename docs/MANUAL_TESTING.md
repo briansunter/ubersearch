@@ -282,7 +282,7 @@ cat > test-invalid-config.json << 'EOF'
 EOF
 
 # Try to use invalid config
-MULTI_SEARCH_CONFIG=test-invalid-config.json bun run src/cli.ts "test" 2>&1
+UBER_SEARCH_CONFIG=test-invalid-config.json bun run src/cli.ts "test" 2>&1
 # Expected: Should show validation error about missing fields
 ```
 

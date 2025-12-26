@@ -3,7 +3,7 @@
  * Test script for SearXNG integration
  */
 
-import { bootstrapContainer, multiSearch } from "../src/app/index";
+import { bootstrapContainer, uberSearch } from "../src/app/index";
 import { isLifecycleProvider } from "../src/bootstrap/container";
 import type { ProviderRegistry } from "../src/core/provider";
 import { ServiceKeys } from "../src/core/serviceKeys";
@@ -45,7 +45,7 @@ async function testSearXNG() {
 
     // Test 3: Search with SearXNG only
     console.log("3. Searching with SearXNG...");
-    const result = await multiSearch({
+    const result = await uberSearch({
       query: "TypeScript testing framework",
       limit: 5,
       engines: ["searxng"],

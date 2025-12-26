@@ -30,7 +30,7 @@ curl http://localhost:8888/healthz
 curl -X GET "http://localhost:8888/search?q=test&format=json"
 ```
 
-## Multi-Search Configuration
+## UberSearch Configuration
 
 The SearXNG provider is already configured in `ubersearch.config.json`.
 
@@ -107,7 +107,7 @@ engines:
 
 See the [official SearXNG documentation](https://docs.searxng.org/) for a full list of supported engines.
 
-## Using with Multi-Search
+## Using with UberSearch
 
 ### Start SearXNG
 
@@ -298,4 +298,4 @@ Then remove the SearXNG entry from `ubersearch.config.json`.
 - [SearXNG GitHub](https://github.com/searxng/searxng)
 - [List of Supported Engines](https://docs.searxng.org/admin/engines/configured_engines.html)
 - [Engine Configuration Reference](https://docs.searxng.org/admin/engines/engine.html)
-- [Multi-Search Documentation](../../README.md)
+- [UberSearch Documentation](../../README.md)

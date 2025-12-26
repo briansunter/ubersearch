@@ -164,7 +164,7 @@ export async function createUberSearchTool() {
     await container.get<UberSearchOrchestrator>("orchestrator");
 
   return {
-    name: "multi_search",
+    name: "uber_search",
     description: "Search across multiple providers",
     inputSchema: {
       type: "object",

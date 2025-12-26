@@ -47,7 +47,6 @@ jobs:
 
       - name: Run tests
         run: bun run test
-        continue-on-error: true  # TODO: Remove after fixing Docker integration tests
 
       - name: Build package
         run: bun run build

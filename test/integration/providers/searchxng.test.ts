@@ -5,6 +5,7 @@
  * These tests require Docker to be running. They fail fast if Docker is unavailable.
  *
  * Note: These tests may take 30-60 seconds as they start/stop Docker containers.
+ * Skip with: SKIP_DOCKER_TESTS=true
  */
 
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:test";
@@ -13,6 +14,9 @@ import { DockerComposeHelper } from "../../../src/core/docker/dockerComposeHelpe
 import { SearchError } from "../../../src/core/types";
 import { SearchxngProvider } from "../../../src/providers/searchxng";
 import { createTestSearchxngConfig } from "../../__helpers__/docker-mocks";
+
+// Skip all tests if SKIP_DOCKER_TESTS is set
+const skipDockerTests = process.env.SKIP_DOCKER_TESTS === "true";
 
 // Check if Docker is available before running any tests
 let dockerAvailable = false;
@@ -39,8 +43,8 @@ async function expectSearchSuccessOrApiError<T>(fn: () => Promise<T>): Promise<v
   }
 }
 
-// Use describe to always run; will fail fast if Docker unavailable
-describe("SearchxngProvider - Docker Integration Tests", () => {
+// Skip if SKIP_DOCKER_TESTS is set; otherwise fail fast if Docker unavailable
+describe.skipIf(skipDockerTests)("SearchxngProvider - Docker Integration Tests", () => {
   let provider: SearchxngProvider;
   let config: ReturnType<typeof createTestSearchxngConfig>;
 
@@ -191,7 +195,7 @@ describe("SearchxngProvider - Docker Integration Tests", () => {
 });
 
 // Tests that require a running SearXNG container
-describe("SearchxngProvider - Search Integration Tests", () => {
+describe.skipIf(skipDockerTests)("SearchxngProvider - Search Integration Tests", () => {
   let provider: SearchxngProvider;
   let containerStarted = false;
 
