@@ -345,10 +345,7 @@ export async function loadConfig(
     }
   }
 
-  // No config file found - use default configuration
-  console.warn("No config file found. Using default configuration (SearXNG).");
-  console.warn("Create a config file for custom providers: ubersearch.config.json");
-
+  // No config file found - use default configuration (silent)
   const defaultConfig = getDefaultConfig();
 
   // Register plugins for default config
@@ -406,8 +403,6 @@ export function loadConfigSync(
     }
   }
 
-  console.warn("No config file found. Using default configuration (SearXNG).");
-  console.warn("Create a config file for custom providers: ubersearch.config.json");
   return getDefaultConfig();
 }
 

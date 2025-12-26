@@ -111,13 +111,25 @@ export interface SearxngSearchResult {
 }
 
 /**
+ * Infobox from SearXNG (Wikipedia, etc.)
+ */
+export interface SearxngInfobox {
+  infobox?: string;
+  id?: string;
+  content?: string;
+  img_src?: string;
+  urls?: Array<{ title?: string; url?: string }>;
+  engine?: string;
+}
+
+/**
  * SearXNG search API response
  */
 export interface SearxngApiResponse {
   query?: string;
   results: SearxngSearchResult[];
   number_of_results?: number;
-  infoboxes?: unknown[];
+  infoboxes?: SearxngInfobox[];
   suggestions?: string[];
   answers?: string[];
   corrections?: string[];

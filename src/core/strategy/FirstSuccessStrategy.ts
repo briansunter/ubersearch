@@ -85,8 +85,8 @@ export class FirstSuccessStrategy implements ISearchStrategy {
           attempts.push({ engineId, success: false, reason: "unknown" });
         }
 
-        // Log warning and continue
-        log.warn(
+        // Log debug message and continue
+        log.debug(
           `Search failed for ${engineId}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }

@@ -111,7 +111,7 @@ export class DockerLifecycleManager {
       "Docker availability check",
     );
     if (!dockerAvailable) {
-      log.warn("Docker is not available. Cannot auto-start container.");
+      log.debug("Docker is not available. Cannot auto-start container.");
       this.initialized = true;
       return;
     }
@@ -119,13 +119,13 @@ export class DockerLifecycleManager {
     // Check if container is already running (with timeout)
     const isRunning = await this.withTimeout(this.healthcheck(), 5000, "Initial health check");
     if (isRunning) {
-      log.info("Container is already running.");
+      log.debug("Container is already running.");
       this.initialized = true;
       return;
     }
 
     // Auto-start container
-    log.info("Starting Docker container...");
+    log.debug("Starting Docker container...");
     try {
       // Run from project root to ensure correct path resolution
       const projectRoot = this.config.projectRoot || process.cwd();
@@ -133,7 +133,7 @@ export class DockerLifecycleManager {
         this.config.containerName ? [this.config.containerName] : undefined,
         { cwd: projectRoot },
       );
-      log.info("Container started successfully.");
+      log.debug("Container started successfully.");
 
       // Wait for health check if endpoint is configured
       if (this.config.healthEndpoint) {
@@ -198,12 +198,12 @@ export class DockerLifecycleManager {
       return;
     }
 
-    log.info("Waiting for health check...");
+    log.debug("Waiting for health check...");
 
     const startTime = Date.now();
     while (Date.now() - startTime < timeoutMs) {
       if (await this.healthcheck()) {
-        log.info("Health check passed.");
+        log.debug("Health check passed.");
         return;
       }
 
@@ -235,13 +235,13 @@ export class DockerLifecycleManager {
       return;
     }
 
-    log.info("Stopping Docker container...");
+    log.debug("Stopping Docker container...");
     try {
       await this.dockerHelper.stop(
         this.config.containerName ? [this.config.containerName] : undefined,
         { cwd: projectRoot },
       );
-      log.info("Container stopped.");
+      log.debug("Container stopped.");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       log.error("Failed to stop container:", message);
@@ -349,7 +349,7 @@ export class DockerLifecycleManager {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      log.warn("Error checking if container is running:", message);
+      log.debug("Error checking if container is running:", message);
       return false;
     }
   }

@@ -95,16 +95,16 @@ export async function bootstrapContainer(
 
         // Skip providers that aren't configured (e.g., missing API key)
         if (!provider.isConfigured()) {
-          log.info(`Skipping provider ${engineConfig.id}: ${provider.getMissingConfigMessage()}`);
+          log.debug(`Skipping provider ${engineConfig.id}: ${provider.getMissingConfigMessage()}`);
           skippedProviders.push(engineConfig.id);
           continue;
         }
 
         registry.register(provider);
-        log.info(`Registered provider: ${engineConfig.id}`);
+        log.debug(`Registered provider: ${engineConfig.id}`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : String(error);
-        log.warn(`Failed to register provider ${engineConfig.id}: ${errorMsg}`);
+        log.debug(`Failed to register provider ${engineConfig.id}: ${errorMsg}`);
         failedProviders.push(engineConfig.id);
       }
     }
@@ -124,7 +124,7 @@ export async function bootstrapContainer(
     }
 
     if (failedProviders.length > 0) {
-      log.warn(`Some providers failed to initialize: ${failedProviders.join(", ")}`);
+      log.debug(`Some providers failed to initialize: ${failedProviders.join(", ")}`);
     }
 
     return registry;

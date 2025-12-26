@@ -118,8 +118,8 @@ export class AllProvidersStrategy implements ISearchStrategy {
           attempts.push({ engineId, success: false, reason: "unknown" });
         }
 
-        // Log warning but continue with other providers
-        log.warn(
+        // Log debug message but continue with other providers
+        log.debug(
           `Search failed for ${engineId}: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
@@ -194,7 +194,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
       if (settledResult.status === "rejected") {
         // Promise itself was rejected (shouldn't happen with our try/catch, but handle it)
         attempts.push({ engineId, success: false, reason: "unknown" });
-        log.warn(`Search failed for ${engineId}: Promise rejected`);
+        log.debug(`Search failed for ${engineId}: Promise rejected`);
         continue;
       }
 
@@ -207,7 +207,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
         } else {
           attempts.push({ engineId, success: false, reason: "unknown" });
         }
-        log.warn(`Search failed for ${engineId}: ${error.message}`);
+        log.debug(`Search failed for ${engineId}: ${error.message}`);
         continue;
       }
 

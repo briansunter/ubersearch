@@ -7,13 +7,16 @@
 import { dirname } from "node:path";
 import type { SearchxngConfig as BaseSearchxngConfig } from "../config/types";
 import { DockerLifecycleManager } from "../core/docker/dockerLifecycleManager";
+import { createLogger } from "../core/logger";
 import type { ILifecycleProvider, ProviderMetadata } from "../core/provider";
 import type { SearchQuery, SearchResponse, SearchResultItem } from "../core/types";
 import { SearchError } from "../core/types";
 import { BaseProvider } from "./BaseProvider";
 import { PROVIDER_DEFAULTS } from "./constants";
-import type { SearxngApiResponse, SearxngSearchResult } from "./types";
+import type { SearxngApiResponse, SearxngInfobox, SearxngSearchResult } from "./types";
 import { buildUrl, fetchWithErrorHandling } from "./utils";
+
+const log = createLogger("SearXNG");
 
 export class SearchxngProvider
   extends BaseProvider<BaseSearchxngConfig>
@@ -79,13 +82,13 @@ export class SearchxngProvider
       const isInitializing = !!(await (this.lifecycleManager as any).initPromise);
       if (!isInitializing) {
         try {
-          console.log(`[SearXNG] Container not healthy, attempting auto-start...`);
+          log.debug("Container not healthy, attempting auto-start...");
           await this.init();
           // Re-check health after init attempt
           isHealthy = await this.healthcheck();
         } catch (initError) {
           const message = initError instanceof Error ? initError.message : String(initError);
-          console.error(`[SearXNG] Failed to auto-start container:`, message);
+          log.debug(`Failed to auto-start container: ${message}`);
         }
       }
     }
@@ -122,10 +125,10 @@ export class SearchxngProvider
       "SearXNG",
     );
 
-    const results: SearxngSearchResult[] = json.results ?? [];
+    const results: SearxngSearchResult[] = Array.isArray(json.results) ? json.results : [];
+    const infoboxes: SearxngInfobox[] = Array.isArray(json.infoboxes) ? json.infoboxes : [];
 
-    this.validateResults(results, "SearXNG");
-
+    // Convert regular results
     const items: SearchResultItem[] = results.map((r: SearxngSearchResult) => ({
       title: r.title ?? r.url ?? "#",
       url: r.url ?? "#",
@@ -133,6 +136,24 @@ export class SearchxngProvider
       score: r.score ?? r.rank,
       sourceEngine: r.engine ?? this.id,
     }));
+
+    // Add infoboxes as results (Wikipedia, etc.)
+    for (const box of infoboxes) {
+      const boxUrl = box.id ?? box.urls?.[0]?.url;
+      if (boxUrl) {
+        items.push({
+          title: box.infobox ?? "Info",
+          url: boxUrl,
+          snippet: box.content ?? "",
+          sourceEngine: box.engine ?? "wikipedia",
+        });
+      }
+    }
+
+    // Only validate if we have no results at all
+    if (items.length === 0) {
+      this.validateResults(results, "SearXNG");
+    }
 
     const limitedItems = items.slice(0, limit);
 
