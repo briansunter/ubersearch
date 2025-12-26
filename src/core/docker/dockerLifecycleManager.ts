@@ -74,7 +74,7 @@ export class DockerLifecycleManager {
 
     this.initPromise = this.performInit().catch((error) => {
       const message = error instanceof Error ? error.message : String(error);
-      log.error("Initialization failed:", message);
+      log.debug("Initialization failed:", message);
       this.initialized = false;
       throw error;
     });
@@ -143,7 +143,7 @@ export class DockerLifecycleManager {
       this.initialized = true;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      log.error("Failed to start container:", message);
+      log.debug("Failed to start container:", message);
       throw error;
     } finally {
       this.initPromise = null;
@@ -244,7 +244,7 @@ export class DockerLifecycleManager {
       log.debug("Container stopped.");
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      log.error("Failed to stop container:", message);
+      log.debug("Failed to stop container:", message);
       // Don't throw on shutdown errors
     }
   }
