@@ -101,6 +101,12 @@ if (args[0] === "health") {
   process.exit(0);
 }
 
+// MCP server command
+if (args[0] === "mcp") {
+  await serveMcp();
+  process.exit(0);
+}
+
 // Parse options
 const options = {
   json: args.includes("--json"),
