@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "ubersearch": {
+      "command": "bunx",
+      "args": ["--bun", "ubersearch-mcp"],
+      "type": "stdio",
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}",
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Unified search across multiple providers (Tavily, Brave, Linkup, SearXNG)"
+    }
+  }
+}
