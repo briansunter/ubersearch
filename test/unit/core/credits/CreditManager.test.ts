@@ -124,6 +124,7 @@ describe("CreditManager", () => {
 
     test("should reset credits on new month", async () => {
       const lastMonth = new Date();
+      lastMonth.setDate(1); // Set to 1st to avoid month overflow (e.g., Jan 31 -> Feb 31 -> Mar 3)
       lastMonth.setMonth(lastMonth.getMonth() - 1);
 
       const oldState: CreditState = {
