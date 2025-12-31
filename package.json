@@ -4,8 +4,7 @@
   "module": "src/index.ts",
   "type": "module",
   "bin": {
-    "ubersearch": "src/cli.ts",
-    "ubersearch-mcp": "src/mcp-server.ts"
+    "ubersearch": "src/cli.ts"
   },
   "exports": {
     ".": {
@@ -51,7 +50,7 @@
     "test:watch": "SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts --watch test/",
     "test:verbose": "DEBUG_TESTS=1 SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts test/",
     "test:docker": "SKIP_DOCKER_TESTS=false bun test --preload ./test/setup.ts test/integration/",
-    "mcp": "bun run src/mcp-server.ts",
+    "mcp": "bun run src/cli.ts mcp",
     "mcp:test": "bun run scripts/test-mcp.ts",
     "build": "bun run scripts/build.ts",
     "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ubersearch",

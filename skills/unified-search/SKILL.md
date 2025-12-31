@@ -54,7 +54,33 @@ ubersearch credits
 
 # Health check
 ubersearch health
+
+# Start MCP server (for Claude Desktop integration)
+ubersearch mcp
 ```
+
+## MCP Server Setup
+
+To use UberSearch as an MCP server with Claude Desktop:
+
+1. Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "ubersearch": {
+      "command": "bunx",
+      "args": ["--bun", "ubersearch", "mcp"],
+      "env": {
+        "TAVILY_API_KEY": "your_key",
+        "BRAVE_API_KEY": "your_key"
+      }
+    }
+  }
+}
+```
+
+2. Restart Claude Desktop to load the server.
 
 ## Search Strategies
 

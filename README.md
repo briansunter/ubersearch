@@ -34,6 +34,33 @@ ubersearch "llm observability" --json
 ubersearch "your search query"
 ```
 
+### MCP Server (Claude Desktop)
+
+Start the MCP server for Claude Desktop integration:
+
+```bash
+ubersearch mcp
+```
+
+Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "ubersearch": {
+      "command": "bunx",
+      "args": ["--bun", "ubersearch", "mcp"],
+      "env": {
+        "TAVILY_API_KEY": "your_key",
+        "BRAVE_API_KEY": "your_key"
+      }
+    }
+  }
+}
+```
+
+See `docs/MCP_SERVER.md` for full MCP documentation.
+
 ### Options
 
 ```bash

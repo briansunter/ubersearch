@@ -94,11 +94,8 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "ubersearch": {
-      "command": "bun",
-      "args": [
-        "run",
-        "/Volumes/Storage/code/ubersearch/src/mcp-server.ts"
-      ],
+      "command": "bunx",
+      "args": ["--bun", "ubersearch", "mcp"],
       "env": {
         "TAVILY_API_KEY": "your_key",
         "BRAVE_API_KEY": "your_key",

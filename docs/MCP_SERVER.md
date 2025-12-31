@@ -49,7 +49,9 @@ bun run mcp:test
 ### Direct Execution
 
 ```bash
-bun run src/mcp-server.ts
+ubersearch mcp
+# or via bun:
+bun run src/cli.ts mcp
 ```
 
 ### Available MCP Tools
@@ -94,11 +96,8 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 {
   "mcpServers": {
     "ubersearch": {
-      "command": "bun",
-      "args": [
-        "run",
-        "/path/to/ubersearch/src/mcp-server.ts"
-      ],
+      "command": "bunx",
+      "args": ["--bun", "ubersearch", "mcp"],
       "env": {
         "TAVILY_API_KEY": "your_key_here",
         "BRAVE_API_KEY": "your_key_here"
@@ -114,11 +113,8 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 {
   "mcpServers": {
     "ubersearch": {
-      "command": "bun",
-      "args": [
-        "run",
-        "/Volumes/Storage/code/ubersearch/src/mcp-server.ts"
-      ],
+      "command": "bunx",
+      "args": ["--bun", "ubersearch", "mcp"],
       "env": {
         "TAVILY_API_KEY": "tvly-...",
         "BRAVE_API_KEY": "BSA...",

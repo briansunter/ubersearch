@@ -10,6 +10,7 @@ import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
 import type { UberSearchOutput } from "./tool/interface";
 import { getCreditStatus, uberSearch } from "./tool/uberSearchTool";
+import { serve as serveMcp } from "./mcp-server";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -34,11 +35,13 @@ ubersearch — Unified search across multiple providers
 USAGE:
     ubersearch <query> [options]
     ubersearch credits
+    ubersearch mcp
 
 ARGUMENTS:
-    <query>     Search query (required, unless using 'credits' command)
+    <query>     Search query (required, unless using a command)
     credits     Show credit status for all engines
     health      Run health checks on all providers
+    mcp         Start MCP server for Claude Desktop integration
 
 OPTIONS:
     --json                      Output results as JSON
@@ -64,6 +67,7 @@ EXAMPLES:
     ubersearch "machine learning" --categories science,it
     ubersearch "hawaii dev meetups" --strategy first-success
     ubersearch credits
+    ubersearch mcp
 
 CONFIGURATION:
     Config files are searched in order:
@@ -76,6 +80,12 @@ ENVIRONMENT:
     - TAVILY_API_KEY      for Tavily
     - BRAVE_API_KEY       for Brave Search
 `);
+  process.exit(0);
+}
+
+// MCP server command
+if (args[0] === "mcp") {
+  await serveMcp();
   process.exit(0);
 }
 
@@ -154,7 +164,7 @@ const queryParts = args.filter((arg, idx) => {
     return false;
   }
   // Skip special commands
-  if (["credits", "health"].includes(arg)) {
+  if (["credits", "health", "mcp"].includes(arg)) {
     return false;
   }
   // Skip values that follow option flags
