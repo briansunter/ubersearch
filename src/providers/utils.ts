@@ -116,10 +116,12 @@ export async function fetchWithErrorHandling<T>(
       // Ignore error body parsing failures
     }
 
+    // Detect rate limiting (HTTP 429)
+    const reason = response.status === 429 ? "rate_limit" : "api_error";
     const errorPrefix = providerDisplayName ? `${providerDisplayName} API error` : "API error";
     throw new SearchError(
       engineId,
-      "api_error",
+      reason,
       `${errorPrefix}: HTTP ${response.status} ${response.statusText}${errorBody ? ` - ${errorBody}` : ""}`,
       response.status,
     );

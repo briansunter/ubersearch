@@ -7,6 +7,7 @@
  * the overall search.
  */
 
+import { withRetry } from "../../providers/retry";
 import { createLogger } from "../logger";
 import type { SearchProvider } from "../provider";
 import type { EngineId, SearchResponse, SearchResultItem } from "../types";
@@ -87,13 +88,15 @@ export class AllProvidersStrategy implements ISearchStrategy {
       }
 
       try {
-        // Execute search
-        const response = await provider.search({
-          query,
-          limit: options.limit,
-          includeRaw: options.includeRaw,
-          categories: options.categories,
-        });
+        // Execute search with retry logic for transient failures
+        const response = await withRetry(engineId, () =>
+          provider.search({
+            query,
+            limit: options.limit,
+            includeRaw: options.includeRaw,
+            categories: options.categories,
+          }),
+        );
 
         // Deduct credits
         if (!context.creditManager.charge(engineId)) {
@@ -168,16 +171,18 @@ export class AllProvidersStrategy implements ISearchStrategy {
       eligibleEngines.push({ engineId, provider });
     }
 
-    // Execute all eligible searches in parallel
+    // Execute all eligible searches in parallel with retry logic
     const searchPromises = eligibleEngines.map(
       async ({ engineId, provider }): Promise<EngineSearchResult> => {
         try {
-          const response = await provider.search({
-            query,
-            limit: options.limit,
-            includeRaw: options.includeRaw,
-            categories: options.categories,
-          });
+          const response = await withRetry(engineId, () =>
+            provider.search({
+              query,
+              limit: options.limit,
+              includeRaw: options.includeRaw,
+              categories: options.categories,
+            }),
+          );
           return { engineId, response };
         } catch (error) {
           return { engineId, error: error instanceof Error ? error : new Error(String(error)) };

@@ -25,7 +25,7 @@ export interface RetryConfig {
   maxDelayMs?: number;
 
   /** Whether to retry on specific error types */
-  retryableErrors?: Array<"network_error" | "api_error" | "timeout">;
+  retryableErrors?: Array<"network_error" | "api_error" | "rate_limit" | "no_results" | "timeout">;
 }
 
 /**
@@ -36,7 +36,7 @@ export const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
   initialDelayMs: 1000,
   backoffMultiplier: 2,
   maxDelayMs: 10000,
-  retryableErrors: ["network_error", "api_error"],
+  retryableErrors: ["network_error", "api_error", "rate_limit", "no_results"],
 };
 
 /**
@@ -74,7 +74,9 @@ export async function withRetry<T>(
         throw error;
       }
 
-      const shouldRetry = retryableErrors.includes(error.reason as "network_error" | "api_error");
+      const shouldRetry = retryableErrors.includes(
+        error.reason as "network_error" | "api_error" | "rate_limit" | "no_results",
+      );
 
       if (!shouldRetry || attempt >= maxAttempts) {
         throw error;

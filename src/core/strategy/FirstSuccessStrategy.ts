@@ -6,6 +6,7 @@
  * with insufficient credits and stops execution after the first success.
  */
 
+import { withRetry } from "../../providers/retry";
 import { createLogger } from "../logger";
 import type { EngineId } from "../types";
 import { SearchError } from "../types";
@@ -59,13 +60,15 @@ export class FirstSuccessStrategy implements ISearchStrategy {
       }
 
       try {
-        // Execute search
-        const response = await provider.search({
-          query,
-          limit: options.limit,
-          includeRaw: options.includeRaw,
-          categories: options.categories,
-        });
+        // Execute search with retry logic for transient failures
+        const response = await withRetry(engineId, () =>
+          provider.search({
+            query,
+            limit: options.limit,
+            includeRaw: options.includeRaw,
+            categories: options.categories,
+          }),
+        );
 
         // Deduct credits
         if (!context.creditManager.charge(engineId)) {

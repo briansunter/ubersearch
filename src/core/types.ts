@@ -30,6 +30,7 @@ export interface SearchResponse {
 export type SearchFailureReason =
   | "network_error"
   | "api_error"
+  | "rate_limit"
   | "no_results"
   | "low_credit"
   | "config_error"
