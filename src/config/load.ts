@@ -203,29 +203,37 @@ export interface LoadConfigOptions {
  */
 /**
  * Get default configuration when no config file is found
- * Prioritizes cloud providers if API keys are set, falls back to SearXNG
+ * SearXNG is always first (free, unlimited), then cloud providers by free tier generosity
  */
 function getDefaultConfig(): ExtendedSearchConfig {
   const engines: ExtendedSearchConfig["engines"] = [];
   const defaultEngineOrder: string[] = [];
 
-  // Add cloud providers if API keys are available (preferred for bunx usage)
-  if (process.env.TAVILY_API_KEY) {
-    defaultEngineOrder.push("tavily");
-    engines.push({
-      id: "tavily",
-      type: "tavily",
-      enabled: true,
-      displayName: "Tavily Search",
-      apiKeyEnv: "TAVILY_API_KEY",
-      endpoint: "https://api.tavily.com/search",
-      searchDepth: "basic",
-      monthlyQuota: 1000,
-      creditCostPerSearch: 1,
-      lowCreditThresholdPercent: 80,
-    });
-  }
+  // Always add SearXNG first - it's free and unlimited (requires Docker)
+  const packageRoot = getPackageRoot();
+  const composeFile = join(packageRoot, "providers", "searxng", "docker-compose.yml");
 
+  defaultEngineOrder.push("searchxng");
+  engines.push({
+    id: "searchxng",
+    type: "searchxng",
+    enabled: true,
+    displayName: "SearXNG (Local)",
+    apiKeyEnv: "SEARXNG_API_KEY",
+    endpoint: "http://localhost:8888/search",
+    composeFile,
+    containerName: "searxng",
+    healthEndpoint: "http://localhost:8888/healthz",
+    defaultLimit: 15,
+    monthlyQuota: 10000,
+    creditCostPerSearch: 0,
+    lowCreditThresholdPercent: 80,
+    autoStart: true,
+    autoStop: true,
+    initTimeoutMs: 60000,
+  });
+
+  // Add cloud providers in order of free tier generosity: Brave (2000/mo) > Tavily (1000/mo) > Linkup
   if (process.env.BRAVE_API_KEY) {
     defaultEngineOrder.push("brave");
     engines.push({
@@ -236,6 +244,22 @@ function getDefaultConfig(): ExtendedSearchConfig {
       apiKeyEnv: "BRAVE_API_KEY",
       endpoint: "https://api.search.brave.com/res/v1/web/search",
       defaultLimit: 15,
+      monthlyQuota: 2000,
+      creditCostPerSearch: 1,
+      lowCreditThresholdPercent: 80,
+    });
+  }
+
+  if (process.env.TAVILY_API_KEY) {
+    defaultEngineOrder.push("tavily");
+    engines.push({
+      id: "tavily",
+      type: "tavily",
+      enabled: true,
+      displayName: "Tavily Search",
+      apiKeyEnv: "TAVILY_API_KEY",
+      endpoint: "https://api.tavily.com/search",
+      searchDepth: "basic",
       monthlyQuota: 1000,
       creditCostPerSearch: 1,
       lowCreditThresholdPercent: 80,
@@ -254,32 +278,6 @@ function getDefaultConfig(): ExtendedSearchConfig {
       monthlyQuota: 1000,
       creditCostPerSearch: 1,
       lowCreditThresholdPercent: 80,
-    });
-  }
-
-  // If no cloud providers configured, fall back to SearXNG (requires Docker)
-  if (engines.length === 0) {
-    const packageRoot = getPackageRoot();
-    const composeFile = join(packageRoot, "providers", "searxng", "docker-compose.yml");
-
-    defaultEngineOrder.push("searchxng");
-    engines.push({
-      id: "searchxng",
-      type: "searchxng",
-      enabled: true,
-      displayName: "SearXNG (Local)",
-      apiKeyEnv: "SEARXNG_API_KEY",
-      endpoint: "http://localhost:8888/search",
-      composeFile,
-      containerName: "searxng",
-      healthEndpoint: "http://localhost:8888/healthz",
-      defaultLimit: 15,
-      monthlyQuota: 10000,
-      creditCostPerSearch: 0,
-      lowCreditThresholdPercent: 80,
-      autoStart: true,
-      autoStop: true,
-      initTimeoutMs: 60000,
     });
   }
 

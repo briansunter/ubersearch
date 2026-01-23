@@ -71,7 +71,7 @@ export class UberSearchOrchestrator {
    */
   async run(query: string, options: UberSearchOptions = {}): Promise<OrchestratorResult> {
     const order = this.getEngineOrder(options.engineOrderOverride);
-    const strategyName = options.strategy ?? "all";
+    const strategyName = options.strategy ?? "first-success";
 
     if (order.length === 0) {
       throw new Error("No engines configured or selected");

@@ -8,9 +8,9 @@
 import { bootstrapContainer, isLifecycleProvider } from "./bootstrap/container";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
+import { serve as serveMcp } from "./mcp-server";
 import type { UberSearchOutput } from "./tool/interface";
 import { getCreditStatus, uberSearch } from "./tool/uberSearchTool";
-import { serve as serveMcp } from "./mcp-server";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -47,7 +47,7 @@ OPTIONS:
     --json                      Output results as JSON
     --engines <engine,list>     Use specific engines (comma-separated)
     --categories <cat,list>     SearXNG categories (comma-separated)
-    --strategy <strategy>       Search strategy: 'all' or 'first-success' (default: all)
+    --strategy <strategy>       Search strategy: 'all' or 'first-success' (default: first-success)
     --limit <number>            Maximum results per engine
     --include-raw               Include raw provider responses
     --config <path>             Path to configuration file

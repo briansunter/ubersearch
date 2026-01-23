@@ -54,7 +54,7 @@ export async function uberSearch(
     limit: input.limit,
     engineOrderOverride: input.engines,
     includeRaw: input.includeRaw,
-    strategy: input.strategy ?? "all",
+    strategy: input.strategy ?? "first-success",
     categories: input.categories,
   });
 
