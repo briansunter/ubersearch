@@ -19,6 +19,7 @@
   },
   "files": [
     "src",
+    "providers",
     "README.md",
     "LICENSE"
   ],

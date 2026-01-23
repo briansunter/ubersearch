@@ -153,23 +153,14 @@ export class DockerLifecycleManager {
   /**
    * Check if container is healthy
    *
-   * Checks both container running status and health endpoint if configured.
+   * Tries HTTP health endpoint first (works for any running instance),
+   * then falls back to Docker container status check.
    *
    * @returns true if container is healthy, false otherwise
    */
   async healthcheck(): Promise<boolean> {
-    // Check if container is running
-    if (this.dockerHelper) {
-      const projectRoot = this.config.projectRoot || process.cwd();
-      const isRunning = await this.dockerHelper.isRunning(this.config.containerName, {
-        cwd: projectRoot,
-      });
-      if (!isRunning) {
-        return false;
-      }
-    }
-
-    // Check health endpoint if configured
+    // Try health endpoint first - works for any running instance
+    // (even if started manually, via different docker-compose, or k8s, etc.)
     if (this.config.healthEndpoint) {
       try {
         const controller = new AbortController();
@@ -180,13 +171,23 @@ export class DockerLifecycleManager {
         });
 
         clearTimeout(timeoutId);
-        return response.ok;
+        if (response.ok) {
+          return true;
+        }
       } catch {
-        return false;
+        // Health endpoint failed, fall through to Docker check
       }
     }
 
-    // If no health endpoint, assume healthy if initialized
+    // Fall back to Docker container check (needed for auto-start capability)
+    if (this.dockerHelper) {
+      const projectRoot = this.config.projectRoot || process.cwd();
+      return await this.dockerHelper.isRunning(this.config.containerName, {
+        cwd: projectRoot,
+      });
+    }
+
+    // If no health endpoint and no Docker helper, assume healthy if initialized
     return this.initialized;
   }
 
