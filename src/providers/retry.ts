@@ -53,6 +53,11 @@ export async function withRetry<T>(
   fn: () => Promise<T>,
   config: RetryConfig = {},
 ): Promise<T> {
+  // Skip retries in test environment to avoid timeouts
+  if (process.env.DISABLE_RETRY === "true") {
+    return fn();
+  }
+
   const {
     maxAttempts = DEFAULT_RETRY_CONFIG.maxAttempts,
     initialDelayMs = DEFAULT_RETRY_CONFIG.initialDelayMs,

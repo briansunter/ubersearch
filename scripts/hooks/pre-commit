@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Pre-commit hook: runs lint and unit tests before allowing commit
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Run git-secrets if available
+if command -v git-secrets &> /dev/null; then
+    echo "Checking for secrets..."
+    git secrets --pre_commit_hook -- "$@"
+fi
+
+# Run linting
+echo "Running lint..."
+bun run lint
+
+# Run unit tests
+echo "Running unit tests..."
+bun run test:unit
+
+echo "Pre-commit checks passed!"

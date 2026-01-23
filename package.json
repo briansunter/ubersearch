@@ -39,6 +39,7 @@
     "zod": "^4.1.12"
   },
   "scripts": {
+    "prepare": "git config core.hooksPath scripts/hooks",
     "lint": "bunx biome check .",
     "lint:fix": "bunx biome check --write .",
     "format": "bunx biome format --write .",

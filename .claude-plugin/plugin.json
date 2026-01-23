@@ -7,12 +7,5 @@
   },
   "repository": "https://github.com/briansunter/ubersearch",
   "license": "MIT",
-  "keywords": [
-    "search",
-    "ai",
-    "tavily",
-    "brave",
-    "searxng",
-    "mcp"
-  ]
+  "keywords": ["search", "ai", "tavily", "brave", "searxng", "mcp"]
 }

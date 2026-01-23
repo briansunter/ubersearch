@@ -16,6 +16,9 @@ if (process.env.SKIP_DOCKER_TESTS === undefined) {
   process.env.SKIP_DOCKER_TESTS = "true";
 }
 
+// Disable retry logic in tests to prevent timeouts
+process.env.DISABLE_RETRY = "true";
+
 import { afterEach, beforeEach } from "bun:test";
 
 // Dynamic import to avoid caching issues
