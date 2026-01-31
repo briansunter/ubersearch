@@ -55,8 +55,7 @@ ehthumbs.db
 Thumbs.db
 
 # === SearXNG Provider ===
-providers/searxng/config/settings.yml
-!providers/searxng/config/settings.yml.template
+# Note: settings.yml is now tracked (ships with package for bootstrap)
 credis.json
 
 # === UberSearch Cache ===

@@ -4,12 +4,42 @@
  * Manages Docker Compose services for local providers
  */
 
-import { exec } from "node:child_process";
-import { existsSync } from "node:fs";
+import { exec, execSync } from "node:child_process";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { promisify } from "node:util";
 import { getSearxngPaths } from "../paths";
 
 const execAsync = promisify(exec);
+
+/**
+ * Get or generate a persistent SearXNG secret key
+ * Stored in the config directory so it persists across restarts
+ */
+function getSearxngSecret(configDir: string): string {
+  const secretFile = join(configDir, ".secret");
+  try {
+    if (existsSync(secretFile)) {
+      const secret = readFileSync(secretFile, "utf-8").trim();
+      if (secret.length >= 32) {
+        return secret;
+      }
+    }
+  } catch {
+    // Fall through to generate new secret
+  }
+
+  // Generate a new secret using crypto
+  const secret = [...Array(64)]
+    .map(() => Math.floor(Math.random() * 16).toString(16))
+    .join("");
+  try {
+    writeFileSync(secretFile, secret, { mode: 0o600 });
+  } catch {
+    // If we can't write, use a session-only secret
+  }
+  return secret;
+}
 
 export interface DockerComposeOptions {
   cwd?: string;
@@ -44,6 +74,7 @@ export class DockerComposeHelper {
           ...process.env,
           SEARXNG_CONFIG: configDir,
           SEARXNG_DATA: dataDir,
+          SEARXNG_SECRET: getSearxngSecret(configDir),
         },
       });
 
