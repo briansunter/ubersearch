@@ -5,6 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import type { BraveConfig } from "../../../src/config/types";
 import type { SearchQuery } from "../../../src/core/types";
 import { SearchError } from "../../../src/core/types";
 import { BraveProvider } from "../../../src/providers/brave";
@@ -14,11 +15,13 @@ const originalProcess = process;
 
 describe("BraveProvider", () => {
   let provider: BraveProvider;
-  let mockConfig: any;
+  let mockConfig: BraveConfig;
 
   beforeEach(() => {
     mockConfig = {
       id: "brave",
+      type: "brave",
+      enabled: true,
       displayName: "Brave Search",
       apiKeyEnv: "BRAVE_API_KEY",
       endpoint: "https://api.search.brave.com/res/v1/web/search",

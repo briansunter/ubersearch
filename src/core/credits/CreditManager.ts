@@ -101,6 +101,24 @@ export class CreditManager {
   }
 
   /**
+   * Refund credits for a failed search
+   * @note This does NOT persist the state - call saveState() separately
+   */
+  refund(engineId: EngineId): void {
+    const config = this.engines.get(engineId);
+    if (!config) {
+      throw new Error(`Unknown engine: ${engineId}`);
+    }
+
+    const record = this.state[engineId];
+    if (!record) {
+      throw new Error(`No credit record for engine: ${engineId}`);
+    }
+
+    record.used = Math.max(0, record.used - config.creditCostPerSearch);
+  }
+
+  /**
    * Check if engine has sufficient credits
    */
   hasSufficientCredits(engineId: EngineId): boolean {

@@ -66,7 +66,7 @@ bun run src/cli.ts "search query" --json
 
 Link for global access:
 ```bash
-ln -s $(pwd)/src/cli.ts ~/.local/bin/ubersearch
+bun link
 ubersearch "search query" --json
 ```
 

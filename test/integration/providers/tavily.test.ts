@@ -6,6 +6,7 @@
  */
 
 import { beforeEach, describe, expect, test } from "bun:test";
+import type { TavilyConfig } from "../../../src/config/types";
 import { TavilyProvider } from "../../../src/providers/tavily";
 
 // Skip these tests if no API key is available
@@ -16,7 +17,7 @@ const skipIntegrationTests =
 if (!skipIntegrationTests) {
   describe("TavilyProvider - Integration Tests", () => {
     let provider: TavilyProvider;
-    let mockConfig: any;
+    let mockConfig: TavilyConfig;
 
     beforeEach(() => {
       mockConfig = {

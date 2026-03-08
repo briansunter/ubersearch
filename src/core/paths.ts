@@ -7,7 +7,7 @@
 
 import { copyFileSync, existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const APP_NAME = "ubersearch";
@@ -109,16 +109,57 @@ export function getPackageRoot(): string {
 }
 
 /**
+ * Get candidate runtime roots where bundled SearXNG assets may live.
+ *
+ * This covers:
+ * - source checkouts (`<root>/providers/searxng`)
+ * - built JS output (`<root>/dist/providers/searxng`)
+ * - compiled binaries with copied assets next to the executable
+ */
+function getRuntimeRoots(): string[] {
+  const roots = new Set<string>();
+
+  roots.add(resolve(getPackageRoot()));
+  roots.add(resolve(dirname(process.execPath)));
+  roots.add(resolve(process.cwd()));
+
+  return [...roots];
+}
+
+function getBundledSearxngAssetCandidates(relativePath: string): string[] {
+  const candidates = new Set<string>();
+
+  for (const root of getRuntimeRoots()) {
+    candidates.add(join(root, "providers", "searxng", relativePath));
+    candidates.add(join(root, "dist", "providers", "searxng", relativePath));
+  }
+
+  return [...candidates];
+}
+
+function resolveBundledSearxngAsset(relativePath: string): string {
+  const candidates = getBundledSearxngAssetCandidates(relativePath);
+  const existing = candidates.find((candidate) => existsSync(candidate));
+
+  if (existing) {
+    return existing;
+  }
+
+  return candidates[0] ?? join(getPackageRoot(), "providers", "searxng", relativePath);
+}
+
+/**
+ * Get the bundled SearXNG docker-compose file path.
+ */
+export function getBundledSearxngComposePath(): string {
+  return resolveBundledSearxngAsset("docker-compose.yml");
+}
+
+/**
  * Get the bundled default settings.yml path
  */
 export function getDefaultSettingsPath(): string {
-  const packageRoot = getPackageRoot();
-  // In bundled mode, look in dist/providers/searxng/
-  // In dev mode, look in providers/searxng/
-  if (packageRoot.endsWith("/dist")) {
-    return join(packageRoot, "providers", "searxng", "config", "settings.yml");
-  }
-  return join(packageRoot, "providers", "searxng", "config", "settings.yml");
+  return resolveBundledSearxngAsset(join("config", "settings.yml"));
 }
 
 /**

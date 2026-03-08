@@ -10,7 +10,12 @@ import type {
   StrategyContext,
   UberSearchOptions,
 } from "../../src/core/strategy/ISearchStrategy";
-import type { EngineId, SearchFailureReason, SearchResultItem } from "../../src/core/types";
+import type {
+  EngineId,
+  SearchFailureReason,
+  SearchQuery,
+  SearchResultItem,
+} from "../../src/core/types";
 import { SearchError } from "../../src/core/types";
 
 // Mock provider for testing
@@ -59,6 +64,13 @@ class MockCreditManager {
     const currentUsage = this.creditUsage.get(engineId) || 0;
     this.creditUsage.set(engineId, currentUsage + 1);
     return true;
+  }
+
+  refund(engineId: EngineId): void {
+    const currentUsage = this.creditUsage.get(engineId) || 0;
+    if (currentUsage > 0) {
+      this.creditUsage.set(engineId, currentUsage - 1);
+    }
   }
 
   // Test helper methods
@@ -527,7 +539,7 @@ describe("FirstSuccessStrategy", () => {
   describe("options handling", () => {
     test("should pass includeRaw option to providers", async () => {
       const googleProvider = new MockSearchProvider("Google", mockResults.google);
-      const searchCalls: any[] = [];
+      const searchCalls: SearchQuery[] = [];
       googleProvider.search = async (params) => {
         searchCalls.push(params);
         return {
@@ -551,7 +563,7 @@ describe("FirstSuccessStrategy", () => {
 
     test("should pass query to providers", async () => {
       const googleProvider = new MockSearchProvider("Google", mockResults.google);
-      const searchCalls: any[] = [];
+      const searchCalls: SearchQuery[] = [];
       googleProvider.search = async (params) => {
         searchCalls.push(params);
         return {

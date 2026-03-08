@@ -7,32 +7,27 @@
  */
 
 import { bootstrapContainer, getCreditStatus, uberSearch } from "./app/index";
-import { isLifecycleProvider } from "./bootstrap/container";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
+import { isLifecycleProvider } from "./plugin/types.js";
 
 interface MCPRequest {
   jsonrpc: string;
   id?: number | string;
   method: string;
-  params?: any;
+  params?: Record<string, unknown>;
 }
 
 interface MCPTool {
   name: string;
   description: string;
-  inputSchema: any;
-}
-
-interface MCPToolCallParams {
-  name: string;
-  arguments: Record<string, any>;
+  inputSchema: Record<string, unknown>;
 }
 
 interface MCPResponse {
   jsonrpc: string;
   id?: number | string;
-  result?: any;
+  result?: unknown;
   error?: {
     code?: number;
     message: string;
@@ -168,23 +163,29 @@ Example: "it,science" for tech and academic results`,
     }
 
     if (request.method === "tools/call") {
-      const { name, arguments: args } = request.params as MCPToolCallParams;
+      const params = request.params ?? {};
+      const name = String(params.name ?? "");
+      const args =
+        typeof params.arguments === "object" && params.arguments !== null
+          ? (params.arguments as Record<string, string>)
+          : ({} as Record<string, string>);
 
       try {
-        let result: any;
+        let result: unknown;
         if (name === "uber_search") {
-          const engines = args.engines
-            ? args.engines.split(",").map((e: string) => e.trim())
-            : undefined;
+          const engines = args.engines ? args.engines.split(",").map((e) => e.trim()) : undefined;
           const categories = args.categories
-            ? args.categories.split(",").map((c: string) => c.trim())
+            ? args.categories.split(",").map((c) => c.trim())
             : undefined;
           result = await withTimeout(
             uberSearch({
-              query: args.query,
-              limit: args.limit,
+              query: args.query ?? "",
+              limit: args.limit ? Number(args.limit) : undefined,
               engines,
-              strategy: args.strategy,
+              strategy:
+                args.strategy === "all" || args.strategy === "first-success"
+                  ? args.strategy
+                  : undefined,
               categories,
             }),
             60000,

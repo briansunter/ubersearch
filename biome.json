@@ -1,7 +1,14 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
   "files": {
-    "includes": ["**/*", "!node_modules", "!providers/searxng/data", "!bun.lockb", "!.cursor"]
+    "includes": [
+      "**/*",
+      "!node_modules",
+      "!dist",
+      "!providers/searxng/data",
+      "!bun.lockb",
+      "!.cursor"
+    ]
   },
   "formatter": {
     "indentStyle": "space",

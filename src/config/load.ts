@@ -14,27 +14,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { getBundledSearxngComposePath } from "../core/paths";
 import { PluginRegistry, registerBuiltInPlugins } from "../plugin";
 import type { ConfigFactory, ExtendedSearchConfig } from "./defineConfig";
 import { formatValidationErrors, validateConfigSafe } from "./validation";
-
-/**
- * Get package root directory
- * Handles both development (src/) and bundled (dist/) environments
- */
-function getPackageRoot(): string {
-  const currentFile = fileURLToPath(import.meta.url);
-  const currentDir = dirname(currentFile);
-
-  // Check if we're in dist/ or src/
-  if (currentDir.includes("/dist")) {
-    // Bundled: dist/cli.js -> go up 1 level
-    return dirname(currentDir);
-  }
-  // Development: src/config/load.ts -> go up 2 levels
-  return dirname(dirname(currentDir));
-}
 
 /** Supported config file extensions */
 const CONFIG_EXTENSIONS = [".ts", ".json"] as const;
@@ -210,8 +193,7 @@ function getDefaultConfig(): ExtendedSearchConfig {
   const defaultEngineOrder: string[] = [];
 
   // Always add SearXNG first - it's free and unlimited (requires Docker)
-  const packageRoot = getPackageRoot();
-  const composeFile = join(packageRoot, "providers", "searxng", "docker-compose.yml");
+  const composeFile = getBundledSearxngComposePath();
 
   defaultEngineOrder.push("searchxng");
   engines.push({

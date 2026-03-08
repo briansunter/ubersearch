@@ -313,6 +313,7 @@ describe("PluginRegistry", () => {
 
     test("should throw for unregistered plugin type", () => {
       const config: MockConfig = {
+        // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
         type: "unregistered" as any,
         id: "test",
         enabled: true,
@@ -326,7 +327,7 @@ describe("PluginRegistry", () => {
     });
 
     test("should pass container to factory", async () => {
-      let receivedContainer: any = null;
+      let receivedContainer: unknown = null;
       const plugin: PluginDefinition = {
         type: "container-test",
         displayName: "Container Test",
@@ -349,6 +350,7 @@ describe("PluginRegistry", () => {
           creditCostPerSearch: 1,
           lowCreditThresholdPercent: 80,
         },
+        // biome-ignore lint/suspicious/noExplicitAny: testing with mock container
         { container: mockContainer as any },
       );
 
@@ -382,7 +384,9 @@ describe("PluginRegistry", () => {
         },
       ];
 
-      const providers = registry.createProviders(configs as any);
+      const providers = registry.createProviders(
+        configs as Array<EngineConfigBase & { type: string }>,
+      );
       expect(providers).toHaveLength(2);
       expect(providers[0].id).toBe("p1");
       expect(providers[1].id).toBe("p2");

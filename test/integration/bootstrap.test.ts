@@ -6,7 +6,12 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { bootstrapContainer } from "../../src/bootstrap/container";
 import type { UberSearchConfig } from "../../src/config/types";
 import type { Container } from "../../src/core/container";
+import type { CreditManager } from "../../src/core/credits/CreditManager";
+import type { FileCreditStateProvider } from "../../src/core/credits/FileCreditStateProvider";
+import type { UberSearchOrchestrator } from "../../src/core/orchestrator";
+import type { ProviderRegistry } from "../../src/core/provider";
 import { ProviderFactory } from "../../src/core/provider/ProviderFactory";
+import type { StrategyFactory } from "../../src/core/strategy/StrategyFactory";
 import { PluginRegistry } from "../../src/plugin";
 
 const mockConfig: UberSearchConfig = {
@@ -107,7 +112,7 @@ describe("bootstrapContainer", () => {
 
   test("should initialize credit manager", async () => {
     container = await bootstrapContainer(mockConfig);
-    const creditManager = await container.get<any>("creditManager");
+    const creditManager = container.get<CreditManager>("creditManager");
 
     expect(creditManager).toBeDefined();
     expect(typeof creditManager.hasSufficientCredits).toBe("function");
@@ -117,18 +122,18 @@ describe("bootstrapContainer", () => {
 
   test("should register enabled providers only", async () => {
     container = await bootstrapContainer(mockConfig);
-    const registry = await container.get<any>("providerRegistry");
+    const registry = container.get<ProviderRegistry>("providerRegistry");
     const providers = registry.list();
 
     expect(providers).toHaveLength(2); // Only enabled providers
-    expect(providers.map((p: any) => p.id)).toContain("tavily-test");
-    expect(providers.map((p: any) => p.id)).toContain("brave-test");
-    expect(providers.map((p: any) => p.id)).not.toContain("disabled-test");
+    expect(providers.map((p) => p.id)).toContain("tavily-test");
+    expect(providers.map((p) => p.id)).toContain("brave-test");
+    expect(providers.map((p) => p.id)).not.toContain("disabled-test");
   });
 
   test("should register orchestrator with correct dependencies", async () => {
     container = await bootstrapContainer(mockConfig);
-    const orchestrator = await container.get<any>("orchestrator");
+    const orchestrator = await container.get<UberSearchOrchestrator>("orchestrator");
 
     expect(orchestrator).toBeDefined();
     expect(typeof orchestrator.run).toBe("function");
@@ -141,6 +146,7 @@ describe("bootstrapContainer", () => {
         ...mockConfig.engines,
         {
           id: "invalid-test",
+          // biome-ignore lint/suspicious/noExplicitAny: testing invalid type
           type: "unknown-type" as any,
           enabled: true,
           displayName: "Invalid Test",
@@ -154,8 +160,9 @@ describe("bootstrapContainer", () => {
     };
 
     // Should not throw, but log warning
+    // biome-ignore lint/suspicious/noExplicitAny: testing invalid config
     container = await bootstrapContainer(invalidConfig as any);
-    const registry = await container.get<any>("providerRegistry");
+    const registry = await container.get<ProviderRegistry>("providerRegistry");
     const providers = registry.list();
 
     // Should still have the valid providers
@@ -189,13 +196,13 @@ describe("bootstrapContainer", () => {
     const customPath = "/tmp/custom-test-credits.json";
     container = await bootstrapContainer(mockConfig, customPath);
 
-    const creditProvider = await container.get<any>("creditStateProvider");
+    const creditProvider = await container.get<FileCreditStateProvider>("creditStateProvider");
     expect(creditProvider.getStatePath()).toBe(customPath);
   });
 
   test("should register strategy factory", async () => {
     container = await bootstrapContainer(mockConfig);
-    const strategyFactory = await container.get<any>("strategyFactory");
+    const strategyFactory = await container.get<typeof StrategyFactory>("strategyFactory");
 
     expect(strategyFactory).toBeDefined();
     expect(typeof strategyFactory.createStrategy).toBe("function");
@@ -250,7 +257,7 @@ describe("Container Service Resolution", () => {
   });
 
   test("should resolve credit manager state correctly", async () => {
-    const creditManager = await container?.get<any>("creditManager");
+    const creditManager = await container?.get<CreditManager>("creditManager");
     const snapshots = creditManager.listSnapshots();
 
     expect(snapshots).toHaveLength(2); // Only enabled engines
@@ -264,7 +271,7 @@ describe("Container Service Resolution", () => {
   });
 
   test("should provide working orchestrator", async () => {
-    const orchestrator = await container?.get<any>("orchestrator");
+    const orchestrator = await container?.get<UberSearchOrchestrator>("orchestrator");
 
     // Mock the search to avoid actual API calls
     const _mockResults = {

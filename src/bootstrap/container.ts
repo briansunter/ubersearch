@@ -11,7 +11,7 @@ import { CreditManager } from "../core/credits";
 import { FileCreditStateProvider } from "../core/credits/FileCreditStateProvider";
 import { createLogger } from "../core/logger";
 import { UberSearchOrchestrator } from "../core/orchestrator";
-import type { ILifecycleProvider, SearchProvider } from "../core/provider";
+import type { SearchProvider } from "../core/provider";
 import { ProviderRegistry } from "../core/provider";
 import { ProviderFactory } from "../core/provider/ProviderFactory";
 import { ServiceKeys } from "../core/serviceKeys";
@@ -155,18 +155,4 @@ export async function bootstrapContainer(
  */
 function createProvider(engineConfig: EngineConfig): SearchProvider {
   return ProviderFactory.createProvider(engineConfig, container);
-}
-
-/**
- * Helper function to check if a provider implements ILifecycleProvider
- */
-export function isLifecycleProvider(provider: unknown): provider is ILifecycleProvider {
-  return (
-    provider != null &&
-    typeof provider === "object" &&
-    "init" in provider &&
-    typeof provider.init === "function" &&
-    "healthcheck" in provider &&
-    typeof provider.healthcheck === "function"
-  );
 }

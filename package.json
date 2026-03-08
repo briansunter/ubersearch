@@ -41,9 +41,9 @@
   },
   "scripts": {
     "prepare": "git config core.hooksPath scripts/hooks",
-    "lint": "bunx biome check .",
-    "lint:fix": "bunx biome check --write .",
-    "format": "bunx biome format --write .",
+    "lint": "bunx biome check src/ test/ scripts/ docs/ *.json *.md",
+    "lint:fix": "bunx biome check --write src/ test/ scripts/ docs/ *.json *.md",
+    "format": "bunx biome format --write src/ test/ scripts/ docs/ *.json *.md",
     "test": "SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts test/",
     "test:unit": "bun test --preload ./test/setup.ts test/unit/",
     "test:integration": "bun test --preload ./test/setup.ts test/integration/",
@@ -55,7 +55,7 @@
     "mcp": "bun run src/cli.ts mcp",
     "mcp:test": "bun run scripts/test-mcp.ts",
     "build": "bun run scripts/build.ts",
-    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ubersearch",
+    "build:binary": "bun build --compile --minify src/cli.ts --outfile dist/ubersearch && bun run scripts/copy-searxng-assets.ts",
     "semantic-release": "semantic-release",
     "semantic-release:dry-run": "semantic-release --dry-run",
     "release": "bun run build && bun run semantic-release"

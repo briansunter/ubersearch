@@ -8,14 +8,18 @@
  */
 
 import { describe, expect, mock, test } from "bun:test";
+import type { CreditSnapshot } from "../../../src/core/credits/CreditManager";
+import type { OrchestratorResult } from "../../../src/core/orchestrator";
+import type { SearchResultItem } from "../../../src/core/types";
+import type { UberSearchOutput } from "../../../src/tool/interface";
 import { getCreditStatus, uberSearch } from "../../../src/tool/uberSearchTool";
 
 // Create a mock container factory for testing
 function createMockContainer(
   options: {
-    orchestratorResponse?: any;
+    orchestratorResponse?: OrchestratorResult;
     orchestratorError?: Error;
-    creditManagerResponse?: any;
+    creditManagerResponse?: CreditSnapshot[];
     creditManagerError?: Error;
   } = {},
 ) {
@@ -76,7 +80,7 @@ function createMockContainer(
       switch (serviceId) {
         case "orchestrator":
           return {
-            run: mock(async (query: string, opts: any) => {
+            run: mock(async (query: string, opts: { engineOrderOverride?: string[] }) => {
               if (options.orchestratorError) {
                 throw options.orchestratorError;
               }
@@ -90,7 +94,7 @@ function createMockContainer(
                 return {
                   ...response,
                   query,
-                  results: response.results.map((r: any) => ({
+                  results: response.results.map((r: SearchResultItem) => ({
                     ...r,
                     sourceEngine: opts.engineOrderOverride[0],
                   })),
@@ -540,9 +544,11 @@ describe("Tool Module Tests", () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(4);
-      expect((results[0] as any).query).toBe("search 1");
+      const search1 = results[0] as UberSearchOutput;
+      const search2 = results[2] as UberSearchOutput;
+      expect(search1.query).toBe("search 1");
       expect(results[1]).toBeDefined();
-      expect((results[2] as any).query).toBe("search 2");
+      expect(search2.query).toBe("search 2");
       expect(results[3]).toBeDefined();
     });
   });

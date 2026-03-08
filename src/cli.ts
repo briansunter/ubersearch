@@ -5,10 +5,11 @@
  * Unified search interface for multiple search providers
  */
 
-import { bootstrapContainer, isLifecycleProvider } from "./bootstrap/container";
+import { bootstrapContainer } from "./bootstrap/container";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
 import { serve as serveMcp } from "./mcp-server";
+import { isLifecycleProvider } from "./plugin/types.js";
 import type { UberSearchOutput } from "./tool/interface";
 import { getCreditStatus, uberSearch } from "./tool/uberSearchTool";
 

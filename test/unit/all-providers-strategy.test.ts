@@ -20,6 +20,7 @@ interface MockProviderRegistry {
 interface MockCreditManager {
   hasSufficientCredits(engineId: EngineId): boolean;
   charge(engineId: EngineId): boolean;
+  refund(engineId: EngineId): void;
 }
 
 function buildContext(
@@ -60,6 +61,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -144,6 +149,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -253,6 +262,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
         }
         return false;
       },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
+      },
     };
 
     const context = buildContext(registry, creditManager);
@@ -300,6 +313,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -355,6 +372,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
         }
         return false;
       },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
+      },
     };
 
     const context = buildContext(registry, creditManager);
@@ -397,6 +418,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -455,6 +480,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 

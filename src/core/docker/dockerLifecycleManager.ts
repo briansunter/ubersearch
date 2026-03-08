@@ -63,21 +63,20 @@ export class DockerLifecycleManager {
    * @throws Error if container startup fails
    */
   async init(): Promise<void> {
-    if (this.initPromise) {
-      return this.initPromise;
-    }
+    // Atomic check-and-set pattern to prevent race conditions
+    if (!this.initPromise) {
+      if (!this.config.autoStart || !this.dockerHelper) {
+        this.initialized = true;
+        return;
+      }
 
-    if (!this.config.autoStart || !this.dockerHelper) {
-      this.initialized = true;
-      return;
+      this.initPromise = this.performInit().catch((error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        log.debug("Initialization failed:", message);
+        this.initialized = false;
+        throw error;
+      });
     }
-
-    this.initPromise = this.performInit().catch((error) => {
-      const message = error instanceof Error ? error.message : String(error);
-      log.debug("Initialization failed:", message);
-      this.initialized = false;
-      throw error;
-    });
     return this.initPromise;
   }
 
@@ -162,20 +161,20 @@ export class DockerLifecycleManager {
     // Try health endpoint first - works for any running instance
     // (even if started manually, via different docker-compose, or k8s, etc.)
     if (this.config.healthEndpoint) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
-
         const response = await fetch(this.config.healthEndpoint, {
           signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
         if (response.ok) {
           return true;
         }
       } catch {
         // Health endpoint failed, fall through to Docker check
+      } finally {
+        clearTimeout(timeoutId);
       }
     }
 
@@ -269,6 +268,23 @@ export class DockerLifecycleManager {
     const errors: string[] = [];
     const warnings: string[] = [];
 
+    // Validate config fields first (these don't require Docker)
+
+    // Check health endpoint if configured
+    if (this.config.healthEndpoint) {
+      try {
+        // Try to parse the URL
+        new URL(this.config.healthEndpoint);
+      } catch {
+        warnings.push(`Health endpoint URL is invalid: ${this.config.healthEndpoint}`);
+      }
+    }
+
+    // Check container name if specified
+    if (this.config.containerName && !/^[a-zA-Z0-9_-]+$/.test(this.config.containerName)) {
+      warnings.push(`Container name contains invalid characters: ${this.config.containerName}`);
+    }
+
     // Check Docker is available
     const dockerAvailable = await DockerComposeHelper.isDockerAvailable();
     if (!dockerAvailable) {
@@ -297,21 +313,6 @@ export class DockerLifecycleManager {
       }
     }
 
-    // Check health endpoint if configured
-    if (this.config.healthEndpoint) {
-      try {
-        // Try to parse the URL
-        new URL(this.config.healthEndpoint);
-      } catch {
-        warnings.push(`Health endpoint URL is invalid: ${this.config.healthEndpoint}`);
-      }
-    }
-
-    // Check container name if specified
-    if (this.config.containerName && !/^[a-zA-Z0-9_-]+$/.test(this.config.containerName)) {
-      warnings.push(`Container name contains invalid characters: ${this.config.containerName}`);
-    }
-
     return {
       valid: errors.length === 0,
       errors,
@@ -331,6 +332,13 @@ export class DockerLifecycleManager {
    */
   isInitialized(): boolean {
     return this.initialized;
+  }
+
+  /**
+   * Check if initialization is currently in progress
+   */
+  isInitializing(): boolean {
+    return this.initPromise !== null;
   }
 
   /**

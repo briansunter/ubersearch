@@ -55,7 +55,7 @@ describe("TavilyProvider", () => {
       // Set the custom env var before creating the provider
       process.env.CUSTOM_TAVILY_KEY = "test-custom-key";
 
-      const customConfig: any = {
+      const customConfig: TavilyConfig = {
         id: "custom-tavily",
         type: "tavily" as const,
         enabled: true,

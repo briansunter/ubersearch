@@ -81,8 +81,8 @@ export class AllProvidersStrategy implements ISearchStrategy {
         continue;
       }
 
-      // Check credit availability
-      if (!context.creditManager.hasSufficientCredits(engineId)) {
+      // Charge credits before search (atomic check+deduct to avoid race conditions)
+      if (!context.creditManager.charge(engineId)) {
         attempts.push({ engineId, success: false, reason: "out_of_credit" });
         continue;
       }
@@ -98,13 +98,6 @@ export class AllProvidersStrategy implements ISearchStrategy {
           }),
         );
 
-        // Deduct credits
-        if (!context.creditManager.charge(engineId)) {
-          // This shouldn't happen because we checked above, but handle gracefully
-          attempts.push({ engineId, success: false, reason: "out_of_credit" });
-          continue;
-        }
-
         // Record success
         attempts.push({ engineId, success: true });
 
@@ -115,6 +108,9 @@ export class AllProvidersStrategy implements ISearchStrategy {
           results.push(...response.items);
         }
       } catch (error) {
+        // Refund credits for failed search
+        context.creditManager.refund(engineId);
+
         // Record failure
         if (error instanceof SearchError) {
           attempts.push({ engineId, success: false, reason: error.reason });
@@ -163,7 +159,8 @@ export class AllProvidersStrategy implements ISearchStrategy {
         continue;
       }
 
-      if (!context.creditManager.hasSufficientCredits(engineId)) {
+      // Charge credits before search (atomic check+deduct to avoid race conditions)
+      if (!context.creditManager.charge(engineId)) {
         ineligibleAttempts.push({ engineId, success: false, reason: "out_of_credit" });
         continue;
       }
@@ -215,6 +212,9 @@ export class AllProvidersStrategy implements ISearchStrategy {
       const { response, error } = settledResult.value;
 
       if (error) {
+        // Refund credits for failed search
+        context.creditManager.refund(engineId);
+
         // Search threw an error
         if (error instanceof SearchError) {
           attempts.push({ engineId, success: false, reason: error.reason });
@@ -226,12 +226,6 @@ export class AllProvidersStrategy implements ISearchStrategy {
       }
 
       if (response) {
-        // Deduct credits
-        if (!context.creditManager.charge(engineId)) {
-          attempts.push({ engineId, success: false, reason: "out_of_credit" });
-          continue;
-        }
-
         // Record success
         attempts.push({ engineId, success: true });
 

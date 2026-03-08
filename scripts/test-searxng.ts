@@ -4,9 +4,9 @@
  */
 
 import { bootstrapContainer, uberSearch } from "../src/app/index";
-import { isLifecycleProvider } from "../src/bootstrap/container";
 import type { ProviderRegistry } from "../src/core/provider";
 import { ServiceKeys } from "../src/core/serviceKeys";
+import { isLifecycleProvider } from "../src/plugin/types.js";
 
 // Set environment variables for testing
 process.env.SEARXNG_API_KEY = "test-key-123";

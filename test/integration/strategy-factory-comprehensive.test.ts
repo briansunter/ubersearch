@@ -6,12 +6,21 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { AllProvidersStrategy } from "../../src/core/strategy/AllProvidersStrategy";
 import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrategy";
-import type { ISearchStrategy } from "../../src/core/strategy/ISearchStrategy";
+import type {
+  ISearchStrategy,
+  StrategyContext,
+  StrategyResult,
+} from "../../src/core/strategy/ISearchStrategy";
 import { StrategyFactory, type StrategyOptions } from "../../src/core/strategy/StrategyFactory";
 
 // Custom strategy for testing factory registration
 class CustomStrategy implements ISearchStrategy {
-  async execute(_query: string, _engineIds: any[], _options: any, _context: any): Promise<any> {
+  async execute(
+    _query: string,
+    _engineIds: string[],
+    _options: unknown,
+    _context: unknown,
+  ): Promise<StrategyResult> {
     return {
       results: [
         {
@@ -19,6 +28,7 @@ class CustomStrategy implements ISearchStrategy {
           url: "https://custom.com",
           snippet: "Custom snippet",
           score: 0.9,
+          sourceEngine: "custom",
         },
       ],
       attempts: [{ engineId: "custom", success: true }],
@@ -33,7 +43,12 @@ class AlternativeCustomStrategy implements ISearchStrategy {
     _options?: StrategyOptions,
   ) {}
 
-  async execute(_query: string, _engineIds: any[], _options: any, _context: any): Promise<any> {
+  async execute(
+    _query: string,
+    _engineIds: string[],
+    _options: unknown,
+    _context: unknown,
+  ): Promise<StrategyResult> {
     return {
       results: [
         {
@@ -41,6 +56,7 @@ class AlternativeCustomStrategy implements ISearchStrategy {
           url: "https://alternative.com",
           snippet: "Alternative snippet",
           score: 0.8,
+          sourceEngine: "alternative",
         },
       ],
       attempts: [{ engineId: "alternative", success: true }],
@@ -120,12 +136,14 @@ describe("StrategyFactory", () => {
     });
 
     test("should throw error for null strategy name", () => {
+      // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
       expect(() => StrategyFactory.createStrategy(null as any)).toThrow(
         'Unknown strategy: "null". Available strategies: [all, first-success]',
       );
     });
 
     test("should throw error for undefined strategy name", () => {
+      // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
       expect(() => StrategyFactory.createStrategy(undefined as any)).toThrow(
         'Unknown strategy: "undefined". Available strategies: [all, first-success]',
       );
@@ -249,7 +267,7 @@ describe("StrategyFactory", () => {
         "test query",
         ["test-engine"],
         { limit: 10, includeRaw: false },
-        mockContext as any,
+        mockContext as unknown as StrategyContext,
       );
 
       expect(result).toBeDefined();
@@ -271,7 +289,12 @@ describe("StrategyFactory", () => {
         },
       };
 
-      const result = await strategy.execute("test query", [], {}, mockContext as any);
+      const result = await strategy.execute(
+        "test query",
+        [],
+        {},
+        mockContext as unknown as StrategyContext,
+      );
 
       expect(result.results).toHaveLength(1);
       expect(result.results[0].title).toBe("Custom Result");

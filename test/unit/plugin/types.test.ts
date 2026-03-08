@@ -87,14 +87,17 @@ describe("isLifecycleProvider", () => {
   });
 
   test("should return false for null", () => {
+    // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
     expect(isLifecycleProvider(null as any)).toBe(false);
   });
 
   test("should return false for undefined", () => {
+    // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
     expect(isLifecycleProvider(undefined as any)).toBe(false);
   });
 
   test("should return false for plain object", () => {
+    // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
     expect(isLifecycleProvider({} as any)).toBe(false);
   });
 
@@ -107,6 +110,7 @@ describe("isLifecycleProvider", () => {
       healthcheck: "not a function",
       shutdown: "not a function",
     };
+    // biome-ignore lint/suspicious/noExplicitAny: testing invalid input
     expect(isLifecycleProvider(fakeProvider as any)).toBe(false);
   });
 });
@@ -138,6 +142,7 @@ describe("hasLifecycleManagement", () => {
       shutdown: async () => {},
       validateConfig: async () => ({ valid: true, errors: [], warnings: [] }),
     };
+    // biome-ignore lint/suspicious/noExplicitAny: testing structural match without class instance
     expect(hasLifecycleManagement(provider as any)).toBe(true);
   });
 });

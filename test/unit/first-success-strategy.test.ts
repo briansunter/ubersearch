@@ -20,6 +20,7 @@ interface MockProviderRegistry {
 interface MockCreditManager {
   hasSufficientCredits(engineId: EngineId): boolean;
   charge(engineId: EngineId): boolean;
+  refund(engineId: EngineId): void;
 }
 
 function buildContext(
@@ -60,6 +61,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -142,6 +147,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
         }
         return false;
       },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
+      },
     };
 
     const context = buildContext(registry, creditManager);
@@ -197,6 +206,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -277,6 +290,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
         }
         return false;
       },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
+      },
     };
 
     const context = buildContext(registry, creditManager);
@@ -323,6 +340,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -378,6 +399,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
         }
         return false;
       },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
+      },
     };
 
     const context = buildContext(registry, creditManager);
@@ -420,6 +445,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 
@@ -478,6 +507,10 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
           return true;
         }
         return false;
+      },
+      refund: (id) => {
+        const current = credits.get(id) || 0;
+        credits.set(id, current + 1);
       },
     };
 

@@ -112,7 +112,6 @@
               "monthlyQuota",
               "creditCostPerSearch",
               "lowCreditThresholdPercent",
-              "apiKeyEnv",
               "endpoint",
               "defaultLimit"
             ],
@@ -145,6 +144,18 @@
         "creditStatePath": { "type": "string" }
       },
       "additionalProperties": true
+    },
+    "plugins": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "displayName": { "type": "string" },
+          "hasLifecycle": { "type": "boolean" }
+        },
+        "additionalProperties": true
+      }
     }
   },
   "additionalProperties": true

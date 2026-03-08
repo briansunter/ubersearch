@@ -79,7 +79,7 @@ export class SearchxngProvider
     let isHealthy = await this.healthcheck();
 
     if (!isHealthy) {
-      const isInitializing = !!(await (this.lifecycleManager as any).initPromise);
+      const isInitializing = this.lifecycleManager.isInitializing();
       if (!isInitializing) {
         try {
           log.debug("Container not healthy, attempting auto-start...");

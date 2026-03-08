@@ -4,13 +4,13 @@
  * Manages Docker Compose services for local providers
  */
 
-import { exec, execSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { getSearxngPaths } from "../paths";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Get or generate a persistent SearXNG secret key
@@ -30,9 +30,7 @@ function getSearxngSecret(configDir: string): string {
   }
 
   // Generate a new secret using crypto
-  const secret = [...Array(64)]
-    .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join("");
+  const secret = [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
   try {
     writeFileSync(secretFile, secret, { mode: 0o600 });
   } catch {
@@ -59,15 +57,15 @@ export class DockerComposeHelper {
     args: string[],
     options: DockerComposeOptions = {},
   ): Promise<string> {
-    const cmd = `docker compose -f "${this.composeFile}" ${args.join(" ")}`;
     const cwd = options.cwd || this.getComposeDir();
     const timeout = options.timeout || 30000;
+    const cmdArgs = ["compose", "-f", this.composeFile, ...args];
 
     try {
       // Get SearXNG paths and ensure directories exist
       const { configDir, dataDir } = getSearxngPaths();
 
-      const { stdout, stderr } = await execAsync(cmd, {
+      const { stdout, stderr } = await execFileAsync("docker", cmdArgs, {
         cwd,
         timeout,
         env: {
@@ -90,7 +88,7 @@ export class DockerComposeHelper {
 
       const errorDetails = [
         `Docker Compose command ${timedOut ? "timed out" : "failed"}: ${errorMessage}`,
-        `Command: ${cmd}`,
+        `Command: docker compose -f ${this.composeFile} ${args.join(" ")}`,
       ];
       if (err.stdout) {
         errorDetails.push(`Output: ${err.stdout}`);
@@ -192,7 +190,7 @@ export class DockerComposeHelper {
    */
   static async isDockerAvailable(): Promise<boolean> {
     try {
-      await execAsync("docker version", { timeout: 5000 });
+      await execFileAsync("docker", ["version"], { timeout: 5000 });
       return true;
     } catch {
       return false;

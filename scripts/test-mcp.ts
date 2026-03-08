@@ -36,7 +36,7 @@ async function testMCPServer() {
           serverReady = true;
         } else if (response.result?.tools) {
           console.log(
-            `✓ Available tools: ${response.result.tools.map((t: any) => t.name).join(", ")}\n`,
+            `✓ Available tools: ${response.result.tools.map((t: { name: string }) => t.name).join(", ")}\n`,
           );
         } else {
           console.log("Response:", JSON.stringify(response, null, 2));

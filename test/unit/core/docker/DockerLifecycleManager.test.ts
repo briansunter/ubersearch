@@ -3,7 +3,8 @@
  * Tests Docker container lifecycle management
  */
 
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { DockerComposeHelper } from "../../../../src/core/docker/dockerComposeHelper";
 import {
   type DockerLifecycleConfig,
   DockerLifecycleManager,
@@ -528,17 +529,22 @@ describe("DockerLifecycleManager", () => {
 
   describe("init edge cases", () => {
     test("should throw error when compose file does not exist and Docker is available", async () => {
-      const config: DockerLifecycleConfig = {
-        autoStart: true,
-        autoStop: true,
-        composeFile: "/nonexistent/docker-compose.yml",
-        containerName: "test-container",
-      };
+      const spy = spyOn(DockerComposeHelper, "isDockerAvailable").mockResolvedValue(true);
+      try {
+        const config: DockerLifecycleConfig = {
+          autoStart: true,
+          autoStop: true,
+          composeFile: "/nonexistent/docker-compose.yml",
+          containerName: "test-container",
+        };
 
-      const manager = new DockerLifecycleManager(config);
+        const manager = new DockerLifecycleManager(config);
 
-      // When Docker is available but file doesn't exist, it should throw
-      await expect(manager.init()).rejects.toThrow("Docker Compose command failed");
+        // When Docker is available but file doesn't exist, it should throw
+        await expect(manager.init()).rejects.toThrow("Docker Compose command");
+      } finally {
+        spy.mockRestore();
+      }
     });
 
     test("should complete init when autoStart is false even with invalid compose file", async () => {

@@ -69,8 +69,10 @@ ubersearch "query" [options]
 Options:
   --json                        Output results as JSON
   --engines engine1,engine2     Use specific engines
-  --strategy all|first-success  Search strategy (default: all)
+  --strategy all|first-success  Search strategy (default: first-success)
   --limit number                Max results per engine
+  --categories categories       Categories filter for SearXNG (e.g., "it,science")
+  --config path                 Config file path
   --include-raw                 Include raw provider responses
   --help, -h                    Show help
   health                        Run provider health checks (starts Docker-backed ones if needed)
@@ -286,7 +288,7 @@ tavily (10 results)
 
 ## Search Strategies
 
-### All (Default)
+### All
 
 Queries all configured/enabled providers and combines results.
 

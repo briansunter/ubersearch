@@ -8,6 +8,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
+import type { SearchxngConfig } from "../../../src/config/types";
 import type { SearchQuery } from "../../../src/core/types";
 import { SearchError } from "../../../src/core/types";
 import { SearchxngProvider } from "../../../src/providers/searchxng";
@@ -24,15 +25,20 @@ const originalFetch = global.fetch;
 
 describe("SearchxngProvider", () => {
   let provider: SearchxngProvider;
-  let mockConfig: any;
+  let mockConfig: SearchxngConfig;
 
   beforeEach(() => {
     mockConfig = {
       id: "searchxng",
+      type: "searchxng",
+      enabled: true,
       displayName: "SearXNG (Local)",
       apiKeyEnv: "SEARXNG_API_KEY",
       endpoint: "http://localhost:8888/search",
       defaultLimit: 10,
+      monthlyQuota: 1000,
+      creditCostPerSearch: 1,
+      lowCreditThresholdPercent: 10,
       autoStart: false, // Disable auto-start to avoid actual Docker operations
       autoStop: false,
       containerName: "searchxng",
@@ -234,7 +240,7 @@ describe("SearchxngProvider", () => {
     });
 
     test("should send correct request headers", async () => {
-      let capturedOptions: any;
+      let capturedOptions: RequestInit | undefined;
       global.fetch = mock(async (_url, options) => {
         capturedOptions = options;
         return {
@@ -243,7 +249,7 @@ describe("SearchxngProvider", () => {
             results: [{ title: "Test", url: "https://example.com", content: "Test" }],
           }),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       await provider.search(query);
@@ -262,7 +268,7 @@ describe("SearchxngProvider", () => {
             results: [{ title: "Test", url: "https://example.com", content: "Test" }],
           }),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       await provider.search(query);
@@ -309,7 +315,7 @@ describe("SearchxngProvider", () => {
             results: [{ title: "Test", url: "https://example.com", content: "Test" }],
           }),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const result = await provider.search(query);
@@ -339,7 +345,7 @@ describe("SearchxngProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("Network error: connection refused");
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -548,7 +554,7 @@ describe("SearchxngProvider", () => {
             ],
           }),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "TypeScript ORM",
@@ -740,6 +746,7 @@ describe("SearchxngProvider", () => {
   describe("Config Variations", () => {
     test("should use default autoStart value of true", () => {
       const config = createTestSearchxngConfig();
+      // biome-ignore lint/suspicious/noExplicitAny: deleting optional field for testing defaults
       delete (config as any).autoStart;
 
       // The provider sets autoStart ?? true internally
@@ -749,6 +756,7 @@ describe("SearchxngProvider", () => {
 
     test("should use default autoStop value of true", () => {
       const config = createTestSearchxngConfig();
+      // biome-ignore lint/suspicious/noExplicitAny: deleting optional field for testing defaults
       delete (config as any).autoStop;
 
       const provider = new SearchxngProvider(config);
@@ -757,6 +765,7 @@ describe("SearchxngProvider", () => {
 
     test("should use default initTimeoutMs of 60000", () => {
       const config = createTestSearchxngConfig();
+      // biome-ignore lint/suspicious/noExplicitAny: deleting optional field for testing defaults
       delete (config as any).initTimeoutMs;
 
       const provider = new SearchxngProvider(config);
@@ -804,7 +813,7 @@ describe("SearchxngProvider", () => {
           ok: true,
           json: async () => createMockSearxngResponse(),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       await customProvider.search({ query: "test" });
 
@@ -821,13 +830,13 @@ describe("SearchxngProvider", () => {
       spyOn(customProvider, "healthcheck").mockResolvedValue(true);
 
       let capturedHeaders: Record<string, string> = {};
-      global.fetch = mock(async (_url, options: any) => {
-        capturedHeaders = options?.headers || {};
+      global.fetch = mock(async (_url, options: RequestInit | undefined) => {
+        capturedHeaders = (options?.headers as Record<string, string>) || {};
         return {
           ok: true,
           json: async () => createMockSearxngResponse(),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       await customProvider.search({ query: "test" });
 
@@ -1018,7 +1027,7 @@ describe("SearchxngProvider", () => {
       const { restore: restoreEnv } = setupTestEnv({ SEARXNG_API_KEY: "test-key" });
 
       try {
-        global.fetch = mockFetch as any;
+        global.fetch = mockFetch as typeof fetch;
         spyOn(provider, "healthcheck").mockResolvedValue(true);
 
         const response = await provider.search({ query: "helper test" });
@@ -1076,7 +1085,7 @@ describe("SearchxngProvider", () => {
           ok: true,
           json: async () => createMockSearxngResponse(),
         };
-      }) as any;
+      }) as unknown as typeof fetch;
 
       const response = await provider.search({ query: "test" });
 

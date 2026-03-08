@@ -5,6 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
+import type { LinkupConfig } from "../../../src/config/types";
 import type { SearchQuery } from "../../../src/core/types";
 import { SearchError } from "../../../src/core/types";
 import { LinkupProvider } from "../../../src/providers/linkup";
@@ -14,11 +15,13 @@ const originalProcess = process;
 
 describe("LinkupProvider", () => {
   let provider: LinkupProvider;
-  let mockConfig: any;
+  let mockConfig: LinkupConfig;
 
   beforeEach(() => {
     mockConfig = {
       id: "linkup",
+      type: "linkup",
+      enabled: true,
       displayName: "Linkup Search",
       apiKeyEnv: "LINKUP_API_KEY",
       endpoint: "https://api.linkup.so/v1/search",

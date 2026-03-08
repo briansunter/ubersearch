@@ -53,8 +53,8 @@ export class FirstSuccessStrategy implements ISearchStrategy {
         continue;
       }
 
-      // Check credit availability
-      if (!context.creditManager.hasSufficientCredits(engineId)) {
+      // Charge credits before search (atomic check+deduct to avoid race conditions)
+      if (!context.creditManager.charge(engineId)) {
         attempts.push({ engineId, success: false, reason: "out_of_credit" });
         continue;
       }
@@ -70,18 +70,15 @@ export class FirstSuccessStrategy implements ISearchStrategy {
           }),
         );
 
-        // Deduct credits
-        if (!context.creditManager.charge(engineId)) {
-          attempts.push({ engineId, success: false, reason: "out_of_credit" });
-          continue;
-        }
-
         // Record success
         attempts.push({ engineId, success: true });
 
         // Return immediately with results from this provider
         return { results: response.items, attempts };
       } catch (error) {
+        // Refund credits for failed search
+        context.creditManager.refund(engineId);
+
         // Record failure and continue to next provider
         if (error instanceof SearchError) {
           attempts.push({ engineId, success: false, reason: error.reason });

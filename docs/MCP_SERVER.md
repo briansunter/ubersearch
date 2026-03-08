@@ -131,7 +131,7 @@ Restart Claude Desktop after updating the config.
 ## Using in Code
 
 ```typescript
-import { uberSearch, getCreditStatus } from 'ubersearch';
+import { uberSearch, getCreditStatus } from 'ubersearch/config';
 
 // Search
 const results = await uberSearch({
@@ -170,7 +170,7 @@ Config files are searched in this order:
 ### TypeScript Config (Recommended)
 
 ```typescript
-import { defineConfig, defineTavily, defineBrave } from 'ubersearch';
+import { defineConfig, defineTavily, defineBrave } from 'ubersearch/config';
 
 export default defineConfig({
   defaultEngineOrder: ['tavily', 'brave'],

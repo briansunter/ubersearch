@@ -13,6 +13,7 @@ import { FirstSuccessStrategy } from "../../src/core/strategy/FirstSuccessStrate
 import type {
   ISearchStrategy,
   StrategyContext,
+  StrategyResult,
   UberSearchOptions,
 } from "../../src/core/strategy/ISearchStrategy";
 import type { StrategyOptions } from "../../src/core/strategy/StrategyFactory";
@@ -721,7 +722,7 @@ describe("StrategyFactory", () => {
           _engineIds: string[],
           _options: UberSearchOptions,
           _context: StrategyContext,
-        ): Promise<any> {
+        ): Promise<StrategyResult> {
           return { results: [], attempts: [] };
         }
       }

@@ -66,6 +66,13 @@ class MockCreditManager {
     return true;
   }
 
+  refund(engineId: EngineId): void {
+    const currentUsage = this.creditUsage.get(engineId) || 0;
+    if (currentUsage > 0) {
+      this.creditUsage.set(engineId, currentUsage - 1);
+    }
+  }
+
   // Test helper methods
   exhaustEngine(engineId: EngineId): void {
     this.exhaustedEngines.add(engineId);

@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { configExists, getConfigPaths, loadConfig } from "../../../src/config/load";
 import type { UberSearchConfig } from "../../../src/config/types";
+import { getBundledSearxngComposePath } from "../../../src/core/paths";
 import { PluginRegistry } from "../../../src/plugin";
 
 describe("Config Loader", () => {
@@ -234,8 +235,18 @@ describe("Config Loader", () => {
 
       const config = await loadConfig();
 
-      expect((config as any).extraField).toBe("should be preserved");
-      expect((config as any).nested.extra).toBe("data");
+      expect((config as Record<string, unknown>).extraField).toBe("should be preserved");
+      expect(((config as Record<string, unknown>).nested as Record<string, unknown>).extra).toBe(
+        "data",
+      );
+    });
+
+    it("should point default SearchXNG config at the bundled compose file", async () => {
+      const config = await loadConfig();
+      const searchxng = config.engines.find((engine) => engine.type === "searchxng");
+
+      expect(searchxng).toBeDefined();
+      expect(searchxng?.composeFile).toBe(getBundledSearxngComposePath());
     });
   });
 
@@ -365,7 +376,13 @@ describe("Config Loader", () => {
 
       const config = await loadConfig();
 
-      expect((config.engines[0] as any).advanced.nested.deeply.value).toBe("test");
+      expect(
+        (
+          config.engines[0] as Record<string, unknown> as {
+            advanced: { nested: { deeply: { value: string } } };
+          }
+        ).advanced.nested.deeply.value,
+      ).toBe("test");
     });
   });
 });
