@@ -106,32 +106,19 @@ const createTestContext = (
     registry.register(p);
   });
 
-  const engines: EngineConfig[] = [
-    {
-      id: "engine1",
-      type: "tavily",
-      enabled: true,
-      displayName: "Engine 1",
-      apiKeyEnv: "TEST_KEY",
-      endpoint: "https://test.com",
-      monthlyQuota: 1000,
-      creditCostPerSearch: 1,
-      lowCreditThresholdPercent: 80,
-      searchDepth: "basic",
-    },
-    {
-      id: "engine2",
-      type: "brave",
-      enabled: true,
-      displayName: "Engine 2",
-      apiKeyEnv: "TEST_KEY",
-      endpoint: "https://test.com",
-      monthlyQuota: 1000,
-      creditCostPerSearch: 1,
-      lowCreditThresholdPercent: 80,
-      defaultLimit: 10,
-    },
-  ];
+  // Dynamically generate engine configs from providers so all IDs are known to the credit manager
+  const engines: EngineConfig[] = providers.map((p) => ({
+    id: p.id,
+    type: "tavily" as const,
+    enabled: true,
+    displayName: `Mock ${p.id}`,
+    apiKeyEnv: "TEST_KEY",
+    endpoint: "https://test.com",
+    monthlyQuota: 1000,
+    creditCostPerSearch: 1,
+    lowCreditThresholdPercent: 80,
+    searchDepth: "basic" as const,
+  }));
 
   const mockCreditManager =
     creditManager || new MockCreditManager(engines, new MockCreditStateProvider());
