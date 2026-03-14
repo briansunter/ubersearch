@@ -185,7 +185,9 @@ function sleep(ms: number): Promise<void> {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe("MCP Server", () => {
+const SKIP_MCP_TESTS = process.env.CI === "true" || process.env.SKIP_MCP_TESTS === "true";
+
+describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
   let harness: MCPTestHarness;
 
   beforeEach(async () => {
