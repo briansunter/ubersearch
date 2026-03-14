@@ -6,6 +6,7 @@ import type { BraveConfig } from "../config/types";
 import type { SearchQuery, SearchResponse } from "../core/types";
 import { BaseProvider } from "./BaseProvider";
 import { PROVIDER_DEFAULTS } from "./constants";
+import { mapSearchResults, PROVIDER_MAPPINGS } from "./helpers";
 import type { BraveApiResponse, BraveWebResult } from "./types";
 import { buildUrl, fetchWithErrorHandling } from "./utils";
 
@@ -48,13 +49,7 @@ export class BraveProvider extends BaseProvider<BraveConfig> {
     this.validateResults(webResults, "Brave");
 
     // Map to normalized format
-    const items = webResults.map((r: BraveWebResult) => ({
-      title: r.title ?? r.url,
-      url: r.url,
-      snippet: r.description ?? r.snippet ?? r.abstract ?? "",
-      score: r.rank ?? r.score,
-      sourceEngine: this.id,
-    }));
+    const items = mapSearchResults(webResults, this.id, PROVIDER_MAPPINGS.brave);
 
     return {
       engineId: this.id,

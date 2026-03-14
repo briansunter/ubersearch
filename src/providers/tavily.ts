@@ -6,7 +6,8 @@ import type { TavilyConfig } from "../config/types";
 import type { SearchQuery, SearchResponse } from "../core/types";
 import { BaseProvider } from "./BaseProvider";
 import { PROVIDER_DEFAULTS } from "./constants";
-import type { TavilyApiResponse, TavilySearchResult } from "./types";
+import { mapSearchResults, PROVIDER_MAPPINGS } from "./helpers";
+import type { TavilyApiResponse } from "./types";
 import { fetchWithErrorHandling } from "./utils";
 
 export class TavilyProvider extends BaseProvider<TavilyConfig> {
@@ -47,21 +48,14 @@ export class TavilyProvider extends BaseProvider<TavilyConfig> {
     this.validateResults(json.results, "Tavily");
 
     // Map to normalized format and filter out invalid results
-    const items = json.results
-      .filter(
-        (r: TavilySearchResult): boolean =>
-          r != null &&
-          typeof r === "object" &&
-          (r.title != null || r.url != null) &&
-          (r.title != null || r.content != null || r.snippet != null),
-      )
-      .map((r: TavilySearchResult) => ({
-        title: r.title ?? r.url ?? "Untitled",
-        url: r.url ?? "",
-        snippet: r.content ?? r.snippet ?? "",
-        score: r.score,
-        sourceEngine: this.id,
-      }));
+    const items = mapSearchResults(
+      json.results,
+      this.id,
+      PROVIDER_MAPPINGS.tavily,
+      (r) =>
+        (r.title != null || r.url != null) &&
+        (r.title != null || r.content != null || r.snippet != null),
+    );
 
     return {
       engineId: this.id,

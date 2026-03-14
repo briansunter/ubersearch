@@ -7,9 +7,10 @@
  * the overall search.
  */
 
-import { withRetry } from "../../providers/retry";
+import { getErrorMessage } from "../errorUtils";
 import { createLogger } from "../logger";
 import type { SearchProvider } from "../provider";
+import { withRetry } from "../retry";
 import type { EngineId, SearchResponse, SearchResultItem } from "../types";
 import { SearchError } from "../types";
 import type {
@@ -28,7 +29,7 @@ const log = createLogger("AllProviders");
 interface EngineSearchResult {
   engineId: EngineId;
   response?: SearchResponse;
-  error?: Error;
+  error?: unknown;
 }
 
 /**
@@ -101,12 +102,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
         // Record success
         attempts.push({ engineId, success: true });
 
-        // Add results, applying limit if specified
-        if (options.limit !== undefined) {
-          results.push(...response.items.slice(0, options.limit - results.length));
-        } else {
-          results.push(...response.items);
-        }
+        results.push(...response.items);
       } catch (error) {
         // Refund credits for failed search
         context.creditManager.refund(engineId);
@@ -119,18 +115,11 @@ export class AllProvidersStrategy implements ISearchStrategy {
         }
 
         // Log debug message but continue with other providers
-        log.debug(
-          `Search failed for ${engineId}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        log.debug(`Search failed for ${engineId}: ${getErrorMessage(error)}`);
       }
     }
 
-    // Apply final limit if specified
-    if (options.limit !== undefined && results.length > options.limit) {
-      results.splice(options.limit);
-    }
-
-    return { results, attempts };
+    return { results: this.finalizeResults(results, options), attempts };
   }
 
   /**
@@ -182,7 +171,7 @@ export class AllProvidersStrategy implements ISearchStrategy {
           );
           return { engineId, response };
         } catch (error) {
-          return { engineId, error: error instanceof Error ? error : new Error(String(error)) };
+          return { engineId, error };
         }
       },
     );
@@ -204,26 +193,33 @@ export class AllProvidersStrategy implements ISearchStrategy {
 
       if (settledResult.status === "rejected") {
         // Promise itself was rejected (shouldn't happen with our try/catch, but handle it)
-        attempts.push({ engineId, success: false, reason: "unknown" });
-        log.debug(`Search failed for ${engineId}: Promise rejected`);
-        continue;
-      }
-
-      const { response, error } = settledResult.value;
-
-      if (error) {
-        // Refund credits for failed search
         context.creditManager.refund(engineId);
-
-        // Search threw an error
+        const error = settledResult.reason;
         if (error instanceof SearchError) {
           attempts.push({ engineId, success: false, reason: error.reason });
         } else {
           attempts.push({ engineId, success: false, reason: "unknown" });
         }
-        log.debug(`Search failed for ${engineId}: ${error.message}`);
+        log.debug(`Search failed for ${engineId}: Promise rejected`);
         continue;
       }
+
+      if ("error" in settledResult.value) {
+        // Refund credits for failed search
+        context.creditManager.refund(engineId);
+
+        // Search threw an error
+        const error = settledResult.value.error;
+        if (error instanceof SearchError) {
+          attempts.push({ engineId, success: false, reason: error.reason });
+        } else {
+          attempts.push({ engineId, success: false, reason: "unknown" });
+        }
+        log.debug(`Search failed for ${engineId}: ${getErrorMessage(error)}`);
+        continue;
+      }
+
+      const { response } = settledResult.value;
 
       if (response) {
         // Record success
@@ -243,11 +239,31 @@ export class AllProvidersStrategy implements ISearchStrategy {
       (a, b) => (engineOrder.get(a.engineId) ?? 0) - (engineOrder.get(b.engineId) ?? 0),
     );
 
-    // Apply final limit if specified
-    if (options.limit !== undefined && results.length > options.limit) {
-      results.splice(options.limit);
+    return { results: this.finalizeResults(results, options), attempts };
+  }
+
+  /**
+   * Deduplicate results by URL, sort by score, and apply limit.
+   */
+  private finalizeResults(
+    results: SearchResultItem[],
+    options: UberSearchOptions,
+  ): SearchResultItem[] {
+    const seen = new Set<string>();
+    const deduped: SearchResultItem[] = [];
+    for (const item of results) {
+      if (!seen.has(item.url)) {
+        seen.add(item.url);
+        deduped.push(item);
+      }
     }
 
-    return { results, attempts };
+    deduped.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+
+    if (options.limit !== undefined && deduped.length > options.limit) {
+      deduped.splice(options.limit);
+    }
+
+    return deduped;
   }
 }

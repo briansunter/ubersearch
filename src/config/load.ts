@@ -14,6 +14,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join } from "node:path";
+import { getErrorMessage } from "../core/errorUtils";
 import { getBundledSearxngComposePath } from "../core/paths";
 import { PluginRegistry, registerBuiltInPlugins } from "../plugin";
 import type { ConfigFactory, ExtendedSearchConfig } from "./defineConfig";
@@ -89,7 +90,10 @@ async function loadTypeScriptConfig(path: string): Promise<ExtendedSearchConfig>
     const configOrFactory = module.default ?? module.config;
 
     if (!configOrFactory) {
-      throw new Error(`Config file must export a default configuration or named 'config' export`);
+      throw new Error(
+        `Config file at ${path} must export a config object as 'default' or 'config'. ` +
+          `Found exports: ${Object.keys(module).join(", ") || "none"}`,
+      );
     }
 
     // Handle factory functions (async config)
@@ -99,9 +103,7 @@ async function loadTypeScriptConfig(path: string): Promise<ExtendedSearchConfig>
 
     return configOrFactory as ExtendedSearchConfig;
   } catch (error) {
-    throw new Error(
-      `Failed to load TypeScript config from ${path}: ${error instanceof Error ? error.message : String(error)}`,
-    );
+    throw new Error(`Failed to load TypeScript config from ${path}: ${getErrorMessage(error)}`);
   }
 }
 
@@ -201,12 +203,11 @@ function getDefaultConfig(): ExtendedSearchConfig {
     type: "searchxng",
     enabled: true,
     displayName: "SearXNG (Local)",
-    apiKeyEnv: "SEARXNG_API_KEY",
     endpoint: "http://localhost:8888/search",
     composeFile,
     containerName: "searxng",
     healthEndpoint: "http://localhost:8888/healthz",
-    defaultLimit: 15,
+    defaultLimit: 10,
     monthlyQuota: 10000,
     creditCostPerSearch: 0,
     lowCreditThresholdPercent: 80,
@@ -225,7 +226,7 @@ function getDefaultConfig(): ExtendedSearchConfig {
       displayName: "Brave Search",
       apiKeyEnv: "BRAVE_API_KEY",
       endpoint: "https://api.search.brave.com/res/v1/web/search",
-      defaultLimit: 15,
+      defaultLimit: 10,
       monthlyQuota: 2000,
       creditCostPerSearch: 1,
       lowCreditThresholdPercent: 80,
@@ -284,9 +285,7 @@ export async function loadConfig(
           rawConfig = loadJsonConfig(path);
         }
       } catch (error) {
-        throw new Error(
-          `Failed to load config file at ${path}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        throw new Error(`Failed to load config file at ${path}: ${getErrorMessage(error)}`);
       }
 
       // Resolve relative paths (like composeFile) to absolute paths
@@ -359,9 +358,7 @@ export function loadConfigSync(
       try {
         rawConfig = loadJsonConfig(path);
       } catch (error) {
-        throw new Error(
-          `Failed to parse config file at ${path}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        throw new Error(`Failed to parse config file at ${path}: ${getErrorMessage(error)}`);
       }
 
       // Resolve relative paths (like composeFile) to absolute paths

@@ -6,6 +6,8 @@
  */
 
 import type { EngineConfigBase } from "../config/types";
+import { getErrorMessage } from "../core/errorUtils";
+import { createLogger } from "../core/logger";
 import type {
   CreateProviderOptions,
   ManagedProvider,
@@ -14,6 +16,8 @@ import type {
   PluginRegistrationOptions,
   PluginRegistrationResult,
 } from "./types";
+
+const log = createLogger("PluginRegistry");
 
 /**
  * Central registry for search provider plugins
@@ -108,7 +112,7 @@ export class PluginRegistry {
           await existing.onUnregister();
         } catch (error) {
           // Log but don't fail - we still want to register the new plugin
-          console.warn(`Error during onUnregister for plugin '${plugin.type}':`, error);
+          log.warn(`Error during onUnregister for plugin '${plugin.type}':`, error);
         }
       }
     }
@@ -126,7 +130,7 @@ export class PluginRegistry {
         return {
           success: false,
           type: plugin.type,
-          message: `Plugin onRegister failed: ${error instanceof Error ? error.message : String(error)}`,
+          message: `Plugin onRegister failed: ${getErrorMessage(error)}`,
         };
       }
     }
@@ -285,14 +289,21 @@ export class PluginRegistry {
         validatedConfig = plugin.configSchema.validate(config) as T & { type: string };
       } catch (error) {
         throw new Error(
-          `Config validation failed for plugin '${config.type}': ` +
-            `${error instanceof Error ? error.message : String(error)}`,
+          `Config validation failed for plugin '${config.type}': ` + `${getErrorMessage(error)}`,
         );
       }
     }
 
     // Create provider using factory
-    return plugin.factory(validatedConfig, container) as ManagedProvider;
+    try {
+      const provider = plugin.factory(validatedConfig, container);
+      return provider as ManagedProvider;
+    } catch (error) {
+      const message = getErrorMessage(error);
+      throw new Error(`Failed to create provider for plugin '${config.type}': ${message}`, {
+        cause: error,
+      });
+    }
   }
 
   /**
@@ -315,7 +326,7 @@ export class PluginRegistry {
         try {
           await plugin.onUnregister();
         } catch (error) {
-          console.warn(`Error during onUnregister for plugin '${plugin.type}':`, error);
+          log.warn(`Error during onUnregister for plugin '${plugin.type}':`, error);
         }
       }
     }

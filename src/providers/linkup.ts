@@ -4,32 +4,25 @@
  */
 
 import type { LinkupConfig } from "../config/types";
-import { DockerLifecycleManager } from "../core/docker/dockerLifecycleManager";
 import type { ILifecycleProvider } from "../core/provider";
 import type { SearchQuery, SearchResponse } from "../core/types";
 import { BaseProvider } from "./BaseProvider";
 import { PROVIDER_DEFAULTS } from "./constants";
+import {
+  addLifecycleMethods,
+  createDockerLifecycle,
+  mapSearchResults,
+  PROVIDER_MAPPINGS,
+} from "./helpers";
 import type { LinkupApiResponse, LinkupSearchResult } from "./types";
 import { fetchWithErrorHandling } from "./utils";
 
 export class LinkupProvider extends BaseProvider<LinkupConfig> implements ILifecycleProvider {
-  private lifecycleManager: DockerLifecycleManager;
-
   constructor(config: LinkupConfig) {
     super(config);
 
-    const autoStart = config.autoStart ?? false;
-    const autoStop = config.autoStop ?? false;
-    const initTimeoutMs = config.initTimeoutMs ?? 30000;
-
-    this.lifecycleManager = new DockerLifecycleManager({
-      containerName: config.containerName,
-      composeFile: config.composeFile,
-      healthEndpoint: config.healthEndpoint,
-      autoStart,
-      autoStop,
-      initTimeoutMs,
-    });
+    const manager = createDockerLifecycle(config);
+    addLifecycleMethods(this, manager);
   }
 
   protected getDocsUrl(): string {
@@ -70,14 +63,7 @@ export class LinkupProvider extends BaseProvider<LinkupConfig> implements ILifec
     this.validateResults(results, "Linkup");
 
     // Map to normalized format
-    // Linkup results have url, name/title, content/snippet
-    const items = results.map((r: LinkupSearchResult) => ({
-      title: r.name ?? r.title ?? r.url,
-      url: r.url,
-      snippet: r.content ?? r.snippet ?? r.description ?? "",
-      score: r.score ?? r.relevance,
-      sourceEngine: this.id,
-    }));
+    const items = mapSearchResults(results, this.id, PROVIDER_MAPPINGS.linkup);
 
     return {
       engineId: this.id,
@@ -87,28 +73,10 @@ export class LinkupProvider extends BaseProvider<LinkupConfig> implements ILifec
     };
   }
 
-  // ILifecycleProvider implementation
-  async init(): Promise<void> {
-    await this.lifecycleManager.init();
-  }
-
-  async healthcheck(): Promise<boolean> {
-    return await this.lifecycleManager.healthcheck();
-  }
-
-  async shutdown(): Promise<void> {
-    await this.lifecycleManager.shutdown();
-  }
-
-  async validateConfig(): Promise<{
-    valid: boolean;
-    errors: string[];
-    warnings: string[];
-  }> {
-    return await this.lifecycleManager.validateDockerConfig();
-  }
-
-  isLifecycleManaged(): boolean {
-    return true; // This provider manages lifecycle
-  }
+  // Lifecycle methods are added via addLifecycleMethods() in constructor
+  declare init: () => Promise<void>;
+  declare healthcheck: () => Promise<boolean>;
+  declare shutdown: () => Promise<void>;
+  declare validateConfig: () => Promise<{ valid: boolean; errors: string[]; warnings: string[] }>;
+  declare isLifecycleManaged: () => boolean;
 }

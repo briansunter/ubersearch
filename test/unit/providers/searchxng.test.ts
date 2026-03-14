@@ -513,9 +513,9 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      // First result should use URL as title and # as fallback
-      expect(response.items[0].title).toBe("#");
-      expect(response.items[0].url).toBe("#");
+      // First result should use fallback values when fields are missing
+      expect(response.items[0].title).toBe("Untitled");
+      expect(response.items[0].url).toBe("");
 
       // Second result should be normal
       expect(response.items[1].title).toBe("Valid Result");

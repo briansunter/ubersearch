@@ -6,10 +6,11 @@
  */
 
 import { bootstrapContainer } from "./bootstrap/container";
+import { getErrorMessage } from "./core/errorUtils";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
 import { serve as serveMcp } from "./mcp-server";
-import { isLifecycleProvider } from "./plugin/types.js";
+import { isLifecycleProvider } from "./plugin/types";
 import type { UberSearchOutput } from "./tool/interface";
 import { getCreditStatus, uberSearch } from "./tool/uberSearchTool";
 
@@ -99,12 +100,6 @@ if (args[0] === "credits") {
 // Health check command
 if (args[0] === "health") {
   await runHealthChecks(configPath);
-  process.exit(0);
-}
-
-// MCP server command
-if (args[0] === "mcp") {
-  await serveMcp();
   process.exit(0);
 }
 
@@ -214,7 +209,7 @@ async function main() {
       printHumanReadable(result);
     }
   } catch (error) {
-    console.error("Search failed:", error instanceof Error ? error.message : String(error));
+    console.error("Search failed:", getErrorMessage(error));
     process.exit(1);
   }
 }
@@ -333,7 +328,7 @@ async function runHealthChecks(configPath?: string) {
           });
           console.log(`✓ ${engineId.padEnd(15)} Healthy`);
         } catch (error) {
-          const message = error instanceof Error ? error.message : String(error);
+          const message = getErrorMessage(error);
           results.push({
             engineId,
             status: "unhealthy",
@@ -367,7 +362,7 @@ async function runHealthChecks(configPath?: string) {
 
     console.log();
   } catch (error) {
-    console.error("Health check failed:", error instanceof Error ? error.message : String(error));
+    console.error("Health check failed:", getErrorMessage(error));
     process.exit(1);
   }
 }
@@ -403,10 +398,7 @@ async function showCredits(configPath?: string) {
 
     console.log();
   } catch (error) {
-    console.error(
-      "Failed to load credits:",
-      error instanceof Error ? error.message : String(error),
-    );
+    console.error("Failed to load credits:", getErrorMessage(error));
     process.exit(1);
   }
 }

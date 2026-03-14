@@ -149,8 +149,8 @@ export const PROVIDER_MAPPINGS = {
   brave: {
     title: ["title", "url"],
     url: ["url"],
-    snippet: ["description", "snippet"],
-    score: ["score"],
+    snippet: ["description", "snippet", "abstract"],
+    score: ["rank", "score"],
   },
   linkup: {
     title: ["name", "title", "url"],

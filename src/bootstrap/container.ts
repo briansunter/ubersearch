@@ -9,6 +9,7 @@ import type { EngineConfig, UberSearchConfig } from "../config/types";
 import { type Container, container } from "../core/container";
 import { CreditManager } from "../core/credits";
 import { FileCreditStateProvider } from "../core/credits/FileCreditStateProvider";
+import { getErrorMessage } from "../core/errorUtils";
 import { createLogger } from "../core/logger";
 import { UberSearchOrchestrator } from "../core/orchestrator";
 import type { SearchProvider } from "../core/provider";
@@ -103,8 +104,8 @@ export async function bootstrapContainer(
         registry.register(provider);
         log.debug(`Registered provider: ${engineConfig.id}`);
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        log.debug(`Failed to register provider ${engineConfig.id}: ${errorMsg}`);
+        const errorMsg = getErrorMessage(error);
+        log.warn(`Failed to register provider ${engineConfig.id}: ${errorMsg}`);
         failedProviders.push(engineConfig.id);
       }
     }

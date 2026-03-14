@@ -20,6 +20,7 @@
  * ```
  */
 
+import { getErrorMessage } from "../errorUtils";
 import { createLogger } from "../logger";
 import { bootstrapSearxngConfig } from "../paths";
 import { DockerComposeHelper } from "./dockerComposeHelper";
@@ -71,7 +72,7 @@ export class DockerLifecycleManager {
       }
 
       this.initPromise = this.performInit().catch((error) => {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = getErrorMessage(error);
         log.debug("Initialization failed:", message);
         this.initialized = false;
         throw error;
@@ -88,11 +89,19 @@ export class DockerLifecycleManager {
     timeoutMs: number,
     operation: string,
   ): Promise<T> {
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)), timeoutMs);
+      timeoutId = setTimeout(
+        () => reject(new Error(`${operation} timed out after ${timeoutMs}ms`)),
+        timeoutMs,
+      );
     });
 
-    return Promise.race([promise, timeoutPromise]);
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   private async performInit(): Promise<void> {
@@ -141,7 +150,7 @@ export class DockerLifecycleManager {
 
       this.initialized = true;
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
       log.debug("Failed to start container:", message);
       throw error;
     } finally {
@@ -171,8 +180,11 @@ export class DockerLifecycleManager {
         if (response.ok) {
           return true;
         }
-      } catch {
-        // Health endpoint failed, fall through to Docker check
+        log.debug(`Health endpoint returned non-ok status: ${response.status}`);
+      } catch (error) {
+        const msg = getErrorMessage(error);
+        log.debug(`Health endpoint check failed: ${msg}`);
+        // Fall through to Docker status check
       } finally {
         clearTimeout(timeoutId);
       }
@@ -243,7 +255,7 @@ export class DockerLifecycleManager {
       );
       log.debug("Container stopped.");
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
       log.debug("Failed to stop container:", message);
       // Don't throw on shutdown errors
     }
@@ -306,7 +318,7 @@ export class DockerLifecycleManager {
         const projectRoot = this.config.projectRoot || process.cwd();
         await this.dockerHelper.ps({ cwd: projectRoot });
       } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : String(error);
+        const message = getErrorMessage(error);
         if (message.includes("config")) {
           errors.push(`Invalid compose file: ${message}`);
         }
@@ -357,7 +369,7 @@ export class DockerLifecycleManager {
         cwd: projectRoot,
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = getErrorMessage(error);
       log.debug("Error checking if container is running:", message);
       return false;
     }

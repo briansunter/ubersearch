@@ -33,6 +33,7 @@ export type SearchFailureReason =
   | "rate_limit"
   | "no_results"
   | "low_credit"
+  | "out_of_credit"
   | "config_error"
   | "no_provider"
   | "provider_unavailable"

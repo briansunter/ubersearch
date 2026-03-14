@@ -190,14 +190,13 @@ export function isLifecycleProvider(
   if (provider == null || typeof provider !== "object") {
     return false;
   }
-  const obj = provider as unknown as Record<string, unknown>;
   return (
     "init" in provider &&
     "healthcheck" in provider &&
     "shutdown" in provider &&
-    typeof obj.init === "function" &&
-    typeof obj.healthcheck === "function" &&
-    typeof obj.shutdown === "function"
+    typeof (provider as Record<string, unknown>).init === "function" &&
+    typeof (provider as Record<string, unknown>).healthcheck === "function" &&
+    typeof (provider as Record<string, unknown>).shutdown === "function"
   );
 }
 

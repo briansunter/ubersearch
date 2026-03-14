@@ -7,7 +7,7 @@
 
 import type { CreditManager } from "../credits";
 import type { ProviderRegistry } from "../provider";
-import type { EngineId, SearchResultItem } from "../types";
+import type { EngineId, SearchFailureReason, SearchResultItem } from "../types";
 
 /**
  * Context object providing dependencies to search strategies
@@ -58,7 +58,7 @@ export interface EngineAttempt {
   success: boolean;
 
   /** Reason for failure (if success=false) */
-  reason?: string;
+  reason?: SearchFailureReason;
 }
 
 /**

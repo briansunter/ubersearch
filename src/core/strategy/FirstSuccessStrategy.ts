@@ -6,8 +6,9 @@
  * with insufficient credits and stops execution after the first success.
  */
 
-import { withRetry } from "../../providers/retry";
+import { getErrorMessage } from "../errorUtils";
 import { createLogger } from "../logger";
+import { withRetry } from "../retry";
 import type { EngineId } from "../types";
 import { SearchError } from "../types";
 import type {
@@ -87,9 +88,7 @@ export class FirstSuccessStrategy implements ISearchStrategy {
         }
 
         // Log debug message and continue
-        log.debug(
-          `Search failed for ${engineId}: ${error instanceof Error ? error.message : String(error)}`,
-        );
+        log.debug(`Search failed for ${engineId}: ${getErrorMessage(error)}`);
       }
     }
 

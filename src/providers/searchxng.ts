@@ -6,13 +6,18 @@
 
 import { dirname } from "node:path";
 import type { SearchxngConfig as BaseSearchxngConfig } from "../config/types";
-import { DockerLifecycleManager } from "../core/docker/dockerLifecycleManager";
 import { createLogger } from "../core/logger";
 import type { ILifecycleProvider, ProviderMetadata } from "../core/provider";
 import type { SearchQuery, SearchResponse, SearchResultItem } from "../core/types";
 import { SearchError } from "../core/types";
 import { BaseProvider } from "./BaseProvider";
 import { PROVIDER_DEFAULTS } from "./constants";
+import {
+  addLifecycleMethods,
+  createDockerLifecycle,
+  mapSearchResults,
+  PROVIDER_MAPPINGS,
+} from "./helpers";
 import type { SearxngApiResponse, SearxngInfobox, SearxngSearchResult } from "./types";
 import { buildUrl, fetchWithErrorHandling } from "./utils";
 
@@ -22,28 +27,22 @@ export class SearchxngProvider
   extends BaseProvider<BaseSearchxngConfig>
   implements ILifecycleProvider
 {
-  private lifecycleManager: DockerLifecycleManager;
+  private lifecycleManager: ReturnType<typeof createDockerLifecycle>;
   private defaultLimit: number;
 
   constructor(config: BaseSearchxngConfig) {
     super(config);
     this.defaultLimit = config.defaultLimit;
 
-    const autoStart = config.autoStart ?? true;
-    const autoStop = config.autoStop ?? true;
-    const initTimeoutMs = config.initTimeoutMs ?? PROVIDER_DEFAULTS.SEARXNG_INIT_TIMEOUT_MS;
-
     const projectRoot = config.composeFile ? dirname(config.composeFile) : process.cwd();
 
-    this.lifecycleManager = new DockerLifecycleManager({
-      containerName: config.containerName,
-      composeFile: config.composeFile,
-      healthEndpoint: config.healthEndpoint,
-      autoStart,
-      autoStop,
-      initTimeoutMs,
+    this.lifecycleManager = createDockerLifecycle(config, {
+      autoStart: true,
+      autoStop: true,
+      initTimeoutMs: PROVIDER_DEFAULTS.SEARXNG_INIT_TIMEOUT_MS,
       projectRoot,
     });
+    addLifecycleMethods(this, this.lifecycleManager);
   }
 
   protected getDocsUrl(): string {
@@ -88,7 +87,7 @@ export class SearchxngProvider
           isHealthy = await this.healthcheck();
         } catch (initError) {
           const message = initError instanceof Error ? initError.message : String(initError);
-          log.debug(`Failed to auto-start container: ${message}`);
+          log.warn(`Failed to auto-start container: ${message}`);
         }
       }
     }
@@ -136,13 +135,11 @@ export class SearchxngProvider
     const infoboxes: SearxngInfobox[] = Array.isArray(json.infoboxes) ? json.infoboxes : [];
 
     // Convert regular results
-    const items: SearchResultItem[] = results.map((r: SearxngSearchResult) => ({
-      title: r.title ?? r.url ?? "#",
-      url: r.url ?? "#",
-      snippet: r.content ?? r.description ?? "",
-      score: r.score ?? r.rank,
-      sourceEngine: r.engine ?? this.id,
-    }));
+    const items: SearchResultItem[] = mapSearchResults(
+      results,
+      this.id,
+      PROVIDER_MAPPINGS.searchxng,
+    );
 
     // Add infoboxes as results (Wikipedia, etc.)
     for (const box of infoboxes) {
@@ -172,28 +169,10 @@ export class SearchxngProvider
     };
   }
 
-  // ILifecycleProvider implementation
-  async init(): Promise<void> {
-    await this.lifecycleManager.init();
-  }
-
-  async healthcheck(): Promise<boolean> {
-    return await this.lifecycleManager.healthcheck();
-  }
-
-  async shutdown(): Promise<void> {
-    await this.lifecycleManager.shutdown();
-  }
-
-  async validateConfig(): Promise<{
-    valid: boolean;
-    errors: string[];
-    warnings: string[];
-  }> {
-    return await this.lifecycleManager.validateDockerConfig();
-  }
-
-  isLifecycleManaged(): boolean {
-    return true;
-  }
+  // Lifecycle methods are added via addLifecycleMethods() in constructor
+  declare init: () => Promise<void>;
+  declare healthcheck: () => Promise<boolean>;
+  declare shutdown: () => Promise<void>;
+  declare validateConfig: () => Promise<{ valid: boolean; errors: string[]; warnings: string[] }>;
+  declare isLifecycleManaged: () => boolean;
 }

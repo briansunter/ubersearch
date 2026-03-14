@@ -88,6 +88,14 @@ export class FakeSearchProvider implements SearchProvider {
     };
   }
 
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
+  }
+
   getMetadata(): ProviderMetadata {
     return {
       id: this.id,
@@ -107,6 +115,14 @@ export class FakeErrorProvider implements SearchProvider {
 
   async search(_query: SearchQuery): Promise<SearchResponse> {
     throw new Error(this.errorMessage);
+  }
+
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
   }
 
   getMetadata(): ProviderMetadata {

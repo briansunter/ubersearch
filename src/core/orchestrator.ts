@@ -7,32 +7,11 @@
 import type { UberSearchConfig } from "../config/types";
 import type { CreditManager, CreditSnapshot } from "./credits";
 import type { ProviderRegistry } from "./provider";
-import type { StrategyContext } from "./strategy/ISearchStrategy";
+import type { EngineAttempt, StrategyContext, UberSearchOptions } from "./strategy/ISearchStrategy";
 import { StrategyFactory } from "./strategy/StrategyFactory";
 import type { EngineId, SearchResultItem } from "./types";
 
-export interface UberSearchOptions {
-  /** Override the default engine order */
-  engineOrderOverride?: EngineId[];
-
-  /** Maximum results per provider */
-  limit?: number;
-
-  /** Include raw provider responses */
-  includeRaw?: boolean;
-
-  /** Search strategy */
-  strategy?: "all" | "first-success";
-
-  /** SearXNG categories to search (e.g., ["general", "it", "science"]) */
-  categories?: string[];
-}
-
-export interface EngineAttempt {
-  engineId: EngineId;
-  success: boolean;
-  reason?: string;
-}
+export type { UberSearchOptions, EngineAttempt };
 
 export interface OrchestratorResult {
   /** Original query */
@@ -88,11 +67,6 @@ export class UberSearchOrchestrator {
 
     // Execute strategy
     const { results, attempts } = await strategy.execute(query, order, options, context);
-
-    // For 'all' strategy, sort results by score (descending)
-    if (strategyName === "all") {
-      results.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
-    }
 
     // Get credit snapshots
     const credits = this.credits.listSnapshots();

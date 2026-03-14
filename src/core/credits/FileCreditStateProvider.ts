@@ -112,7 +112,7 @@ export class FileCreditStateProvider implements CreditStateProvider {
       // Write file using Bun's async API
       await Bun.write(this.statePath, JSON.stringify(state, null, 2));
     } catch (error) {
-      log.warn(`Failed to save credit state to ${this.statePath}:`, error);
+      log.error(`Failed to save credit state to ${this.statePath}:`, error);
     }
   }
 

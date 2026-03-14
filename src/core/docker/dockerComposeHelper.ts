@@ -6,7 +6,7 @@
 
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { getSearxngPaths } from "../paths";
 
@@ -30,7 +30,8 @@ function getSearxngSecret(configDir: string): string {
   }
 
   // Generate a new secret using crypto
-  const secret = [...Array(64)].map(() => Math.floor(Math.random() * 16).toString(16)).join("");
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const secret = [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("");
   try {
     writeFileSync(secretFile, secret, { mode: 0o600 });
   } catch {
@@ -69,7 +70,9 @@ export class DockerComposeHelper {
         cwd,
         timeout,
         env: {
-          ...process.env,
+          PATH: process.env.PATH,
+          HOME: process.env.HOME,
+          DOCKER_HOST: process.env.DOCKER_HOST,
           SEARXNG_CONFIG: configDir,
           SEARXNG_DATA: dataDir,
           SEARXNG_SECRET: getSearxngSecret(configDir),
@@ -105,7 +108,7 @@ export class DockerComposeHelper {
    * Get directory containing compose file
    */
   private getComposeDir(): string {
-    return require("node:path").dirname(this.composeFile);
+    return dirname(this.composeFile);
   }
 
   /**
@@ -173,13 +176,19 @@ export class DockerComposeHelper {
   async isRunning(service?: string, options?: DockerComposeOptions): Promise<boolean> {
     try {
       const output = await this.ps(options);
+      const lines = output.split("\n").filter((l) => l.trim());
 
       if (service) {
-        return output.includes(service) && !output.includes("Exit");
+        return lines.some((line) => {
+          const lower = line.toLowerCase();
+          return (
+            lower.includes(service.toLowerCase()) && /\bup\b/i.test(line) && !/exit/i.test(line)
+          );
+        });
       }
 
       // Check if any services are running
-      return output.includes("Up");
+      return lines.some((line) => /\bup\b/i.test(line));
     } catch (_error) {
       return false;
     }

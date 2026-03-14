@@ -2,6 +2,8 @@
  * Input and output interfaces for the ubersearch tool
  */
 
+import type { SearchFailureReason } from "../core/types";
+
 export interface UberSearchInput {
   /** Search query string */
   query: string;
@@ -37,7 +39,7 @@ export interface UberSearchEngineAttempt {
   success: boolean;
 
   /** Reason for failure (if success=false) */
-  reason?: string;
+  reason?: SearchFailureReason;
 }
 
 export interface UberSearchOutputItem {

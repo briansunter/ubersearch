@@ -8,14 +8,7 @@
  * - SearchXNG
  */
 
-import type {
-  BraveConfig,
-  EngineConfigBase,
-  LinkupConfig,
-  SearchxngConfig,
-  TavilyConfig,
-} from "../config/types";
-import type { SearchProvider } from "../core/provider";
+import type { BraveConfig, LinkupConfig, SearchxngConfig, TavilyConfig } from "../config/types";
 import { BraveProvider } from "../providers/brave";
 import { LinkupProvider } from "../providers/linkup";
 import { SearchxngProvider } from "../providers/searchxng";
@@ -77,14 +70,19 @@ export const searchxngPlugin: PluginDefinition<SearchxngConfig, SearchxngProvide
 
 /**
  * All built-in plugins
- * Using type assertion since specific configs/providers extend base types
+ *
+ * Each plugin has a specific config/provider type (e.g. TavilyConfig/TavilyProvider),
+ * but consumers only need the base PluginDefinition interface. The factory parameter
+ * is contravariant in TConfig, so TypeScript disallows a direct assignment; however,
+ * the cast is safe because each specific config extends EngineConfigBase and each
+ * provider extends SearchProvider.
  */
 export const builtInPlugins = [
   tavilyPlugin,
   bravePlugin,
   linkupPlugin,
   searchxngPlugin,
-] as unknown as PluginDefinition<EngineConfigBase, SearchProvider>[];
+] as unknown as PluginDefinition[];
 
 /**
  * Register all built-in plugins with the registry

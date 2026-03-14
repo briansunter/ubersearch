@@ -5,7 +5,7 @@
  * https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html
  */
 
-import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -170,11 +170,6 @@ export function bootstrapSearxngConfig(): boolean {
   const { configDir } = getSearxngPaths();
   const targetSettings = join(configDir, "settings.yml");
 
-  // If settings already exist, don't overwrite
-  if (existsSync(targetSettings)) {
-    return false;
-  }
-
   const defaultSettings = getDefaultSettingsPath();
 
   // If default settings don't exist, we can't bootstrap
@@ -186,12 +181,16 @@ export function bootstrapSearxngConfig(): boolean {
     return false;
   }
 
-  // Copy default settings to XDG config dir
+  // Use exclusive flag to prevent TOCTOU race and avoid overwriting
   try {
-    copyFileSync(defaultSettings, targetSettings);
+    const content = readFileSync(defaultSettings);
+    writeFileSync(targetSettings, content, { flag: "wx" });
     console.log(`[SearXNG] Bootstrapped default config to ${targetSettings}`);
     return true;
   } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === "EEXIST") {
+      return false; // File already exists, no action needed
+    }
     console.error(`[SearXNG] Failed to bootstrap config:`, error);
     return false;
   }

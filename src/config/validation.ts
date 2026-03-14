@@ -73,7 +73,28 @@ export const UberSearchConfigSchema = z
       })
       .optional(),
   })
-  .passthrough();
+  .passthrough()
+  .refine(
+    (config) => {
+      const ids = config.engines.map((e: { id: string }) => e.id);
+      return new Set(ids).size === ids.length;
+    },
+    {
+      message: "Duplicate engine IDs found in engines array",
+    },
+  )
+  .refine(
+    (config) => {
+      if (!config.defaultEngineOrder) {
+        return true;
+      }
+      const engineIds = new Set(config.engines.map((e: { id: string }) => e.id));
+      return config.defaultEngineOrder.every((id: string) => engineIds.has(id));
+    },
+    {
+      message: "defaultEngineOrder contains engine IDs not defined in engines array",
+    },
+  );
 
 // CLI input schema
 export const CliInputSchema = z.object({

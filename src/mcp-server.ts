@@ -7,9 +7,10 @@
  */
 
 import { bootstrapContainer, getCreditStatus, uberSearch } from "./app/index";
+import { getErrorMessage } from "./core/errorUtils";
 import type { ProviderRegistry } from "./core/provider";
 import { ServiceKeys } from "./core/serviceKeys";
-import { isLifecycleProvider } from "./plugin/types.js";
+import { isLifecycleProvider } from "./plugin/types";
 
 interface MCPRequest {
   jsonrpc: string;
@@ -26,10 +27,10 @@ interface MCPTool {
 
 interface MCPResponse {
   jsonrpc: string;
-  id?: number | string;
+  id?: number | string | null;
   result?: unknown;
   error?: {
-    code?: number;
+    code: number;
     message: string;
   };
 }
@@ -40,6 +41,9 @@ interface HealthResult {
   message?: string;
 }
 
+// Module-level container reference for shutdown handlers
+let globalContainer: Awaited<ReturnType<typeof bootstrapContainer>> | null = null;
+
 // Helper function with timeout
 async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
   const timeoutPromise = new Promise<never>((_, reject) => {
@@ -48,8 +52,37 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string
   return Promise.race([promise, timeoutPromise]);
 }
 
+function setupShutdownHandlers() {
+  const shutdown = async () => {
+    try {
+      const container = globalContainer;
+      if (container) {
+        const registry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
+        if (registry) {
+          for (const provider of registry.list()) {
+            if (isLifecycleProvider(provider) && typeof provider.shutdown === "function") {
+              try {
+                await provider.shutdown();
+              } catch {
+                // Best-effort shutdown
+              }
+            }
+          }
+        }
+      }
+    } catch {
+      // Best-effort cleanup
+    }
+    process.exit(0);
+  };
+
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
+}
+
 // MCP Server entry point for Claude Desktop
 export async function serve() {
+  setupShutdownHandlers();
   const tools: MCPTool[] = [
     {
       name: "uber_search",
@@ -113,6 +146,8 @@ Example: "it,science" for tech and academic results`,
   ];
 
   // Handle MCP tool calls via stdin/stdout
+  const validToolNames = new Set(tools.map((t) => t.name));
+
   const readline = (await import("node:readline")).createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -124,6 +159,15 @@ Example: "it,science" for tech and academic results`,
     try {
       request = JSON.parse(line);
     } catch {
+      const errorResponse: MCPResponse = {
+        jsonrpc: "2.0",
+        id: null,
+        error: {
+          code: -32700,
+          message: "Parse error: invalid JSON",
+        },
+      };
+      process.stdout.write(`${JSON.stringify(errorResponse)}\n`);
       continue;
     }
 
@@ -143,7 +187,7 @@ Example: "it,science" for tech and academic results`,
           },
         },
       };
-      console.log(JSON.stringify(response));
+      process.stdout.write(`${JSON.stringify(response)}\n`);
       continue;
     }
 
@@ -158,7 +202,7 @@ Example: "it,science" for tech and academic results`,
         id: request.id,
         result: { tools },
       };
-      console.log(JSON.stringify(response));
+      process.stdout.write(`${JSON.stringify(response)}\n`);
       continue;
     }
 
@@ -169,6 +213,48 @@ Example: "it,science" for tech and academic results`,
         typeof params.arguments === "object" && params.arguments !== null
           ? (params.arguments as Record<string, string>)
           : ({} as Record<string, string>);
+
+      // Validate tool name
+      if (!validToolNames.has(name)) {
+        const response: MCPResponse = {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: -32602,
+            message: `Unknown tool: '${name}'`,
+          },
+        };
+        process.stdout.write(`${JSON.stringify(response)}\n`);
+        continue;
+      }
+
+      // Validate required query parameter for uber_search
+      if (name === "uber_search" && (!args.query || args.query.trim() === "")) {
+        const response: MCPResponse = {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: -32602,
+            message: "Invalid params: 'query' is required and must be non-empty",
+          },
+        };
+        process.stdout.write(`${JSON.stringify(response)}\n`);
+        continue;
+      }
+
+      // Input sanitization - query length check
+      if (args.query && args.query.length > 2000) {
+        const response: MCPResponse = {
+          jsonrpc: "2.0",
+          id: request.id,
+          error: {
+            code: -32602,
+            message: "Invalid params: query exceeds maximum length of 2000 characters",
+          },
+        };
+        process.stdout.write(`${JSON.stringify(response)}\n`);
+        continue;
+      }
 
       try {
         let result: unknown;
@@ -194,7 +280,10 @@ Example: "it,science" for tech and academic results`,
         } else if (name === "uber_search_credits") {
           result = await withTimeout(getCreditStatus(), 10000, "getCreditStatus");
         } else if (name === "uber_search_health") {
-          const container = await withTimeout(bootstrapContainer(), 30000, "bootstrapContainer");
+          if (!globalContainer) {
+            globalContainer = await withTimeout(bootstrapContainer(), 30000, "bootstrapContainer");
+          }
+          const container = globalContainer;
           const registry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
           const providers = registry.list();
 
@@ -208,7 +297,7 @@ Example: "it,science" for tech and academic results`,
                 results.push({
                   engineId: provider.id,
                   status: "unhealthy",
-                  message: error instanceof Error ? error.message : String(error),
+                  message: getErrorMessage(error),
                 });
               }
             } else {
@@ -216,8 +305,6 @@ Example: "it,science" for tech and academic results`,
             }
           }
           result = results;
-        } else {
-          throw new Error(`Unknown tool: ${name}`);
         }
 
         const response: MCPResponse = {
@@ -232,17 +319,29 @@ Example: "it,science" for tech and academic results`,
             ],
           },
         };
-        console.log(JSON.stringify(response));
+        process.stdout.write(`${JSON.stringify(response)}\n`);
       } catch (error) {
         const errorResponse: MCPResponse = {
           jsonrpc: "2.0",
           id: request.id,
           error: {
+            code: -32603,
             message: error instanceof Error ? error.message : String(error),
           },
         };
-        console.log(JSON.stringify(errorResponse));
+        process.stdout.write(`${JSON.stringify(errorResponse)}\n`);
       }
+    } else if (request.id !== undefined) {
+      // Unknown method - send error response (only for requests with id, not notifications)
+      const response: MCPResponse = {
+        jsonrpc: "2.0",
+        id: request.id,
+        error: {
+          code: -32601,
+          message: `Method not found: ${request.method}`,
+        },
+      };
+      process.stdout.write(`${JSON.stringify(response)}\n`);
     }
   }
 }

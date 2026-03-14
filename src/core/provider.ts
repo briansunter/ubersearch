@@ -23,20 +23,7 @@ export interface SearchProvider {
   getMissingConfigMessage(): string;
 }
 
-/**
- * Interface for providers that manage lifecycle (init, healthcheck, shutdown)
- */
-export interface ILifecycleProvider {
-  init(): Promise<void>;
-  healthcheck(): Promise<boolean>;
-  shutdown(): Promise<void>;
-  validateConfig(): Promise<{
-    valid: boolean;
-    errors: string[];
-    warnings: string[];
-  }>;
-  isLifecycleManaged(): boolean;
-}
+export type { ILifecycleProvider } from "./provider/ILifecycleProvider";
 
 /**
  * Registry to manage all available providers
