@@ -629,11 +629,11 @@ describe("AllProvidersStrategy", () => {
         context,
       );
 
-      // Results should be in the order providers were called
-      expect(result.results[0].title).toBe("Google Result 1");
-      expect(result.results[1].title).toBe("Google Result 2");
-      expect(result.results[2].title).toBe("Bing Result 1");
-      expect(result.results[3].title).toBe("Bing Result 2");
+      // Results should be sorted by score descending
+      expect(result.results[0]?.title).toBe("Google Result 1"); // score 0.9
+      expect(result.results[1]?.title).toBe("Bing Result 1"); // score 0.85
+      expect(result.results[2]?.title).toBe("Google Result 2"); // score 0.8
+      expect(result.results[3]?.title).toBe("Bing Result 2"); // score 0.75
     });
 
     test("should handle large number of providers", async () => {
