@@ -1,3 +1,5 @@
+![UberSearch: free AI search with fallback — try SearXNG first, fall back to paid providers only when needed](docs/banner.png)
+
 # UberSearch
 
 Unified, Bun-first search interface across multiple providers with credit tracking, pluggable strategies, and optional Docker-managed SearXNG.
@@ -231,7 +233,9 @@ interface SearchResultItem {
 - `defineConfig({ plugins, engines, ... })` - Config with plugins
 - `defineEngine<T>(config)` - Type-safe custom engine config
 
-## Architecture (short)
+## Architecture
+
+![UberSearch architecture: a CLI/MCP/API frontend feeds the orchestrator, which tries free SearXNG first and falls back to paid providers (Tavily, Brave, Linkup) in order, then aggregates results with credit tracking](docs/explainer.png)
 
 - Config resolved and validated (`src/config`), plugins registered
 - DI container bootstraps orchestrator, credit manager, provider registry (`src/bootstrap/container.ts`)
