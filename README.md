@@ -1,4 +1,6 @@
-![UberSearch: free AI search with fallback — try SearXNG first, fall back to paid providers only when needed](docs/banner.png)
+<p align="center">
+  <img src="docs/banner.png" alt="UberSearch: free AI search with fallback — try SearXNG first, fall back to paid providers only when needed" width="320">
+</p>
 
 # UberSearch
 
