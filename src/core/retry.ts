@@ -87,14 +87,14 @@ export async function withRetry<T>(
         throw error;
       }
 
-      const nextDelay = Math.min(delay * backoffMultiplier, maxDelayMs);
+      const retryDelay = Math.min(delay, maxDelayMs);
 
       console.warn(
-        `[${engineId}] Attempt ${attempt}/${maxAttempts} failed: ${error.message}. Retrying in ${nextDelay}ms...`,
+        `[${engineId}] Attempt ${attempt}/${maxAttempts} failed: ${error.message}. Retrying in ${retryDelay}ms...`,
       );
 
-      await new Promise((resolve) => setTimeout(resolve, nextDelay));
-      delay = nextDelay;
+      await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      delay = Math.min(delay * backoffMultiplier, maxDelayMs);
     }
   }
 

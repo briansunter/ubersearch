@@ -17,15 +17,38 @@ import { getCreditStatus, uberSearch } from "./tool/uberSearchTool";
 // Parse command line arguments
 const args = process.argv.slice(2);
 
+const optionsWithValues = ["--engines", "--strategy", "--limit", "--config", "--categories"];
+const booleanOptions = ["--json", "--include-raw", "--help", "-h"];
+const knownOptions = new Set([...optionsWithValues, ...booleanOptions]);
+
+function requireOptionValue(optionName: string, index: number): string {
+  const value = args[index + 1];
+  if (!value || value.startsWith("--")) {
+    console.error(`Error: ${optionName} requires a value`);
+    process.exit(1);
+  }
+  return value;
+}
+
+function parseCommaSeparatedList(optionName: string, value: string): string[] {
+  const list = value
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+
+  if (list.length === 0) {
+    console.error(`Error: ${optionName} requires at least one value`);
+    process.exit(1);
+  }
+
+  return list;
+}
+
 // Parse --config first and remove from args (global option that can appear anywhere)
 const configIdx = args.indexOf("--config");
 let configPath: string | undefined;
 if (configIdx !== -1) {
-  configPath = args[configIdx + 1];
-  if (!configPath || configPath.startsWith("--")) {
-    console.error("Error: --config requires a file path");
-    process.exit(1);
-  }
+  configPath = requireOptionValue("--config", configIdx);
   args.splice(configIdx, 2);
 }
 
@@ -73,16 +96,27 @@ EXAMPLES:
 
 CONFIGURATION:
     Config files are searched in order:
-    1. ./ubersearch.config.json
-    2. $XDG_CONFIG_HOME/ubersearch/config.json
-    3. ~/.config/ubersearch/config.json
+    1. ./ubersearch.config.ts
+    2. ./ubersearch.config.json
+    3. $XDG_CONFIG_HOME/ubersearch/config.ts
+    4. $XDG_CONFIG_HOME/ubersearch/config.json
+    5. ~/.config/ubersearch/config.ts
+    6. ~/.config/ubersearch/config.json
 
 ENVIRONMENT:
     Set API keys in environment variables:
     - TAVILY_API_KEY      for Tavily
     - BRAVE_API_KEY       for Brave Search
+    - LINKUP_API_KEY      for Linkup
 `);
   process.exit(0);
+}
+
+for (const arg of args) {
+  if (arg.startsWith("--") && !knownOptions.has(arg)) {
+    console.error(`Error: Unknown option: ${arg}`);
+    process.exit(1);
+  }
 }
 
 // MCP server command
@@ -116,16 +150,14 @@ const options = {
 // Parse --engines
 const enginesIdx = args.indexOf("--engines");
 if (enginesIdx !== -1) {
-  const enginesArg = args[enginesIdx + 1];
-  if (enginesArg !== undefined) {
-    options.engines = enginesArg.split(",").map((e) => e.trim());
-  }
+  const enginesArg = requireOptionValue("--engines", enginesIdx);
+  options.engines = parseCommaSeparatedList("--engines", enginesArg);
 }
 
 // Parse --strategy
 const strategyIdx = args.indexOf("--strategy");
-if (strategyIdx !== -1 && args[strategyIdx + 1]) {
-  const strategy = args[strategyIdx + 1];
+if (strategyIdx !== -1) {
+  const strategy = requireOptionValue("--strategy", strategyIdx);
   if (strategy === "all" || strategy === "first-success") {
     options.strategy = strategy;
   } else {
@@ -137,29 +169,23 @@ if (strategyIdx !== -1 && args[strategyIdx + 1]) {
 // Parse --limit
 const limitIdx = args.indexOf("--limit");
 if (limitIdx !== -1) {
-  const limitArg = args[limitIdx + 1];
-  if (limitArg !== undefined) {
-    const limit = parseInt(limitArg, 10);
-    if (Number.isNaN(limit) || limit < 1) {
-      console.error(`Invalid limit: ${limitArg}. Must be a positive number`);
-      process.exit(1);
-    }
-    options.limit = limit;
+  const limitArg = requireOptionValue("--limit", limitIdx);
+  if (!/^[1-9]\d*$/.test(limitArg)) {
+    console.error(`Invalid limit: ${limitArg}. Must be a positive integer`);
+    process.exit(1);
   }
+  options.limit = Number(limitArg);
 }
 
 // Parse --categories
 const categoriesIdx = args.indexOf("--categories");
 if (categoriesIdx !== -1) {
-  const categoriesArg = args[categoriesIdx + 1];
-  if (categoriesArg !== undefined) {
-    options.categories = categoriesArg.split(",").map((c) => c.trim());
-  }
+  const categoriesArg = requireOptionValue("--categories", categoriesIdx);
+  options.categories = parseCommaSeparatedList("--categories", categoriesArg);
 }
 
 // Extract query (non-option arguments)
 // Filter out option flags (--*) and their values
-const optionsWithValues = ["--engines", "--strategy", "--limit", "--config", "--categories"];
 const queryParts = args.filter((arg, idx) => {
   // Skip arguments starting with --
   if (arg.startsWith("--")) {
@@ -404,4 +430,6 @@ async function showCredits(configPath?: string) {
 }
 
 // Run main
-main();
+if (import.meta.main) {
+  void main();
+}

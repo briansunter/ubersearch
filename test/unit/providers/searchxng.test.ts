@@ -513,13 +513,10 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      // First result should use fallback values when fields are missing
-      expect(response.items[0].title).toBe("Untitled");
-      expect(response.items[0].url).toBe("");
-
-      // Second result should be normal
-      expect(response.items[1].title).toBe("Valid Result");
-      expect(response.items[1].url).toBe("https://example.com");
+      // Invalid result without a URL should be dropped.
+      expect(response.items).toHaveLength(1);
+      expect(response.items[0].title).toBe("Valid Result");
+      expect(response.items[0].url).toBe("https://example.com");
     });
   });
 

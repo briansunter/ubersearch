@@ -13,6 +13,19 @@ import { fileURLToPath } from "node:url";
 const APP_NAME = "ubersearch";
 
 /**
+ * Expand a leading ~ in user-provided paths.
+ */
+export function expandTilde(path: string): string {
+  if (path === "~") {
+    return homedir();
+  }
+  if (path.startsWith("~/")) {
+    return join(homedir(), path.slice(2));
+  }
+  return path;
+}
+
+/**
  * Get XDG config home directory
  * Default: ~/.config
  */

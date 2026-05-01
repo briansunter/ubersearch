@@ -110,6 +110,30 @@ describe("bootstrapContainer", () => {
     expect(config.defaultEngineOrder).toEqual(["tavily-test", "brave-test"]);
   });
 
+  test("should return isolated containers for separate bootstraps", async () => {
+    const braveEngine = mockConfig.engines.find((engine) => engine.id === "brave-test");
+    if (!braveEngine) {
+      throw new Error("Expected brave-test engine");
+    }
+
+    const firstContainer = await bootstrapContainer(mockConfig);
+    const secondConfig: UberSearchConfig = {
+      ...mockConfig,
+      defaultEngineOrder: ["brave-test"],
+      engines: [braveEngine],
+    };
+    const secondContainer = await bootstrapContainer(secondConfig);
+
+    const firstConfig = firstContainer.get<UberSearchConfig>("config");
+    const secondLoadedConfig = secondContainer.get<UberSearchConfig>("config");
+
+    expect(firstConfig.defaultEngineOrder).toEqual(["tavily-test", "brave-test"]);
+    expect(secondLoadedConfig.defaultEngineOrder).toEqual(["brave-test"]);
+
+    firstContainer.reset();
+    secondContainer.reset();
+  });
+
   test("should initialize credit manager", async () => {
     container = await bootstrapContainer(mockConfig);
     const creditManager = container.get<CreditManager>("creditManager");

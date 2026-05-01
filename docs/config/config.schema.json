@@ -7,7 +7,7 @@
     "defaultEngineOrder": {
       "type": "array",
       "minItems": 1,
-      "items": { "type": "string" }
+      "items": { "type": "string", "minLength": 1 }
     },
     "engines": {
       "type": "array",
@@ -30,13 +30,13 @@
             ],
             "properties": {
               "type": { "const": "tavily" },
-              "id": { "type": "string" },
+              "id": { "type": "string", "minLength": 1 },
               "enabled": { "type": "boolean" },
-              "displayName": { "type": "string" },
+              "displayName": { "type": "string", "minLength": 1 },
               "monthlyQuota": { "type": "integer", "minimum": 1 },
               "creditCostPerSearch": { "type": "integer", "minimum": 0 },
               "lowCreditThresholdPercent": { "type": "number", "minimum": 0, "maximum": 100 },
-              "apiKeyEnv": { "type": "string" },
+              "apiKeyEnv": { "type": "string", "minLength": 1 },
               "endpoint": { "type": "string", "format": "uri" },
               "searchDepth": { "enum": ["basic", "advanced"] }
             },
@@ -58,13 +58,13 @@
             ],
             "properties": {
               "type": { "const": "brave" },
-              "id": { "type": "string" },
+              "id": { "type": "string", "minLength": 1 },
               "enabled": { "type": "boolean" },
-              "displayName": { "type": "string" },
+              "displayName": { "type": "string", "minLength": 1 },
               "monthlyQuota": { "type": "integer", "minimum": 1 },
               "creditCostPerSearch": { "type": "integer", "minimum": 0 },
               "lowCreditThresholdPercent": { "type": "number", "minimum": 0, "maximum": 100 },
-              "apiKeyEnv": { "type": "string" },
+              "apiKeyEnv": { "type": "string", "minLength": 1 },
               "endpoint": { "type": "string", "format": "uri" },
               "defaultLimit": { "type": "integer", "minimum": 1 }
             },
@@ -85,13 +85,13 @@
             ],
             "properties": {
               "type": { "const": "linkup" },
-              "id": { "type": "string" },
+              "id": { "type": "string", "minLength": 1 },
               "enabled": { "type": "boolean" },
-              "displayName": { "type": "string" },
+              "displayName": { "type": "string", "minLength": 1 },
               "monthlyQuota": { "type": "integer", "minimum": 1 },
               "creditCostPerSearch": { "type": "integer", "minimum": 0 },
               "lowCreditThresholdPercent": { "type": "number", "minimum": 0, "maximum": 100 },
-              "apiKeyEnv": { "type": "string" },
+              "apiKeyEnv": { "type": "string", "minLength": 1 },
               "endpoint": { "type": "string", "format": "uri" },
               "autoStart": { "type": "boolean" },
               "autoStop": { "type": "boolean" },
@@ -117,13 +117,13 @@
             ],
             "properties": {
               "type": { "const": "searchxng" },
-              "id": { "type": "string" },
+              "id": { "type": "string", "minLength": 1 },
               "enabled": { "type": "boolean" },
-              "displayName": { "type": "string" },
+              "displayName": { "type": "string", "minLength": 1 },
               "monthlyQuota": { "type": "integer", "minimum": 1 },
               "creditCostPerSearch": { "type": "integer", "minimum": 0 },
               "lowCreditThresholdPercent": { "type": "number", "minimum": 0, "maximum": 100 },
-              "apiKeyEnv": { "type": "string" },
+              "apiKeyEnv": { "type": "string", "minLength": 1 },
               "endpoint": { "type": "string", "format": "uri" },
               "defaultLimit": { "type": "integer", "minimum": 1 },
               "autoStart": { "type": "boolean" },

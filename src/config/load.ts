@@ -13,9 +13,10 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { dirname, isAbsolute, join } from "node:path";
+import { dirname, isAbsolute, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { getErrorMessage } from "../core/errorUtils";
-import { getBundledSearxngComposePath } from "../core/paths";
+import { expandTilde, getBundledSearxngComposePath } from "../core/paths";
 import { PluginRegistry, registerBuiltInPlugins } from "../plugin";
 import type { ConfigFactory, ExtendedSearchConfig } from "./defineConfig";
 import { formatValidationErrors, validateConfigSafe } from "./validation";
@@ -84,7 +85,7 @@ async function loadTypeScriptConfig(path: string): Promise<ExtendedSearchConfig>
   try {
     // Use dynamic import for TS files
     // Bun natively supports importing .ts files
-    const module = await import(path);
+    const module = await import(pathToFileURL(path).href);
 
     // Config can be default export or named 'config'
     const configOrFactory = module.default ?? module.config;
@@ -140,11 +141,18 @@ function resolveConfigPaths(
     engines: config.engines.map((engine) => {
       // Check if engine has composeFile property (SearXNG type)
       if ("composeFile" in engine && engine.composeFile) {
+        const composeFile = expandTilde(engine.composeFile);
         // Only resolve if it's a relative path
-        if (!isAbsolute(engine.composeFile)) {
+        if (!isAbsolute(composeFile)) {
           return {
             ...engine,
-            composeFile: join(configDir, engine.composeFile),
+            composeFile: join(configDir, composeFile),
+          };
+        }
+        if (composeFile !== engine.composeFile) {
+          return {
+            ...engine,
+            composeFile,
           };
         }
       }
@@ -272,25 +280,30 @@ export async function loadConfig(
   options: LoadConfigOptions = {},
 ): Promise<ExtendedSearchConfig> {
   const { skipValidation = false, registry, skipBuiltInPlugins = false } = options;
+  if (explicitPath && !existsSync(resolve(explicitPath))) {
+    throw new Error(`Config file not found at ${resolve(explicitPath)}`);
+  }
+
   const paths = getConfigPaths(explicitPath);
 
   for (const path of paths) {
-    if (existsSync(path)) {
+    const resolvedPath = resolve(path);
+    if (existsSync(resolvedPath)) {
       let rawConfig: ExtendedSearchConfig;
 
       try {
-        if (isTypeScriptConfig(path)) {
-          rawConfig = await loadTypeScriptConfig(path);
+        if (isTypeScriptConfig(resolvedPath)) {
+          rawConfig = await loadTypeScriptConfig(resolvedPath);
         } else {
-          rawConfig = loadJsonConfig(path);
+          rawConfig = loadJsonConfig(resolvedPath);
         }
       } catch (error) {
-        throw new Error(`Failed to load config file at ${path}: ${getErrorMessage(error)}`);
+        throw new Error(`Failed to load config file at ${resolvedPath}: ${getErrorMessage(error)}`);
       }
 
       // Resolve relative paths (like composeFile) to absolute paths
       // based on the config file's directory
-      rawConfig = resolveConfigPaths(rawConfig, path);
+      rawConfig = resolveConfigPaths(rawConfig, resolvedPath);
 
       // Skip validation if explicitly requested (useful for testing)
       if (!skipValidation) {
@@ -299,7 +312,7 @@ export async function loadConfig(
         if (!result.success) {
           const errors = formatValidationErrors(result.error);
           throw new Error(
-            `Invalid configuration in ${path}:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
+            `Invalid configuration in ${resolvedPath}:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
           );
         }
         rawConfig = result.data as ExtendedSearchConfig;
@@ -344,25 +357,37 @@ export function loadConfigSync(
   explicitPath?: string,
   options: { skipValidation?: boolean } = {},
 ): ExtendedSearchConfig {
+  if (explicitPath && !existsSync(resolve(explicitPath))) {
+    throw new Error(`Config file not found at ${resolve(explicitPath)}`);
+  }
+
   const paths = getConfigPaths(explicitPath);
 
   for (const path of paths) {
-    if (existsSync(path)) {
+    const resolvedPath = resolve(path);
+    if (existsSync(resolvedPath)) {
       // Skip TypeScript files in sync mode
-      if (isTypeScriptConfig(path)) {
+      if (isTypeScriptConfig(resolvedPath)) {
+        if (explicitPath) {
+          throw new Error(
+            `Synchronous config loading does not support TypeScript config: ${resolvedPath}`,
+          );
+        }
         continue;
       }
 
       let rawConfig: ExtendedSearchConfig;
 
       try {
-        rawConfig = loadJsonConfig(path);
+        rawConfig = loadJsonConfig(resolvedPath);
       } catch (error) {
-        throw new Error(`Failed to parse config file at ${path}: ${getErrorMessage(error)}`);
+        throw new Error(
+          `Failed to parse config file at ${resolvedPath}: ${getErrorMessage(error)}`,
+        );
       }
 
       // Resolve relative paths (like composeFile) to absolute paths
-      rawConfig = resolveConfigPaths(rawConfig, path);
+      rawConfig = resolveConfigPaths(rawConfig, resolvedPath);
 
       if (options.skipValidation) {
         return rawConfig;
@@ -372,7 +397,7 @@ export function loadConfigSync(
       if (!result.success) {
         const errors = formatValidationErrors(result.error);
         throw new Error(
-          `Invalid configuration in ${path}:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
+          `Invalid configuration in ${resolvedPath}:\n${errors.map((e) => `  - ${e}`).join("\n")}`,
         );
       }
 
@@ -388,5 +413,5 @@ export function loadConfigSync(
  */
 export function configExists(): boolean {
   const paths = getConfigPaths();
-  return paths.some((path) => existsSync(path));
+  return paths.some((path) => existsSync(resolve(path)));
 }

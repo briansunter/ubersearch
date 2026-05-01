@@ -115,6 +115,16 @@ describe("PluginRegistry", () => {
       const result = await registry.register(plugin2, { overwrite: true });
 
       expect(result.success).toBe(true);
+      expect(result.overwritten).toBe(true);
+    });
+
+    test("should not mark overwrite when overwrite option is used for a new plugin", async () => {
+      const result = await registry.register(createMockPlugin("new-overwrite"), {
+        overwrite: true,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.overwritten).toBe(false);
     });
 
     test("should call onRegister hook when provided", async () => {
@@ -149,6 +159,24 @@ describe("PluginRegistry", () => {
       expect(result.message).toContain("onRegister failed");
       expect(registry.has("failing-hook")).toBe(false);
     });
+
+    test("should restore previous plugin if overwrite onRegister fails", async () => {
+      const original = createMockPlugin("restore-on-fail");
+      await registry.register(original);
+
+      const replacement: PluginDefinition = {
+        ...createMockPlugin("restore-on-fail"),
+        displayName: "Replacement",
+        onRegister: () => {
+          throw new Error("Hook failed");
+        },
+      };
+
+      const result = await registry.register(replacement, { overwrite: true });
+
+      expect(result.success).toBe(false);
+      expect(registry.get("restore-on-fail")).toBe(original);
+    });
   });
 
   describe("registerSync", () => {
@@ -166,6 +194,19 @@ describe("PluginRegistry", () => {
 
       const result = registry.registerSync(plugin);
       expect(result.success).toBe(false);
+    });
+
+    test("should report overwritten accurately", () => {
+      const first = registry.registerSync(createMockPlugin("sync-overwrite"), {
+        overwrite: true,
+      });
+      registry.registerSync(createMockPlugin("sync-overwrite"));
+      const second = registry.registerSync(createMockPlugin("sync-overwrite"), {
+        overwrite: true,
+      });
+
+      expect(first.overwritten).toBe(false);
+      expect(second.overwritten).toBe(true);
     });
   });
 

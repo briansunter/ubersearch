@@ -71,12 +71,16 @@ export class DockerLifecycleManager {
         return;
       }
 
-      this.initPromise = this.performInit().catch((error) => {
-        const message = getErrorMessage(error);
-        log.debug("Initialization failed:", message);
-        this.initialized = false;
-        throw error;
-      });
+      this.initPromise = this.performInit()
+        .catch((error) => {
+          const message = getErrorMessage(error);
+          log.debug("Initialization failed:", message);
+          this.initialized = false;
+          throw error;
+        })
+        .finally(() => {
+          this.initPromise = null;
+        });
     }
     return this.initPromise;
   }
@@ -145,7 +149,7 @@ export class DockerLifecycleManager {
 
       // Wait for health check if endpoint is configured
       if (this.config.healthEndpoint) {
-        await this.waitForHealth();
+        await this.waitForHealth(this.config.initTimeoutMs);
       }
 
       this.initialized = true;
@@ -153,8 +157,6 @@ export class DockerLifecycleManager {
       const message = getErrorMessage(error);
       log.debug("Failed to start container:", message);
       throw error;
-    } finally {
-      this.initPromise = null;
     }
   }
 

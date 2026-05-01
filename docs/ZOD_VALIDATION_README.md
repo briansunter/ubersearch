@@ -302,12 +302,14 @@ CLI options also use Zod for validation:
 
 ```typescript
 const CliInputSchema = z.object({
-  query: z.string().min(1),
+  query: z.string().trim().min(1),
   limit: z.number().int().positive().optional(),
-  engines: z.array(z.string()).min(1).optional(),
+  engines: z.array(z.string().trim().min(1)).min(1).optional(),
+  includeRaw: z.boolean().optional(),
   strategy: z.enum(["all", "first-success"]).optional(),
+  parallel: z.boolean().optional(),
+  categories: z.array(z.string().trim().min(1)).min(1).optional(),
   json: z.boolean().optional(),
-  priority: priorityConfigSchema.optional(),
 });
 ```
 

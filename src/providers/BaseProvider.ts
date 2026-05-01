@@ -41,7 +41,7 @@ export abstract class BaseProvider<T extends EngineConfigBase> implements Search
       return true; // No env var configured, consider it configured
     }
 
-    const apiKey = process.env[apiKeyEnv];
+    const apiKey = process.env[apiKeyEnv]?.trim();
     return !!apiKey;
   }
 

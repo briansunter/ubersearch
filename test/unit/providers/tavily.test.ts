@@ -388,6 +388,23 @@ describe("TavilyProvider", () => {
       expect(customProvider.getMissingConfigMessage()).toContain("CUSTOM_TAVILY_KEY");
     });
 
+    test("should report not configured when API key environment variable is whitespace", () => {
+      process.env.CUSTOM_TAVILY_KEY = "   ";
+
+      const customConfig = {
+        id: "custom-tavily",
+        displayName: "Custom Tavily",
+        apiKeyEnv: "CUSTOM_TAVILY_KEY",
+        searchDepth: "basic" as const,
+        endpoint: "https://api.tavily.com/search",
+      };
+
+      const customProvider = new TavilyProvider(customConfig);
+
+      expect(customProvider.isConfigured()).toBe(false);
+      delete process.env.CUSTOM_TAVILY_KEY;
+    });
+
     test("should throw error when API key is empty string", async () => {
       global.process.env = { TAVILY_API_KEY: "" };
 

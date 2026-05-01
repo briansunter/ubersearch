@@ -5,6 +5,7 @@
  */
 
 import { bootstrapContainer } from "../bootstrap/container";
+import { formatValidationErrors, validateCliInput } from "../config/validation";
 import type { CreditManager } from "../core/credits";
 import type { UberSearchOrchestrator } from "../core/orchestrator";
 import { ServiceKeys } from "../core/serviceKeys";
@@ -39,6 +40,30 @@ export async function uberSearch(
   input: UberSearchInput,
   options?: string | UberSearchOptions,
 ): Promise<UberSearchOutput> {
+  let validatedInput: ReturnType<typeof validateCliInput>;
+  try {
+    validatedInput = validateCliInput({
+      query: input.query,
+      limit: input.limit,
+      engines: input.engines,
+      includeRaw: input.includeRaw,
+      strategy: input.strategy,
+      parallel: input.parallel,
+      categories: input.categories,
+    });
+  } catch (error) {
+    if (error && typeof error === "object" && "issues" in error) {
+      throw new Error(
+        `Invalid search input:\n${formatValidationErrors(
+          error as Parameters<typeof formatValidationErrors>[0],
+        )
+          .map((message) => `  - ${message}`)
+          .join("\n")}`,
+      );
+    }
+    throw error;
+  }
+
   // Handle backwards compatibility: string arg is config path
   const opts: UberSearchOptions =
     typeof options === "string" ? { configPath: options } : (options ?? {});
@@ -50,12 +75,13 @@ export async function uberSearch(
   const orchestrator = container.get<UberSearchOrchestrator>(ServiceKeys.ORCHESTRATOR);
 
   // Execute search
-  const result = await orchestrator.run(input.query, {
-    limit: input.limit,
-    engineOrderOverride: input.engines,
-    includeRaw: input.includeRaw,
-    strategy: input.strategy ?? "first-success",
-    categories: input.categories,
+  const result = await orchestrator.run(validatedInput.query, {
+    limit: validatedInput.limit,
+    engineOrderOverride: validatedInput.engines,
+    includeRaw: validatedInput.includeRaw,
+    strategy: validatedInput.strategy ?? "first-success",
+    parallel: validatedInput.parallel,
+    categories: validatedInput.categories,
   });
 
   // Format output

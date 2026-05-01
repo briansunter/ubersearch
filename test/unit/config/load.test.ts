@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { configExists, getConfigPaths, loadConfig } from "../../../src/config/load";
+import { homedir, tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { configExists, getConfigPaths, loadConfig, loadConfigSync } from "../../../src/config/load";
 import type { UberSearchConfig } from "../../../src/config/types";
 import { getBundledSearxngComposePath } from "../../../src/core/paths";
 import { PluginRegistry } from "../../../src/plugin";
@@ -134,6 +134,88 @@ describe("Config Loader", () => {
       const config = await loadConfig(customPath);
 
       expect(config.defaultEngineOrder).toEqual(["tavily"]);
+    });
+
+    it("should throw when explicit config path does not exist", async () => {
+      const missingPath = join(testDir, "missing-config.json");
+
+      await expect(loadConfig(missingPath)).rejects.toThrow("Config file not found");
+    });
+
+    it("should throw when sync loader receives explicit TypeScript config", () => {
+      const customPath = join(testDir, "custom-config.ts");
+      writeFileSync(customPath, "export default { defaultEngineOrder: [], engines: [] };");
+
+      expect(() => loadConfigSync(customPath, { skipValidation: true })).toThrow(
+        "does not support TypeScript config",
+      );
+    });
+
+    it("should load TypeScript config from explicit relative path", async () => {
+      const configDir = join(testDir, "configs");
+      mkdirSync(configDir, { recursive: true });
+      writeFileSync(
+        join(configDir, "custom.ts"),
+        `
+          export default {
+            defaultEngineOrder: ["searchxng"],
+            engines: [{
+              id: "searchxng",
+              type: "searchxng",
+              enabled: true,
+              displayName: "SearXNG (Local)",
+              endpoint: "http://localhost:8888/search",
+              defaultLimit: 10,
+              monthlyQuota: 10000,
+              creditCostPerSearch: 0,
+              lowCreditThresholdPercent: 80,
+              composeFile: "./docker-compose.yml"
+            }]
+          };
+        `,
+      );
+
+      const config = await loadConfig("./configs/custom.ts");
+      const searchxng = config.engines[0];
+
+      expect(config.defaultEngineOrder).toEqual(["searchxng"]);
+      expect(searchxng?.type).toBe("searchxng");
+      if (searchxng?.type !== "searchxng") {
+        throw new Error("Expected SearXNG config");
+      }
+      expect(searchxng.composeFile).toBe(resolve("./configs/docker-compose.yml"));
+    });
+
+    it("should expand tilde compose paths before resolving config-relative paths", async () => {
+      const configPath = join(testDir, "ubersearch.config.json");
+      writeFileSync(
+        configPath,
+        JSON.stringify({
+          defaultEngineOrder: ["searchxng"],
+          engines: [
+            {
+              id: "searchxng",
+              type: "searchxng",
+              enabled: true,
+              displayName: "SearXNG (Local)",
+              endpoint: "http://localhost:8888/search",
+              defaultLimit: 10,
+              monthlyQuota: 10000,
+              creditCostPerSearch: 0,
+              lowCreditThresholdPercent: 80,
+              composeFile: "~/ubersearch/docker-compose.yml",
+            },
+          ],
+        }),
+      );
+
+      const config = await loadConfig();
+      const searchxng = config.engines[0];
+
+      if (searchxng?.type !== "searchxng") {
+        throw new Error("Expected SearXNG config");
+      }
+      expect(searchxng.composeFile).toBe(join(homedir(), "ubersearch", "docker-compose.yml"));
     });
 
     it("should load config from XDG config directory", async () => {

@@ -46,10 +46,76 @@ let globalContainer: Awaited<ReturnType<typeof bootstrapContainer>> | null = nul
 
 // Helper function with timeout
 async function withTimeout<T>(promise: Promise<T>, ms: number, operation: string): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms);
+    timeoutId = setTimeout(() => reject(new Error(`${operation} timed out after ${ms}ms`)), ms);
   });
-  return Promise.race([promise, timeoutPromise]);
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function parseOptionalCommaList(paramName: string, value: unknown): string[] | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  const rawValues = typeof value === "string" ? value.split(",") : value;
+  if (!Array.isArray(rawValues)) {
+    throw new Error(`Invalid params: '${paramName}' must be a comma-separated string`);
+  }
+
+  const values: string[] = [];
+  for (const item of rawValues) {
+    if (typeof item !== "string") {
+      throw new Error(`Invalid params: '${paramName}' must contain only strings`);
+    }
+
+    const trimmed = item.trim();
+    if (trimmed.length > 0) {
+      values.push(trimmed);
+    }
+  }
+
+  return values.length > 0 ? values : undefined;
+}
+
+function parseLimit(value: unknown): number | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isInteger(value) || value < 1) {
+      throw new Error("Invalid params: 'limit' must be a positive integer");
+    }
+    return value;
+  }
+
+  if (typeof value !== "string" || !/^[1-9]\d*$/.test(value.trim())) {
+    throw new Error("Invalid params: 'limit' must be a positive integer");
+  }
+
+  const limit = Number(value);
+  if (!Number.isInteger(limit) || limit < 1) {
+    throw new Error("Invalid params: 'limit' must be a positive integer");
+  }
+
+  return limit;
+}
+
+function parseStrategy(value: unknown): "all" | "first-success" | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+
+  if (value === "all" || value === "first-success") {
+    return value;
+  }
+
+  throw new Error("Invalid params: 'strategy' must be 'all' or 'first-success'");
 }
 
 function setupShutdownHandlers() {
@@ -171,6 +237,12 @@ Example: "it,science" for tech and academic results`,
       continue;
     }
 
+    const writeResponse = (response: MCPResponse): void => {
+      if (request.id !== undefined) {
+        process.stdout.write(`${JSON.stringify(response)}\n`);
+      }
+    };
+
     // Handle initialize request - required by MCP protocol
     if (request.method === "initialize") {
       const response: MCPResponse = {
@@ -187,7 +259,7 @@ Example: "it,science" for tech and academic results`,
           },
         },
       };
-      process.stdout.write(`${JSON.stringify(response)}\n`);
+      writeResponse(response);
       continue;
     }
 
@@ -202,7 +274,7 @@ Example: "it,science" for tech and academic results`,
         id: request.id,
         result: { tools },
       };
-      process.stdout.write(`${JSON.stringify(response)}\n`);
+      writeResponse(response);
       continue;
     }
 
@@ -211,8 +283,8 @@ Example: "it,science" for tech and academic results`,
       const name = String(params.name ?? "");
       const args =
         typeof params.arguments === "object" && params.arguments !== null
-          ? (params.arguments as Record<string, string>)
-          : ({} as Record<string, string>);
+          ? (params.arguments as Record<string, unknown>)
+          : ({} as Record<string, unknown>);
 
       // Validate tool name
       if (!validToolNames.has(name)) {
@@ -224,12 +296,14 @@ Example: "it,science" for tech and academic results`,
             message: `Unknown tool: '${name}'`,
           },
         };
-        process.stdout.write(`${JSON.stringify(response)}\n`);
+        writeResponse(response);
         continue;
       }
 
+      const queryParam = typeof args.query === "string" ? args.query : "";
+
       // Validate required query parameter for uber_search
-      if (name === "uber_search" && (!args.query || args.query.trim() === "")) {
+      if (name === "uber_search" && queryParam.trim() === "") {
         const response: MCPResponse = {
           jsonrpc: "2.0",
           id: request.id,
@@ -238,12 +312,12 @@ Example: "it,science" for tech and academic results`,
             message: "Invalid params: 'query' is required and must be non-empty",
           },
         };
-        process.stdout.write(`${JSON.stringify(response)}\n`);
+        writeResponse(response);
         continue;
       }
 
       // Input sanitization - query length check
-      if (args.query && args.query.length > 2000) {
+      if (queryParam.length > 2000) {
         const response: MCPResponse = {
           jsonrpc: "2.0",
           id: request.id,
@@ -252,26 +326,23 @@ Example: "it,science" for tech and academic results`,
             message: "Invalid params: query exceeds maximum length of 2000 characters",
           },
         };
-        process.stdout.write(`${JSON.stringify(response)}\n`);
+        writeResponse(response);
         continue;
       }
 
       try {
         let result: unknown;
         if (name === "uber_search") {
-          const engines = args.engines ? args.engines.split(",").map((e) => e.trim()) : undefined;
-          const categories = args.categories
-            ? args.categories.split(",").map((c) => c.trim())
-            : undefined;
+          const engines = parseOptionalCommaList("engines", args.engines);
+          const categories = parseOptionalCommaList("categories", args.categories);
+          const limit = parseLimit(args.limit);
+          const strategy = parseStrategy(args.strategy);
           result = await withTimeout(
             uberSearch({
-              query: args.query ?? "",
-              limit: args.limit ? Number(args.limit) : undefined,
+              query: queryParam,
+              limit,
               engines,
-              strategy:
-                args.strategy === "all" || args.strategy === "first-success"
-                  ? args.strategy
-                  : undefined,
+              strategy,
               categories,
             }),
             60000,
@@ -319,17 +390,18 @@ Example: "it,science" for tech and academic results`,
             ],
           },
         };
-        process.stdout.write(`${JSON.stringify(response)}\n`);
+        writeResponse(response);
       } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
         const errorResponse: MCPResponse = {
           jsonrpc: "2.0",
           id: request.id,
           error: {
-            code: -32603,
-            message: error instanceof Error ? error.message : String(error),
+            code: message.startsWith("Invalid params:") ? -32602 : -32603,
+            message,
           },
         };
-        process.stdout.write(`${JSON.stringify(errorResponse)}\n`);
+        writeResponse(errorResponse);
       }
     } else if (request.id !== undefined) {
       // Unknown method - send error response (only for requests with id, not notifications)

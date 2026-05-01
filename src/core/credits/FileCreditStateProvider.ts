@@ -6,7 +6,12 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createLogger } from "../logger";
-import type { CreditState, CreditStateProvider } from "./CreditStateProvider";
+import { expandTilde } from "../paths";
+import {
+  type CreditState,
+  type CreditStateProvider,
+  isValidCreditRecord,
+} from "./CreditStateProvider";
 
 const log = createLogger("CreditState");
 
@@ -41,7 +46,7 @@ export class FileCreditStateProvider implements CreditStateProvider {
    *                   XDG_STATE_HOME or ~/.local/state/ubersearch/credits.json
    */
   constructor(statePath?: string) {
-    this.statePath = statePath ?? this.getDefaultStatePath();
+    this.statePath = statePath ? expandTilde(statePath) : this.getDefaultStatePath();
   }
 
   /**
@@ -53,6 +58,21 @@ export class FileCreditStateProvider implements CreditStateProvider {
   private getDefaultStatePath(): string {
     const base = process.env.XDG_STATE_HOME ?? join(homedir(), ".local", "state");
     return join(base, "ubersearch", "credits.json");
+  }
+
+  private normalizeState(raw: unknown): CreditState {
+    if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+      return {};
+    }
+
+    const state: CreditState = {};
+    for (const [engineId, value] of Object.entries(raw)) {
+      if (isValidCreditRecord(value)) {
+        state[engineId] = { used: value.used, lastReset: value.lastReset };
+      }
+    }
+
+    return state;
   }
 
   /**
@@ -76,7 +96,7 @@ export class FileCreditStateProvider implements CreditStateProvider {
 
     try {
       const raw = await file.text();
-      return JSON.parse(raw) as CreditState;
+      return this.normalizeState(JSON.parse(raw));
     } catch (error) {
       log.warn(`Failed to load credit state from ${this.statePath}:`, error);
       return {};

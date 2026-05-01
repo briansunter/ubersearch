@@ -275,6 +275,24 @@ describe("Configuration Validation Tests", () => {
       expect(result.success).toBe(false);
     });
 
+    test("should reject empty apiKeyEnv", () => {
+      const invalidConfig = {
+        type: "tavily",
+        id: "tavily",
+        enabled: true,
+        displayName: "Tavily AI",
+        monthlyQuota: 1000,
+        creditCostPerSearch: 1,
+        lowCreditThresholdPercent: 80,
+        apiKeyEnv: "",
+        endpoint: "https://api.tavily.com/search",
+        searchDepth: "advanced",
+      };
+
+      const result = TavilyConfigSchema.safeParse(invalidConfig);
+      expect(result.success).toBe(false);
+    });
+
     test("should reject invalid searchDepth", () => {
       const invalidConfig = {
         type: "tavily",
@@ -761,6 +779,8 @@ describe("Configuration Validation Tests", () => {
         engines: ["tavily", "brave"],
         includeRaw: true,
         strategy: "first-success",
+        parallel: true,
+        categories: ["general", "it"],
         json: true,
       };
 
@@ -770,6 +790,8 @@ describe("Configuration Validation Tests", () => {
         expect(result.data.query).toBe("test search query");
         expect(result.data.limit).toBe(10);
         expect(result.data.strategy).toBe("first-success");
+        expect(result.data.parallel).toBe(true);
+        expect(result.data.categories).toEqual(["general", "it"]);
       }
     });
 
@@ -799,6 +821,34 @@ describe("Configuration Validation Tests", () => {
         expect(result.error.issues[0].message).toContain(
           "Too small: expected string to have >=1 characters",
         );
+      }
+    });
+
+    test("should reject whitespace-only query", () => {
+      const invalidInput = {
+        query: "   ",
+      };
+
+      const result = CliInputSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["query"]);
+      }
+    });
+
+    test("should trim query and list items", () => {
+      const validInput = {
+        query: "  test query  ",
+        engines: [" tavily "],
+        categories: [" it "],
+      };
+
+      const result = CliInputSchema.safeParse(validInput);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.query).toBe("test query");
+        expect(result.data.engines).toEqual(["tavily"]);
+        expect(result.data.categories).toEqual(["it"]);
       }
     });
 
@@ -854,6 +904,58 @@ describe("Configuration Validation Tests", () => {
         expect(result.error.issues[0].message).toContain(
           "Too small: expected array to have >=1 items",
         );
+      }
+    });
+
+    test("should reject empty engine names", () => {
+      const invalidInput = {
+        query: "test query",
+        engines: ["tavily", " "],
+      };
+
+      const result = CliInputSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["engines", 1]);
+      }
+    });
+
+    test("should reject empty categories array", () => {
+      const invalidInput = {
+        query: "test query",
+        categories: [],
+      };
+
+      const result = CliInputSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["categories"]);
+      }
+    });
+
+    test("should reject empty category names", () => {
+      const invalidInput = {
+        query: "test query",
+        categories: ["it", ""],
+      };
+
+      const result = CliInputSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["categories", 1]);
+      }
+    });
+
+    test("should reject non-boolean parallel flag", () => {
+      const invalidInput = {
+        query: "test query",
+        parallel: "true",
+      };
+
+      const result = CliInputSchema.safeParse(invalidInput);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["parallel"]);
       }
     });
 

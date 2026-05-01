@@ -5,7 +5,11 @@
 
 import type { EngineConfig } from "../../config/types";
 import type { EngineId } from "../types";
-import type { CreditState, CreditStateProvider } from "./CreditStateProvider";
+import {
+  type CreditState,
+  type CreditStateProvider,
+  isValidCreditRecord,
+} from "./CreditStateProvider";
 
 export interface CreditSnapshot {
   engineId: EngineId;
@@ -43,9 +47,9 @@ export class CreditManager {
     const currentMonth = now.toISOString().slice(0, 7); // YYYY-MM
 
     for (const [engineId, _config] of this.engines) {
-      const record = this.state[engineId];
+      const record = (this.state as Record<string, unknown>)[engineId];
 
-      if (!record) {
+      if (!isValidCreditRecord(record)) {
         this.state[engineId] = {
           used: 0,
           lastReset: now.toISOString(),

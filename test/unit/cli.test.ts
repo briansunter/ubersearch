@@ -393,5 +393,37 @@ describe("CLI Tests", () => {
       expect(process.exit).toHaveBeenCalledWith(1);
       expect(captured.error.some((msg) => msg.includes("Invalid limit"))).toBe(true);
     });
+
+    test("should reject missing --engines value", async () => {
+      setupProcessMock(["test", "query", "--engines", "--json"]);
+
+      try {
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
+      } catch (error: unknown) {
+        if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
+          throw error;
+        }
+      }
+
+      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(captured.error.some((msg) => msg.includes("--engines requires a value"))).toBe(true);
+    });
+
+    test("should reject unknown options", async () => {
+      setupProcessMock(["test", "query", "--unknown"]);
+
+      try {
+        delete require.cache[require.resolve("../../src/cli.ts")];
+        await import("../../src/cli.ts");
+      } catch (error: unknown) {
+        if (!(error instanceof Error) || !error.message.includes("Process.exit")) {
+          throw error;
+        }
+      }
+
+      expect(process.exit).toHaveBeenCalledWith(1);
+      expect(captured.error.some((msg) => msg.includes("Unknown option"))).toBe(true);
+    });
   });
 });

@@ -6,9 +6,9 @@
 
 import { execFile } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import { getSearxngPaths } from "../paths";
+import { expandTilde, getSearxngPaths } from "../paths";
 
 const execFileAsync = promisify(execFile);
 
@@ -49,7 +49,11 @@ export interface DockerComposeOptions {
  * Helper for managing Docker Compose services
  */
 export class DockerComposeHelper {
-  constructor(private composeFile: string) {}
+  private composeFile: string;
+
+  constructor(composeFile: string) {
+    this.composeFile = resolve(expandTilde(composeFile));
+  }
 
   /**
    * Execute docker compose command
@@ -70,9 +74,7 @@ export class DockerComposeHelper {
         cwd,
         timeout,
         env: {
-          PATH: process.env.PATH,
-          HOME: process.env.HOME,
-          DOCKER_HOST: process.env.DOCKER_HOST,
+          ...process.env,
           SEARXNG_CONFIG: configDir,
           SEARXNG_DATA: dataDir,
           SEARXNG_SECRET: getSearxngSecret(configDir),

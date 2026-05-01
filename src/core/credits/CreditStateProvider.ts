@@ -16,23 +16,44 @@ import type { EngineId } from "../types";
  *
  * @interface CreditState
  */
+export interface CreditRecord {
+  /**
+   * Total number of credits used by this engine in the current billing period.
+   */
+  used: number;
+
+  /**
+   * ISO 8601 date string indicating when the credits were last reset.
+   * Used to determine when monthly quotas should be refreshed.
+   */
+  lastReset: string;
+}
+
 export interface CreditState {
   /**
    * Maps engine identifiers to their credit usage information.
    * Each entry tracks the total credits used and the last reset timestamp.
    */
-  [engineId: EngineId]: {
-    /**
-     * Total number of credits used by this engine in the current billing period.
-     */
-    used: number;
+  [engineId: EngineId]: CreditRecord;
+}
 
-    /**
-     * ISO 8601 date string indicating when the credits were last reset.
-     * Used to determine when monthly quotas should be refreshed.
-     */
-    lastReset: string;
-  };
+/**
+ * Type guard for a well-formed credit record. Used during persistence load
+ * (drop malformed entries) and at runtime (treat unknown shape as missing).
+ */
+export function isValidCreditRecord(value: unknown): value is CreditRecord {
+  if (value == null || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as { used?: unknown; lastReset?: unknown };
+  return (
+    typeof candidate.used === "number" &&
+    Number.isFinite(candidate.used) &&
+    candidate.used >= 0 &&
+    typeof candidate.lastReset === "string" &&
+    !Number.isNaN(Date.parse(candidate.lastReset))
+  );
 }
 
 /**

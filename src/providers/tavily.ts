@@ -53,9 +53,11 @@ export class TavilyProvider extends BaseProvider<TavilyConfig> {
       this.id,
       PROVIDER_MAPPINGS.tavily,
       (r) =>
-        (r.title != null || r.url != null) &&
+        typeof r.url === "string" &&
+        r.url.trim().length > 0 &&
         (r.title != null || r.content != null || r.snippet != null),
     );
+    this.validateResults(items, "Tavily");
 
     return {
       engineId: this.id,

@@ -94,9 +94,11 @@ export class PluginRegistry {
     options: PluginRegistrationOptions = {},
   ): Promise<PluginRegistrationResult> {
     const { overwrite = false } = options;
+    const existing = this.plugins.get(plugin.type);
+    const wasRegistered = existing !== undefined;
 
     // Check for existing registration
-    if (this.plugins.has(plugin.type)) {
+    if (wasRegistered) {
       if (!overwrite) {
         return {
           success: false,
@@ -106,7 +108,6 @@ export class PluginRegistry {
       }
 
       // Call onUnregister for existing plugin if it exists
-      const existing = this.plugins.get(plugin.type);
       if (existing?.onUnregister) {
         try {
           await existing.onUnregister();
@@ -125,8 +126,12 @@ export class PluginRegistry {
       try {
         await plugin.onRegister();
       } catch (error) {
-        // Rollback registration on error
-        this.plugins.delete(plugin.type);
+        // Roll back registration on error, restoring the previous plugin if this was an overwrite.
+        if (existing) {
+          this.plugins.set(plugin.type, existing);
+        } else {
+          this.plugins.delete(plugin.type);
+        }
         return {
           success: false,
           type: plugin.type,
@@ -138,7 +143,7 @@ export class PluginRegistry {
     return {
       success: true,
       type: plugin.type,
-      overwritten: overwrite && this.plugins.has(plugin.type),
+      overwritten: overwrite && wasRegistered,
     };
   }
 
@@ -150,8 +155,9 @@ export class PluginRegistry {
     options: PluginRegistrationOptions = {},
   ): PluginRegistrationResult {
     const { overwrite = false } = options;
+    const wasRegistered = this.plugins.has(plugin.type);
 
-    if (this.plugins.has(plugin.type) && !overwrite) {
+    if (wasRegistered && !overwrite) {
       return {
         success: false,
         type: plugin.type,
@@ -164,7 +170,7 @@ export class PluginRegistry {
     return {
       success: true,
       type: plugin.type,
-      overwritten: overwrite && this.plugins.has(plugin.type),
+      overwritten: overwrite && wasRegistered,
     };
   }
 

@@ -542,6 +542,25 @@ describe("DockerLifecycleManager", () => {
 
         // When Docker is available but file doesn't exist, it should throw
         await expect(manager.init()).rejects.toThrow("Docker Compose command");
+        expect(manager.isInitializing()).toBe(false);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    test("should clear initializing state after init succeeds without Docker", async () => {
+      const spy = spyOn(DockerComposeHelper, "isDockerAvailable").mockResolvedValue(false);
+      try {
+        const manager = new DockerLifecycleManager({
+          autoStart: true,
+          autoStop: true,
+          composeFile: "/nonexistent/docker-compose.yml",
+        });
+
+        await manager.init();
+
+        expect(manager.isInitialized()).toBe(true);
+        expect(manager.isInitializing()).toBe(false);
       } finally {
         spy.mockRestore();
       }

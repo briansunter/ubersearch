@@ -63,7 +63,13 @@ export class LinkupProvider extends BaseProvider<LinkupConfig> implements ILifec
     this.validateResults(results, "Linkup");
 
     // Map to normalized format
-    const items = mapSearchResults(results, this.id, PROVIDER_MAPPINGS.linkup);
+    const items = mapSearchResults(
+      results,
+      this.id,
+      PROVIDER_MAPPINGS.linkup,
+      (r) => typeof r.url === "string" && r.url.trim().length > 0,
+    );
+    this.validateResults(items, "Linkup");
 
     return {
       engineId: this.id,

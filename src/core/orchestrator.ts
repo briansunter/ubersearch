@@ -68,6 +68,9 @@ export class UberSearchOrchestrator {
     // Execute strategy
     const { results, attempts } = await strategy.execute(query, order, options, context);
 
+    // Persist any credit charges/refunds made by the strategy before reporting snapshots.
+    await this.credits.saveState();
+
     // Get credit snapshots
     const credits = this.credits.listSnapshots();
 

@@ -1,6 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync } from "node:fs";
-import { getBundledSearxngComposePath, getDefaultSettingsPath } from "../../../src/core/paths";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import {
+  expandTilde,
+  getBundledSearxngComposePath,
+  getDefaultSettingsPath,
+} from "../../../src/core/paths";
 
 describe("core/paths", () => {
   test("should resolve the bundled SearXNG compose file", () => {
@@ -15,5 +21,13 @@ describe("core/paths", () => {
 
     expect(settingsPath).toContain("providers/searxng/config/settings.yml");
     expect(existsSync(settingsPath)).toBe(true);
+  });
+
+  test("should expand leading tilde paths", () => {
+    expect(expandTilde("~")).toBe(homedir());
+    expect(expandTilde("~/ubersearch/config.json")).toBe(
+      join(homedir(), "ubersearch", "config.json"),
+    );
+    expect(expandTilde("/tmp/ubersearch/config.json")).toBe("/tmp/ubersearch/config.json");
   });
 });

@@ -12,7 +12,7 @@ Unified, Bun-first search interface across multiple providers with credit tracki
 - 🔌 Extensible: Add custom providers via TypeScript plugin system
 - 🤝 Single interface: shared types + CLI + programmatic API
 - 💳 Credits: per-engine quotas with snapshots and low-credit warnings
-- 🧠 Strategies: `all` (merge) or `first-success` (fastest win)
+- 🧠 Strategies: `all` (merge) or `first-success` (ordered fallback)
 - ⚙️ Config: JSON or TypeScript (`defineConfig`), XDG-aware resolution
 - 🐳 Auto-start: optional Docker lifecycle for local SearXNG
 
@@ -56,7 +56,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
       "args": ["--bun", "ubersearch", "mcp"],
       "env": {
         "TAVILY_API_KEY": "your_key",
-        "BRAVE_API_KEY": "your_key"
+        "BRAVE_API_KEY": "your_key",
+        "LINKUP_API_KEY": "your_key"
       }
     }
   }
@@ -101,7 +102,7 @@ ubersearch credits
 ## Configuration
 
 Resolution order (first wins):
-1. Explicit path passed to CLI/API (`--config /path/to/config.json`)
+1. Explicit path passed to CLI/API (`--config /path/to/config.json`; must exist)
 2. `./ubersearch.config.(ts|json)` (current directory)
 3. `$XDG_CONFIG_HOME/ubersearch/config.(ts|json)` (default: `~/.config/ubersearch/`)
 
@@ -211,13 +212,14 @@ interface SearchQuery {
   query: string;
   limit?: number;
   includeRaw?: boolean;
+  categories?: string[];
 }
 
 interface SearchResponse {
   engineId: string;
   items: SearchResultItem[];
   raw?: unknown;
-  tookMs?: number;
+  tookMs: number;
 }
 
 interface SearchResultItem {

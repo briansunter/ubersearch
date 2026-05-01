@@ -112,6 +112,35 @@ describe("withRetry", () => {
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
+    test("should use initialDelayMs for the first retry", async () => {
+      const originalWarn = console.warn;
+      const warnMock = mock(() => undefined);
+      console.warn = warnMock;
+
+      let attempts = 0;
+      const fn = mock(async () => {
+        attempts++;
+        if (attempts === 1) {
+          throw new SearchError("test-engine", "network_error", "Connection failed");
+        }
+        return "recovered";
+      });
+
+      try {
+        const result = await withRetry("test-engine", fn, {
+          maxAttempts: 2,
+          initialDelayMs: 5,
+          backoffMultiplier: 2,
+          maxDelayMs: 20,
+        });
+
+        expect(result).toBe("recovered");
+        expect(String(warnMock.mock.calls[0]?.[0])).toContain("Retrying in 5ms");
+      } finally {
+        console.warn = originalWarn;
+      }
+    });
+
     test("should retry on no_results errors by default", async () => {
       let attempts = 0;
       const fn = mock(async () => {

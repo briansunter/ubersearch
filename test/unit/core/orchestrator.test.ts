@@ -54,6 +54,7 @@ describe("UberSearchOrchestrator", () => {
       initialize: mock(async () => {}),
       charge: mock(() => true),
       hasSufficientCredits: mock(() => true),
+      saveState: mock(async () => {}),
       listSnapshots: mock(() => [{ engineId: "test", remaining: 100 }]),
     } as unknown as CreditManager;
 
@@ -99,6 +100,7 @@ describe("UberSearchOrchestrator", () => {
       expect(result).toBeDefined();
       expect(result.query).toBe("test query");
       expect(result.results.length).toBeGreaterThanOrEqual(0);
+      expect(mockCreditManager.saveState).toHaveBeenCalledTimes(1);
     });
 
     test("should throw error for empty engine list", async () => {

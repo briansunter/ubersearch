@@ -139,6 +139,7 @@ export class SearchxngProvider
       results,
       this.id,
       PROVIDER_MAPPINGS.searchxng,
+      (r) => typeof r.url === "string" && r.url.trim().length > 0,
     );
 
     // Add infoboxes as results (Wikipedia, etc.)
@@ -154,9 +155,8 @@ export class SearchxngProvider
       }
     }
 
-    // Only validate if we have no results at all
     if (items.length === 0) {
-      this.validateResults(results, "SearXNG");
+      throw new SearchError(this.id, "no_results", "SearXNG returned no results");
     }
 
     const limitedItems = items.slice(0, limit);

@@ -223,6 +223,35 @@ describe("Tool Module Tests", () => {
       expect(result.items[0].sourceEngine).toBe("brave");
     });
 
+    test("should validate and pass parallel and categories options", async () => {
+      const run = mock(async (query: string, opts: Record<string, unknown>) => {
+        expect(query).toBe("trimmed query");
+        expect(opts.parallel).toBe(true);
+        expect(opts.categories).toEqual(["it", "science"]);
+        return {
+          query,
+          results: [],
+          engineAttempts: [],
+          credits: [],
+        };
+      });
+      const container = {
+        get: (serviceId: string) => (serviceId === "orchestrator" ? { run } : null),
+      };
+
+      const result = await uberSearch(
+        {
+          query: "  trimmed query  ",
+          categories: [" it ", "science"],
+          parallel: true,
+        },
+        { containerOverride: container },
+      );
+
+      expect(result.query).toBe("trimmed query");
+      expect(run).toHaveBeenCalledTimes(1);
+    });
+
     test("should support string config path for backwards compatibility", async () => {
       // This tests the backwards compat - string arg is treated as config path
       // Since we can't easily test with real bootstrap, we verify the signature works
@@ -235,12 +264,47 @@ describe("Tool Module Tests", () => {
       expect(result.query).toBe("test query");
     });
 
-    test("should handle empty query", async () => {
+    test("should reject empty query", async () => {
       const container = createMockContainer();
-      const result = await uberSearch({ query: "" }, { containerOverride: container });
 
-      expect(result.query).toBe("");
-      expect(result.items).toHaveLength(2);
+      await expect(uberSearch({ query: "" }, { containerOverride: container })).rejects.toThrow(
+        "Invalid search input",
+      );
+    });
+
+    test("should reject whitespace-only query", async () => {
+      const container = createMockContainer();
+
+      await expect(uberSearch({ query: "   " }, { containerOverride: container })).rejects.toThrow(
+        "Invalid search input",
+      );
+    });
+
+    test("should reject invalid limit", async () => {
+      const container = createMockContainer();
+
+      await expect(
+        uberSearch({ query: "test query", limit: 0 }, { containerOverride: container }),
+      ).rejects.toThrow("Invalid search input");
+    });
+
+    test("should reject empty engine names", async () => {
+      const container = createMockContainer();
+
+      await expect(
+        uberSearch(
+          { query: "test query", engines: ["tavily", " "] },
+          { containerOverride: container },
+        ),
+      ).rejects.toThrow("Invalid search input");
+    });
+
+    test("should reject invalid categories", async () => {
+      const container = createMockContainer();
+
+      await expect(
+        uberSearch({ query: "test query", categories: [] }, { containerOverride: container }),
+      ).rejects.toThrow("Invalid search input");
     });
 
     test("should handle very long query", async () => {

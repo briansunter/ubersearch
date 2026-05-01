@@ -72,9 +72,9 @@ describe("FileCreditStateProvider", () => {
     test("should handle file with invalid structure", async () => {
       await writeFile(stateFilePath, JSON.stringify({ invalid: "structure" }));
 
-      // Should load but the structure might cause issues in business logic
+      // Invalid records are ignored so corrupted state cannot break credit initialization.
       const state = await provider.loadState();
-      expect(state).toEqual({ invalid: "structure" });
+      expect(state).toEqual({});
     });
 
     test("should handle deeply nested state", async () => {

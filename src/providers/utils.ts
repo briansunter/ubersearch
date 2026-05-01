@@ -8,6 +8,8 @@
 import type { EngineId } from "../core/types";
 import { SearchError } from "../core/types";
 
+const MAX_ERROR_BODY_LENGTH = 1000;
+
 /**
  * Options for HTTP requests
  */
@@ -43,7 +45,7 @@ export interface FetchResult<T> {
  * @throws SearchError if environment variable is not set
  */
 export function getApiKey(engineId: EngineId, envVarName: string): string {
-  const apiKey = process.env[envVarName];
+  const apiKey = process.env[envVarName]?.trim();
   if (!apiKey) {
     throw new SearchError(engineId, "config_error", `Missing environment variable: ${envVarName}`);
   }
@@ -115,6 +117,9 @@ export async function fetchWithErrorHandling<T>(
     } catch {
       // Ignore error body parsing failures
     }
+    if (errorBody.length > MAX_ERROR_BODY_LENGTH) {
+      errorBody = `${errorBody.slice(0, MAX_ERROR_BODY_LENGTH)}...`;
+    }
 
     // Detect rate limiting (HTTP 429)
     const reason = response.status === 429 ? "rate_limit" : "api_error";
@@ -180,5 +185,12 @@ export function buildUrl(baseUrl: string, params: Record<string, string | number
   for (const [key, value] of Object.entries(params)) {
     searchParams.append(key, String(value));
   }
-  return `${baseUrl}?${searchParams.toString()}`;
+
+  const queryString = searchParams.toString();
+  if (!queryString) {
+    return baseUrl;
+  }
+
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${separator}${queryString}`;
 }

@@ -369,6 +369,28 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
 
       expect(resp).toBeNull();
     });
+
+    test("tools/list notification produces no response", async () => {
+      const resp = await harness.sendNotification({
+        jsonrpc: "2.0",
+        method: "tools/list",
+      });
+
+      expect(resp).toBeNull();
+    });
+
+    test("tools/call notification produces no response", async () => {
+      const resp = await harness.sendNotification({
+        jsonrpc: "2.0",
+        method: "tools/call",
+        params: {
+          name: "uber_search",
+          arguments: {},
+        },
+      });
+
+      expect(resp).toBeNull();
+    });
   });
 
   // =========================================================================
@@ -587,6 +609,70 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
 
       expect(resp.error).toBeDefined();
       expect(resp.error?.code).toBe(-32602);
+    });
+
+    test("invalid limit returns params error with code -32602", async () => {
+      const resp = await harness.send({
+        jsonrpc: "2.0",
+        id: 151,
+        method: "tools/call",
+        params: {
+          name: "uber_search",
+          arguments: { query: "bun test", limit: 0 },
+        },
+      });
+
+      expect(resp.error).toBeDefined();
+      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.message).toContain("limit");
+    });
+
+    test("boolean limit returns params error with code -32602", async () => {
+      const resp = await harness.send({
+        jsonrpc: "2.0",
+        id: 152,
+        method: "tools/call",
+        params: {
+          name: "uber_search",
+          arguments: { query: "bun test", limit: true },
+        },
+      });
+
+      expect(resp.error).toBeDefined();
+      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.message).toContain("limit");
+    });
+
+    test("invalid strategy returns params error with code -32602", async () => {
+      const resp = await harness.send({
+        jsonrpc: "2.0",
+        id: 153,
+        method: "tools/call",
+        params: {
+          name: "uber_search",
+          arguments: { query: "bun test", strategy: "fastest" },
+        },
+      });
+
+      expect(resp.error).toBeDefined();
+      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.message).toContain("strategy");
+    });
+
+    test("invalid engines type returns params error with code -32602", async () => {
+      const resp = await harness.send({
+        jsonrpc: "2.0",
+        id: 154,
+        method: "tools/call",
+        params: {
+          name: "uber_search",
+          arguments: { query: "bun test", engines: 123 },
+        },
+      });
+
+      expect(resp.error).toBeDefined();
+      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.message).toContain("engines");
     });
 
     test("valid search request returns result with content array", async () => {

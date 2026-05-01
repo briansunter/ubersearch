@@ -29,21 +29,21 @@ export const DockerConfigSchema = z.object({
 // Provider-specific schemas
 export const TavilyConfigSchema = EngineConfigBaseSchema.extend({
   type: z.literal("tavily"),
-  apiKeyEnv: z.string(),
+  apiKeyEnv: z.string().min(1),
   endpoint: z.string().url(),
   searchDepth: z.enum(["basic", "advanced"]),
 });
 
 export const BraveConfigSchema = EngineConfigBaseSchema.extend({
   type: z.literal("brave"),
-  apiKeyEnv: z.string(),
+  apiKeyEnv: z.string().min(1),
   endpoint: z.string().url(),
   defaultLimit: z.number().int().positive(),
 });
 
 export const LinkupConfigSchema = EngineConfigBaseSchema.extend({
   type: z.literal("linkup"),
-  apiKeyEnv: z.string(),
+  apiKeyEnv: z.string().min(1),
   endpoint: z.string().url(),
 }).merge(DockerConfigSchema);
 
@@ -96,13 +96,17 @@ export const UberSearchConfigSchema = z
     },
   );
 
-// CLI input schema
+const NonEmptyTrimmedStringSchema = z.string().trim().min(1);
+
+// CLI/direct tool input schema
 export const CliInputSchema = z.object({
-  query: z.string().min(1),
+  query: NonEmptyTrimmedStringSchema,
   limit: z.number().int().positive().optional(),
-  engines: z.array(z.string()).min(1).optional(),
+  engines: z.array(NonEmptyTrimmedStringSchema).min(1).optional(),
   includeRaw: z.boolean().optional(),
   strategy: z.enum(["all", "first-success"]).optional(),
+  parallel: z.boolean().optional(),
+  categories: z.array(NonEmptyTrimmedStringSchema).min(1).optional(),
   json: z.boolean().optional(),
 });
 

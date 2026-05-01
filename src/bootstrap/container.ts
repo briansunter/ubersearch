@@ -6,7 +6,7 @@
 
 import { loadConfig } from "../config/load";
 import type { EngineConfig, UberSearchConfig } from "../config/types";
-import { type Container, container } from "../core/container";
+import { Container } from "../core/container";
 import { CreditManager } from "../core/credits";
 import { FileCreditStateProvider } from "../core/credits/FileCreditStateProvider";
 import { getErrorMessage } from "../core/errorUtils";
@@ -41,8 +41,7 @@ export async function bootstrapContainer(
   configOrPath?: string | UberSearchConfig,
   options?: BootstrapOptions | string,
 ): Promise<Container> {
-  // Clear existing registrations (useful for testing)
-  container.reset();
+  const appContainer = new Container();
 
   // Handle legacy second argument (creditStatePath)
   const opts: BootstrapOptions =
@@ -64,23 +63,25 @@ export async function bootstrapContainer(
   }
 
   // Register configuration as singleton
-  container.singleton(ServiceKeys.CONFIG, () => config);
+  appContainer.singleton(ServiceKeys.CONFIG, () => config);
 
   // Register credit state provider
-  container.singleton(ServiceKeys.CREDIT_STATE_PROVIDER, () => {
+  appContainer.singleton(ServiceKeys.CREDIT_STATE_PROVIDER, () => {
     const creditStatePath = opts.creditStatePath ?? config.storage?.creditStatePath;
     return new FileCreditStateProvider(creditStatePath);
   });
 
   // Register credit manager
-  container.singleton(ServiceKeys.CREDIT_MANAGER, () => {
+  appContainer.singleton(ServiceKeys.CREDIT_MANAGER, () => {
     const enabledEngines = config.engines.filter((e) => e.enabled);
-    const stateProvider = container.get<FileCreditStateProvider>(ServiceKeys.CREDIT_STATE_PROVIDER);
+    const stateProvider = appContainer.get<FileCreditStateProvider>(
+      ServiceKeys.CREDIT_STATE_PROVIDER,
+    );
     return new CreditManager(enabledEngines, stateProvider);
   });
 
   // Register provider registry
-  container.singleton(ServiceKeys.PROVIDER_REGISTRY, () => {
+  appContainer.singleton(ServiceKeys.PROVIDER_REGISTRY, () => {
     const registry = new ProviderRegistry();
     const failedProviders: string[] = [];
     const skippedProviders: string[] = [];
@@ -92,7 +93,7 @@ export async function bootstrapContainer(
       }
 
       try {
-        const provider = createProvider(engineConfig);
+        const provider = createProvider(engineConfig, appContainer);
 
         // Skip providers that aren't configured (e.g., missing API key)
         if (!provider.isConfigured()) {
@@ -132,28 +133,28 @@ export async function bootstrapContainer(
   });
 
   // Register strategy factory
-  container.singleton(ServiceKeys.STRATEGY_FACTORY, () => StrategyFactory);
+  appContainer.singleton(ServiceKeys.STRATEGY_FACTORY, () => StrategyFactory);
 
   // Register orchestrator
-  container.singleton(ServiceKeys.ORCHESTRATOR, () => {
-    const creditManager = container.get<CreditManager>(ServiceKeys.CREDIT_MANAGER);
-    const providerRegistry = container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
+  appContainer.singleton(ServiceKeys.ORCHESTRATOR, () => {
+    const creditManager = appContainer.get<CreditManager>(ServiceKeys.CREDIT_MANAGER);
+    const providerRegistry = appContainer.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
     return new UberSearchOrchestrator(config, creditManager, providerRegistry);
   });
 
   // Initialize services that need async setup
-  const creditManager = container.get<CreditManager>(ServiceKeys.CREDIT_MANAGER);
+  const creditManager = appContainer.get<CreditManager>(ServiceKeys.CREDIT_MANAGER);
   await creditManager.initialize();
 
   // Resolve provider registry to trigger validation (throws if no providers registered)
-  container.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
+  appContainer.get<ProviderRegistry>(ServiceKeys.PROVIDER_REGISTRY);
 
-  return container;
+  return appContainer;
 }
 
 /**
  * Create a provider instance based on engine configuration
  */
-function createProvider(engineConfig: EngineConfig): SearchProvider {
-  return ProviderFactory.createProvider(engineConfig, container);
+function createProvider(engineConfig: EngineConfig, appContainer: Container): SearchProvider {
+  return ProviderFactory.createProvider(engineConfig, appContainer);
 }

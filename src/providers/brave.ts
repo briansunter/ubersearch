@@ -49,7 +49,13 @@ export class BraveProvider extends BaseProvider<BraveConfig> {
     this.validateResults(webResults, "Brave");
 
     // Map to normalized format
-    const items = mapSearchResults(webResults, this.id, PROVIDER_MAPPINGS.brave);
+    const items = mapSearchResults(
+      webResults,
+      this.id,
+      PROVIDER_MAPPINGS.brave,
+      (r) => typeof r.url === "string" && r.url.trim().length > 0,
+    );
+    this.validateResults(items, "Brave");
 
     return {
       engineId: this.id,

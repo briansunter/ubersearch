@@ -56,6 +56,19 @@ export function getFirstMatch<T = unknown>(
   return undefined;
 }
 
+function normalizeScore(value: unknown): number | undefined {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : undefined;
+  }
+
+  if (typeof value === "string" && value.trim().length > 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+}
+
 /**
  * Map a single raw result object to a SearchResultItem
  *
@@ -89,12 +102,17 @@ export function mapSearchResult(
   const snippetKeys = mappings.snippet ?? DEFAULT_FIELD_MAPPINGS.snippet;
   const scoreKeys = mappings.score ?? DEFAULT_FIELD_MAPPINGS.score;
 
+  const score = normalizeScore(getFirstMatch(r, scoreKeys));
+  const sourceEngine = mappings.sourceEngine
+    ? String(r[mappings.sourceEngine] ?? "").trim() || engineId
+    : engineId;
+
   return {
-    title: String(getFirstMatch(r, titleKeys) ?? "Untitled"),
-    url: String(getFirstMatch(r, urlKeys) ?? ""),
-    snippet: String(getFirstMatch(r, snippetKeys) ?? ""),
-    score: getFirstMatch<number>(r, scoreKeys),
-    sourceEngine: mappings.sourceEngine ? String(r[mappings.sourceEngine] ?? engineId) : engineId,
+    title: String(getFirstMatch(r, titleKeys) ?? "Untitled").trim(),
+    url: String(getFirstMatch(r, urlKeys) ?? "").trim(),
+    snippet: String(getFirstMatch(r, snippetKeys) ?? "").trim(),
+    score,
+    sourceEngine,
   };
 }
 

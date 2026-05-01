@@ -46,6 +46,19 @@ describe("getApiKey", () => {
     expect(() => getApiKey("test-engine", "EMPTY_KEY")).toThrow(SearchError);
     delete process.env.EMPTY_KEY;
   });
+
+  test("should trim whitespace around API keys", () => {
+    process.env.SPACED_KEY = "  my-secret-key  ";
+    const key = getApiKey("test-engine", "SPACED_KEY");
+    expect(key).toBe("my-secret-key");
+    delete process.env.SPACED_KEY;
+  });
+
+  test("should throw SearchError when env var is only whitespace", () => {
+    process.env.WHITESPACE_KEY = "   ";
+    expect(() => getApiKey("test-engine", "WHITESPACE_KEY")).toThrow(SearchError);
+    delete process.env.WHITESPACE_KEY;
+  });
 });
 
 describe("fetchWithErrorHandling", () => {
@@ -246,6 +259,27 @@ describe("fetchWithErrorHandling", () => {
         expect.unreachable("should have thrown");
       } catch (error) {
         expect((error as SearchError).message).toContain("quota exceeded");
+      }
+    });
+
+    test("should truncate very large error bodies", async () => {
+      globalThis.fetch = mock(
+        async () =>
+          new Response("x".repeat(2000), {
+            status: 500,
+            statusText: "Internal Server Error",
+          }),
+      ) as unknown as typeof fetch;
+
+      try {
+        await fetchWithErrorHandling("test-engine", "https://api.example.com/search", {
+          method: "GET",
+          headers: {},
+        });
+        expect.unreachable("should have thrown");
+      } catch (error) {
+        expect((error as SearchError).message.length).toBeLessThan(1200);
+        expect((error as SearchError).message).toContain("...");
       }
     });
   });
@@ -471,7 +505,7 @@ describe("buildUrl", () => {
 
   test("should handle empty params object", () => {
     const url = buildUrl("https://api.example.com/search", {});
-    expect(url).toBe("https://api.example.com/search?");
+    expect(url).toBe("https://api.example.com/search");
   });
 
   test("should encode special characters in parameter values", () => {
@@ -480,5 +514,12 @@ describe("buildUrl", () => {
     });
     // URLSearchParams encodes & as %26 and spaces as +
     expect(url).toContain("q=hello+world+%26+goodbye");
+  });
+
+  test("should append parameters to URLs with existing query strings", () => {
+    const url = buildUrl("https://api.example.com/search?existing=1", {
+      q: "test",
+    });
+    expect(url).toBe("https://api.example.com/search?existing=1&q=test");
   });
 });
