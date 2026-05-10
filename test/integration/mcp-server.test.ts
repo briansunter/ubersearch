@@ -10,6 +10,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { type ChildProcess, spawn } from "node:child_process";
+import pkg from "../../package.json" with { type: "json" };
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -161,6 +162,25 @@ class MCPTestHarness {
     return null;
   }
 
+  /**
+   * Send raw text expecting no response (e.g. malformed JSON the SDK silently
+   * drops). Waits `waitMs`, returns whatever response arrived (or null).
+   */
+  async sendRawNotification(text: string, waitMs = 300): Promise<JsonRpcResponse | null> {
+    if (!this.proc?.stdin) {
+      throw new Error("MCP server process not started");
+    }
+
+    const countBefore = this.responses.length;
+    this.proc.stdin.write(`${text}\n`);
+    await sleep(waitMs);
+
+    if (this.responses.length > countBefore) {
+      return this.responses.shift() ?? null;
+    }
+    return null;
+  }
+
   async stop(): Promise<void> {
     if (this.proc) {
       this.proc.kill("SIGTERM");
@@ -298,7 +318,8 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
       const result = resp.result as Record<string, unknown>;
       const serverInfo = result.serverInfo as Record<string, string>;
       expect(serverInfo.name).toBe("ubersearch");
-      expect(serverInfo.version).toBe("1.0.0");
+      // Version is sourced from package.json (per ADR-0001 / PRD).
+      expect(serverInfo.version).toBe(pkg.version);
     });
 
     test("returns protocol version", async () => {
@@ -334,15 +355,18 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
       expect(capabilities.tools).toBeDefined();
     });
 
-    test("does not return an error", async () => {
+    test("rejects initialize without required params", async () => {
+      // SDK divergence (vs. hand-rolled): the official @modelcontextprotocol/sdk
+      // enforces the InitializeRequest schema (protocolVersion, capabilities,
+      // clientInfo). Hand-rolled accepted bare `initialize` calls; SDK does not.
+      // This is spec-correct behavior — real MCP clients always send proper params.
       const resp = await harness.send({
         jsonrpc: "2.0",
         id: 1,
         method: "initialize",
       });
 
-      expect(resp.error).toBeUndefined();
-      expect(resp.result).toBeDefined();
+      expect(resp.error).toBeDefined();
     });
   });
 
@@ -828,8 +852,13 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
         },
       });
 
+      // SDK divergence: the SDK validates request shape against
+      // CallToolRequestSchema and surfaces failures as -32603 (Internal error)
+      // with a structured zod message, not -32602 (InvalidParams). Hand-rolled
+      // returned -32602 here. The user-facing impact is a different code on a
+      // protocol-shape error that well-behaved clients should never hit.
       expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.code).toBe(-32603);
     });
 
     test("tool name with typo returns error", async () => {
@@ -866,7 +895,9 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
       expect(resp.error?.message).toContain("Method not found");
     });
 
-    test("error message includes the unknown method name", async () => {
+    test("error message indicates method not found", async () => {
+      // SDK divergence: hand-rolled echoed the method name in the error
+      // message; the SDK returns a generic "Method not found" string.
       const resp = await harness.send({
         jsonrpc: "2.0",
         id: 51,
@@ -875,7 +906,7 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
 
       expect(resp.error).toBeDefined();
       expect(resp.error?.code).toBe(-32601);
-      expect(resp.error?.message).toContain("resources/list");
+      expect(resp.error?.message).toContain("Method not found");
     });
 
     test("empty method string returns method-not-found", async () => {
@@ -907,52 +938,38 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
   // =========================================================================
 
   describe("Parse Error", () => {
-    test("malformed JSON returns parse error with code -32700", async () => {
-      const resp = await harness.sendRaw("{not valid json}");
+    // SDK divergence: the official @modelcontextprotocol/sdk silently drops
+    // malformed JSON on the stdio transport rather than emitting -32700 Parse
+    // error responses. Hand-rolled responded with -32700. Real MCP clients do
+    // not send malformed JSON, so the user-facing impact is nil; the tests
+    // below verify the SDK behavior (silence + server liveness).
 
-      expect(resp.jsonrpc).toBe("2.0");
-      expect(resp.id).toBeNull();
-      expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32700);
-      expect(resp.error?.message).toContain("Parse error");
-    });
-
-    test("empty object is valid JSON and not a parse error", async () => {
-      // {} is valid JSON so it should not trigger -32700.
-      // However, it has no `id`, so the server treats it as a notification
-      // to an unknown method and silently drops it (no response).
-      const resp = await harness.sendNotification({
-        jsonrpc: "2.0",
-        method: "", // effectively what {} looks like with undefined method
-      } as Omit<JsonRpcRequest, "id">);
-
-      // No response expected for a notification
+    test("malformed JSON is silently dropped by the SDK", async () => {
+      const resp = await harness.sendRawNotification("{not valid json}");
       expect(resp).toBeNull();
     });
 
-    test("truncated JSON returns parse error", async () => {
-      const resp = await harness.sendRaw('{"jsonrpc": "2.0", "id": 1, "method":');
-
-      expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32700);
+    test("empty object is valid JSON and not a parse error", async () => {
+      const resp = await harness.sendNotification({
+        jsonrpc: "2.0",
+        method: "",
+      } as Omit<JsonRpcRequest, "id">);
+      expect(resp).toBeNull();
     });
 
-    test("plain text returns parse error", async () => {
-      const resp = await harness.sendRaw("hello world");
-
-      expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32700);
+    test("truncated JSON is silently dropped", async () => {
+      const resp = await harness.sendRawNotification('{"jsonrpc": "2.0", "id": 1, "method":');
+      expect(resp).toBeNull();
     });
 
-    test("parse error response has null id", async () => {
-      const resp = await harness.sendRaw("!!!invalid!!!");
-
-      expect(resp.id).toBeNull();
+    test("plain text is silently dropped", async () => {
+      const resp = await harness.sendRawNotification("hello world");
+      expect(resp).toBeNull();
     });
 
-    test("server continues processing after parse error", async () => {
-      // Send malformed JSON first
-      await harness.sendRaw("not json");
+    test("server continues processing after malformed input", async () => {
+      // Send malformed JSON first (silently dropped)
+      await harness.sendRawNotification("not json");
 
       // Then send a valid request - server should still work
       const resp = await harness.send({
@@ -1029,17 +1046,18 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
   // =========================================================================
 
   describe("Edge Cases", () => {
-    test("tools/call with no params object still works", async () => {
-      // params is undefined - the server defaults to {}
+    test("tools/call with no params object is rejected", async () => {
+      // SDK divergence: hand-rolled defaulted params to {} and surfaced this
+      // as -32602; the SDK validates against CallToolRequestSchema and emits
+      // -32603 with a structured zod message.
       const resp = await harness.send({
         jsonrpc: "2.0",
         id: 80,
         method: "tools/call",
       });
 
-      // Should get an error about unknown tool (name would be "")
       expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.code).toBe(-32603);
     });
 
     test("tools/call with non-object arguments is handled", async () => {
@@ -1068,16 +1086,28 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
         },
       });
 
-      // null arguments should be treated as empty, triggering query validation
+      // SDK divergence: hand-rolled coerced null arguments to {} and surfaced
+      // the missing-query check as -32602. The SDK rejects the null at schema
+      // level with -32603. Either way an error is returned.
       expect(resp.error).toBeDefined();
-      expect(resp.error?.code).toBe(-32602);
+      expect(resp.error?.code).toBe(-32603);
     });
 
     test("initialize can be called multiple times", async () => {
+      // The SDK enforces the InitializeRequest schema, so each call must
+      // include protocolVersion/capabilities/clientInfo. Both calls succeed
+      // and return matching serverInfo.
+      const initParams = {
+        protocolVersion: "2024-11-05",
+        capabilities: {},
+        clientInfo: { name: "test-client", version: "1.0.0" },
+      };
+
       const resp1 = await harness.send({
         jsonrpc: "2.0",
         id: 83,
         method: "initialize",
+        params: initParams,
       });
       expect(resp1.result).toBeDefined();
 
@@ -1085,10 +1115,10 @@ describe.skipIf(SKIP_MCP_TESTS)("MCP Server", () => {
         jsonrpc: "2.0",
         id: 84,
         method: "initialize",
+        params: initParams,
       });
       expect(resp2.result).toBeDefined();
 
-      // Both should return the same structure
       const r1 = resp1.result as Record<string, unknown>;
       const r2 = resp2.result as Record<string, unknown>;
       expect((r1.serverInfo as Record<string, string>).name).toBe(

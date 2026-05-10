@@ -222,7 +222,10 @@ The local SearXNG instance is not running. Either:
 
 ## Development
 
-- **MCP Server**: `src/mcp-server.ts`
+- **MCP Server entry point**: `src/mcp-server.ts` (thin shim — re-exports `serve` from `src/mcp/bootstrap.ts`)
+- **MCP modules**: `src/mcp/` (registry, parsers, handlers, bootstrap)
 - **Test Script**: `scripts/test-mcp.ts`
 - **Core Tool**: `src/tool/uberSearchTool.ts`
 - **CLI**: `src/cli.ts`
+
+The MCP protocol is implemented via [`@modelcontextprotocol/sdk`](https://github.com/modelcontextprotocol/typescript-sdk) — see `docs/adr/0001-migrate-to-mcp-sdk.md`.

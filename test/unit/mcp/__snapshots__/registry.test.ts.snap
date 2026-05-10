@@ -1,0 +1,72 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`MCP tool registry snapshot of the tool surface 1`] = `
+[
+  {
+    "description": "Unified search across multiple providers (Tavily, Brave, Linkup, SearXNG)",
+    "inputSchema": {
+      "properties": {
+        "categories": {
+          "default": "",
+          "description": 
+"SearXNG categories (comma-separated). Available categories:
+- general: Web search (brave, duckduckgo, startpage, qwant)
+- it: Tech (github, stackoverflow, npm, pypi, huggingface)
+- science: Academic (arxiv, google_scholar)
+- news: News (hackernews, reddit, bbc)
+- videos: Video (youtube)
+Example: "it,science" for tech and academic results"
+,
+          "type": "string",
+        },
+        "engines": {
+          "default": "",
+          "description": "Comma-separated list of engines to use (e.g., 'tavily,brave')",
+          "type": "string",
+        },
+        "limit": {
+          "default": 10,
+          "description": "Maximum results per engine",
+          "type": "number",
+        },
+        "query": {
+          "description": "Search query",
+          "type": "string",
+        },
+        "strategy": {
+          "default": "all",
+          "description": "Search strategy: 'all' (query all) or 'first-success' (stop after first)",
+          "enum": [
+            "all",
+            "first-success",
+          ],
+          "type": "string",
+        },
+      },
+      "required": [
+        "query",
+      ],
+      "type": "object",
+    },
+    "name": "uber_search",
+  },
+  {
+    "description": "Show credit status for all configured search engines",
+    "inputSchema": {
+      "properties": {},
+      "required": [],
+      "type": "object",
+    },
+    "name": "uber_search_credits",
+  },
+  {
+    "description": "Run health checks on all configured search providers",
+    "inputSchema": {
+      "properties": {},
+      "required": [],
+      "type": "object",
+    },
+    "name": "uber_search_health",
+  },
+]
+`;
