@@ -56,3 +56,17 @@ bun run build:binary           # Compile standalone binary
 - `StrategyFactory` is a singleton that must be reset between tests (handled by `test/setup.ts`)
 - Provider configs use `apiKeyEnv` (env var name, not the key itself)
 - SearXNG settings.yml is auto-copied to XDG on first run; the source template is in `providers/searxng/config/`
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature>/` in this repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context — `CONTEXT.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
