@@ -1,5 +1,5 @@
 ---
-name: UberSearch
+name: ubersearch
 description: Unified web search CLI and MCP server across Tavily, Brave, Linkup, and SearXNG. Use when searching the web, researching topics, checking provider health or credits, or configuring multi-provider search strategies.
 keywords: [search, web, tavily, brave, searxng, linkup, research, mcp, credits, health]
 topics: [search, research, web, mcp]
