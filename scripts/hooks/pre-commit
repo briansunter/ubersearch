@@ -19,4 +19,8 @@ bun run lint
 echo "Running unit tests..."
 bun run test:unit
 
+# Run type checking
+echo "Running typecheck..."
+bun run typecheck
+
 echo "Pre-commit checks passed!"

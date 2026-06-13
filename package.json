@@ -31,7 +31,8 @@
     "@semantic-release/release-notes-generator": "^14.0.1",
     "@types/bun": "latest",
     "conventional-changelog-conventionalcommits": "^9.1.0",
-    "semantic-release": "^24.2.0"
+    "semantic-release": "^24.2.0",
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -46,9 +47,9 @@
     "lint:fix": "bunx biome check --write src/ test/ scripts/ docs/ *.json *.md",
     "format": "bunx biome format --write src/ test/ scripts/ docs/ *.json *.md",
     "test": "SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts test/",
+    "typecheck": "tsc --noEmit",
     "test:unit": "bun test --preload ./test/setup.ts test/unit/",
     "test:integration": "bun test --preload ./test/setup.ts test/integration/",
-    "test:e2e": "bun test --preload ./test/setup.ts test/e2e/",
     "test:coverage": "SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts --coverage test/",
     "test:watch": "SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts --watch test/",
     "test:verbose": "DEBUG_TESTS=1 SKIP_DOCKER_TESTS=true bun test --preload ./test/setup.ts test/",
