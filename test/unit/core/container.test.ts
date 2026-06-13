@@ -60,15 +60,12 @@ describe("Container", () => {
       expect(instance1.getValue()).toBe("singleton");
     });
 
-    test("should support singleton with async factory", async () => {
+    test("should throw when a singleton factory returns a Promise", () => {
       container.singleton("async", () => createAsyncService("async-singleton"));
 
-      const instance1 = await container.get<Promise<IService>>("async");
-      const instance2 = await container.get<Promise<IService>>("async");
-
-      // For async factories, get() returns the same Promise, so instances are same
-      expect(instance1).toBe(instance2);
-      expect(instance1.getValue()).toBe("async-singleton");
+      expect(() => container.get("async")).toThrow(
+        "factory returned a Promise. The container is synchronous",
+      );
     });
 
     test("should lazy initialize singleton", () => {
@@ -111,20 +108,12 @@ describe("Container", () => {
       expect(instance2.getValue()).toBe("transient");
     });
 
-    test("should support transient with async factory", async () => {
+    test("should throw when a transient factory returns a Promise", () => {
       container.bind("async", () => createAsyncService("async-transient"));
 
-      const promise1 = container.get<Promise<IService>>("async");
-      const promise2 = container.get<Promise<IService>>("async");
-
-      // Different Promise instances for transient
-      expect(promise1).not.toBe(promise2);
-
-      const instance1 = await promise1;
-      const instance2 = await promise2;
-
-      expect(instance1.getValue()).toBe("async-transient");
-      expect(instance2.getValue()).toBe("async-transient");
+      expect(() => container.get("async")).toThrow(
+        "factory returned a Promise. The container is synchronous",
+      );
     });
 
     test("should create new instance on each get", () => {
@@ -272,6 +261,43 @@ describe("Container", () => {
       expect(singletonInfo?.singleton).toBe(true);
       expect(transientInfo?.singleton).toBe(false);
       expect(unregisteredInfo).toBeUndefined();
+    });
+  });
+
+  describe("async factory guard", () => {
+    test("should throw a descriptive error when a singleton factory returns a thenable", () => {
+      container.singleton("async-singleton", () => Promise.resolve(new TestService("async")));
+
+      expect(() => container.get("async-singleton")).toThrow(
+        "factory returned a Promise. The container is synchronous",
+      );
+    });
+
+    test("should throw a descriptive error when a transient factory returns a thenable", () => {
+      container.bind("async-transient", () => Promise.resolve(new TestService("async")));
+
+      expect(() => container.get("async-transient")).toThrow(
+        "factory returned a Promise. The container is synchronous",
+      );
+    });
+
+    test("should throw even for custom thenable objects", () => {
+      // biome-ignore lint/suspicious/noThenProperty: intentionally building a thenable to exercise the guard
+      const thenable = { then: (resolve: (v: string) => void) => resolve("value") };
+      container.bind("thenable", () => thenable);
+
+      expect(() => container.get("thenable")).toThrow(
+        "factory returned a Promise. The container is synchronous",
+      );
+    });
+
+    test("should not throw for objects with a non-function 'then' property", () => {
+      // Objects that coincidentally have a 'then' key that is not a function are not thenables
+      // biome-ignore lint/suspicious/noThenProperty: testing that non-function `then` is not treated as thenable
+      const notAThenable = { then: "some string value", value: 42 };
+      container.bind("not-thenable", () => notAThenable);
+
+      expect(() => container.get("not-thenable")).not.toThrow();
     });
   });
 

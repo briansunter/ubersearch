@@ -116,9 +116,12 @@ describe("SearchCache", () => {
       cache.set(key2, { items: ["a", "b"] });
       cache.set(key3, { items: ["a"], raw: true });
 
-      expect(cache.get(key1)).toEqual({ items: ["a"] });
-      expect(cache.get(key2)).toEqual({ items: ["a", "b"] });
-      expect(cache.get(key3)).toEqual({ items: ["a"], raw: true });
+      expect(cache.get<{ items: string[] }>(key1)).toEqual({ items: ["a"] });
+      expect(cache.get<{ items: string[] }>(key2)).toEqual({ items: ["a", "b"] });
+      expect(cache.get<{ items: string[]; raw: boolean }>(key3)).toEqual({
+        items: ["a"],
+        raw: true,
+      });
     });
   });
 
@@ -183,6 +186,23 @@ describe("SearchCache", () => {
 
       expect(cache.get("x")).toBeUndefined();
       expect(cache.get("y")).toBeUndefined();
+    });
+  });
+
+  describe("prune-on-set (opportunistic eviction)", () => {
+    test("should evict expired entries after enough subsequent sets trigger pruning", async () => {
+      // Insert an entry that will expire quickly
+      cache.set("will-expire", "old", 1);
+
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Fill the cache to trigger the prune threshold (PRUNE_EVERY_N_SETS = 50)
+      for (let i = 0; i < 50; i++) {
+        cache.set(`filler-${i}`, `value-${i}`, 60_000);
+      }
+
+      // The expired entry should have been pruned by now
+      expect(cache.get("will-expire")).toBeUndefined();
     });
   });
 

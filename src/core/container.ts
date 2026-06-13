@@ -137,6 +137,20 @@ export class Container {
       // Create instance using factory
       const instance = binding.factory(this);
 
+      // Guard against async factories — the container is synchronous. Any async
+      // initialization must happen post-construction (e.g. the way bootstrapContainer
+      // initializes CreditManager after container.get() returns).
+      if (
+        instance !== null &&
+        typeof instance === "object" &&
+        typeof (instance as { then?: unknown }).then === "function"
+      ) {
+        throw new Error(
+          `Service '${String(id)}' factory returned a Promise. The container is synchronous; ` +
+            "perform async initialization post-construction (see bootstrapContainer pattern).",
+        );
+      }
+
       // Cache singleton instances
       if (binding.singleton) {
         binding.cached = instance;

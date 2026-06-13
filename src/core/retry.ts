@@ -5,8 +5,11 @@
  * provider operations
  */
 
-import type { EngineId } from "./types";
+import { createLogger } from "./logger";
+import type { EngineId, SearchFailureReason } from "./types";
 import { SearchError } from "./types";
+
+const log = createLogger("retry");
 
 /**
  * Retry configuration
@@ -25,7 +28,7 @@ export interface RetryConfig {
   maxDelayMs?: number;
 
   /** Whether to retry on specific error types */
-  retryableErrors?: Array<"network_error" | "api_error" | "rate_limit" | "no_results" | "timeout">;
+  retryableErrors?: Array<"network_error" | "api_error" | "rate_limit" | "no_results">;
 }
 
 /**
@@ -79,9 +82,7 @@ export async function withRetry<T>(
         throw error;
       }
 
-      const shouldRetry = retryableErrors.includes(
-        error.reason as "network_error" | "api_error" | "rate_limit" | "no_results",
-      );
+      const shouldRetry = (retryableErrors as SearchFailureReason[]).includes(error.reason);
 
       if (!shouldRetry || attempt >= maxAttempts) {
         throw error;
@@ -89,7 +90,7 @@ export async function withRetry<T>(
 
       const retryDelay = Math.min(delay, maxDelayMs);
 
-      console.warn(
+      log.warn(
         `[${engineId}] Attempt ${attempt}/${maxAttempts} failed: ${error.message}. Retrying in ${retryDelay}ms...`,
       );
 

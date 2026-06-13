@@ -12,12 +12,16 @@ interface CacheEntry<T> {
   expiresAt: number;
 }
 
+/** Prune expired entries every N sets to avoid O(n) cost on every write */
+const PRUNE_EVERY_N_SETS = 50;
+
 /**
  * Simple in-memory cache with TTL support
  */
 export class SearchCache {
   private cache = new Map<string, CacheEntry<unknown>>();
   private readonly DEFAULT_TTL_MS = 5 * 60 * 1000;
+  private setCount = 0;
 
   /**
    * Get a value from the cache if it exists and hasn't expired
@@ -51,6 +55,11 @@ export class SearchCache {
       data: value,
       expiresAt: Date.now() + ttlMs,
     });
+
+    this.setCount++;
+    if (this.setCount % PRUNE_EVERY_N_SETS === 0) {
+      this.prune();
+    }
   }
 
   /**
