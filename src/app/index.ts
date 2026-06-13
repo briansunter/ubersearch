@@ -10,6 +10,7 @@ export {
   defineLinkup,
   definePlugin,
   defineSearchxng,
+  defineSearxng,
   defineTavily,
 } from "../config/defineConfig";
 export type {
@@ -17,6 +18,7 @@ export type {
   EngineConfig,
   LinkupConfig,
   SearchxngConfig,
+  SearxngConfig,
   TavilyConfig,
   UberSearchConfig,
 } from "../config/types";

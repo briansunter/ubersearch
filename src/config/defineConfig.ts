@@ -12,7 +12,7 @@ import type {
   EngineConfig,
   EngineConfigBase,
   LinkupConfig,
-  SearchxngConfig,
+  SearxngConfig,
   TavilyConfig,
   UberSearchConfig,
 } from "./types";
@@ -110,14 +110,19 @@ export function defineLinkup(
 /**
  * Helper to define a SearXNG engine configuration
  */
-export function defineSearchxng(
-  config: Omit<SearchxngConfig, "type"> & Partial<Pick<SearchxngConfig, "type">>,
-): SearchxngConfig {
+export function defineSearxng(
+  config: Omit<SearxngConfig, "type"> & Partial<Pick<SearxngConfig, "type">>,
+): SearxngConfig {
   return {
     type: "searchxng",
     ...config,
   };
 }
+
+/**
+ * @deprecated Use `defineSearxng` instead.
+ */
+export const defineSearchxng = defineSearxng;
 
 /**
  * Generic helper for custom engine types

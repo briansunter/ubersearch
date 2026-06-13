@@ -321,10 +321,10 @@ describe("Config Loader", () => {
 
       const config = await loadConfig();
 
-      expect((config as Record<string, unknown>).extraField).toBe("should be preserved");
-      expect(((config as Record<string, unknown>).nested as Record<string, unknown>).extra).toBe(
-        "data",
-      );
+      expect((config as unknown as Record<string, unknown>).extraField).toBe("should be preserved");
+      expect(
+        ((config as unknown as Record<string, unknown>).nested as Record<string, unknown>).extra,
+      ).toBe("data");
     });
 
     it("should point default SearchXNG config at the bundled compose file", async () => {
@@ -464,7 +464,7 @@ describe("Config Loader", () => {
 
       expect(
         (
-          config.engines[0] as Record<string, unknown> as {
+          config.engines[0] as unknown as {
             advanced: { nested: { deeply: { value: string } } };
           }
         ).advanced.nested.deeply.value,

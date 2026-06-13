@@ -176,7 +176,7 @@ export const PROVIDER_MAPPINGS = {
     snippet: ["content", "snippet", "description"],
     score: ["score", "relevance"],
   },
-  searchxng: {
+  searxng: {
     title: ["title", "url"],
     url: ["url"],
     snippet: ["content", "description"],

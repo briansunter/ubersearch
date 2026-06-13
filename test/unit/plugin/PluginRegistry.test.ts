@@ -26,6 +26,14 @@ class MockProvider implements SearchProvider {
     };
   }
 
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
+  }
+
   async search(_query: SearchQuery): Promise<SearchResponse> {
     return {
       engineId: this.id,
@@ -42,7 +50,7 @@ interface MockConfig extends EngineConfigBase {
 }
 
 // Create a mock plugin
-function createMockPlugin(type: string = "mock"): PluginDefinition<MockConfig, MockProvider> {
+function createMockPlugin(type: string = "mock"): PluginDefinition {
   return {
     type,
     displayName: `Mock ${type}`,
@@ -337,7 +345,7 @@ describe("PluginRegistry", () => {
       const plugin = createMockPlugin("create-test");
       await registry.register(plugin);
 
-      const config: MockConfig = {
+      const config = {
         type: "create-test",
         id: "test-instance",
         enabled: true,
@@ -345,7 +353,7 @@ describe("PluginRegistry", () => {
         monthlyQuota: 1000,
         creditCostPerSearch: 1,
         lowCreditThresholdPercent: 80,
-      };
+      } as unknown as MockConfig;
 
       const provider = registry.createProvider(config);
       expect(provider).toBeDefined();
@@ -429,8 +437,8 @@ describe("PluginRegistry", () => {
         configs as Array<EngineConfigBase & { type: string }>,
       );
       expect(providers).toHaveLength(2);
-      expect(providers[0].id).toBe("p1");
-      expect(providers[1].id).toBe("p2");
+      expect(providers[0]!.id).toBe("p1");
+      expect(providers[1]!.id).toBe("p2");
     });
   });
 

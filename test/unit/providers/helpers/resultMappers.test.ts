@@ -79,10 +79,10 @@ describe("result mappers", () => {
         url: "https://example.com",
         engine: "   ",
       },
-      "searchxng",
-      PROVIDER_MAPPINGS.searchxng,
+      "searxng",
+      PROVIDER_MAPPINGS.searxng,
     );
 
-    expect(item.sourceEngine).toBe("searchxng");
+    expect(item.sourceEngine).toBe("searxng");
   });
 });

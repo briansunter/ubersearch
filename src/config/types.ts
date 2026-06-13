@@ -62,14 +62,17 @@ export interface LinkupConfig extends EngineConfigBase, DockerConfigurable {
   endpoint: string;
 }
 
-export interface SearchxngConfig extends EngineConfigBase, DockerConfigurable {
+export interface SearxngConfig extends EngineConfigBase, DockerConfigurable {
   type: "searchxng";
   apiKeyEnv?: string;
   endpoint: string;
   defaultLimit: number;
 }
 
-export type EngineConfig = TavilyConfig | BraveConfig | LinkupConfig | SearchxngConfig;
+export type EngineConfig = TavilyConfig | BraveConfig | LinkupConfig | SearxngConfig;
+
+/** @deprecated Use `SearxngConfig` instead. */
+export type SearchxngConfig = SearxngConfig;
 
 export interface UberSearchConfig {
   /** Default order to try engines (can be overridden per query) */

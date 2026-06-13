@@ -1,17 +1,17 @@
 /**
  * Comprehensive SearXNG Provider Tests
  *
- * Tests for src/providers/searchxng.ts
+ * Tests for src/providers/searxng.ts
  *
  * Note: These tests use instance method spying instead of mock.module
  * to avoid polluting module state across test files.
  */
 
 import { afterEach, beforeEach, describe, expect, mock, spyOn, test } from "bun:test";
-import type { SearchxngConfig } from "../../../src/config/types";
+import type { SearxngConfig } from "../../../src/config/types";
 import type { SearchQuery } from "../../../src/core/types";
 import { SearchError } from "../../../src/core/types";
-import { SearchxngProvider } from "../../../src/providers/searchxng";
+import { SearxngProvider } from "../../../src/providers/searxng";
 import {
   createMockSearxngResponse,
   createTestSearchxngConfig,
@@ -23,9 +23,9 @@ import {
 const originalEnv = { ...process.env };
 const originalFetch = global.fetch;
 
-describe("SearchxngProvider", () => {
-  let provider: SearchxngProvider;
-  let mockConfig: SearchxngConfig;
+describe("SearxngProvider", () => {
+  let provider: SearxngProvider;
+  let mockConfig: SearxngConfig;
 
   beforeEach(() => {
     mockConfig = {
@@ -47,7 +47,7 @@ describe("SearchxngProvider", () => {
       initTimeoutMs: 60000,
     };
 
-    provider = new SearchxngProvider(mockConfig);
+    provider = new SearxngProvider(mockConfig);
 
     // Reset environment
     process.env = { ...originalEnv };
@@ -84,11 +84,21 @@ describe("SearchxngProvider", () => {
         autoStart: false,
         autoStop: false,
       };
-      const customProvider = new SearchxngProvider(customConfig);
+      const customProvider = new SearxngProvider(customConfig);
 
       expect(customProvider.id).toBe("custom-searchxng");
       const metadata = customProvider.getMetadata();
       expect(metadata.displayName).toBe("SearXNG (Local)"); // This is hardcoded in the provider
+    });
+
+    // SearXNG has no API key (getApiKeyEnv returns ""), so getMissingConfigMessage
+    // must produce a sensible generic message rather than "Set  environment variable."
+    test("getMissingConfigMessage returns generic message when apiKeyEnv is empty", () => {
+      const noKeyConfig = { ...mockConfig, apiKeyEnv: undefined };
+      const noKeyProvider = new SearxngProvider(noKeyConfig);
+      const msg = noKeyProvider.getMissingConfigMessage();
+      expect(msg).toBe("Provider is not configured.");
+      expect(msg).not.toContain("Set  environment");
     });
   });
 
@@ -174,7 +184,7 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].title).toBe("Title field");
+      expect(response.items[0]!.title).toBe("Title field");
     });
 
     test("should handle result with score field", async () => {
@@ -195,7 +205,7 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(0.95);
+      expect(response.items[0]!.score).toBe(0.95);
     });
 
     test("should handle result with rank field", async () => {
@@ -216,7 +226,7 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(1);
+      expect(response.items[0]!.score).toBe(1);
     });
 
     test("should handle result with description field", async () => {
@@ -236,7 +246,7 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Description field");
+      expect(response.items[0]!.snippet).toBe("Description field");
     });
 
     test("should send correct request headers", async () => {
@@ -254,8 +264,9 @@ describe("SearchxngProvider", () => {
       const query: SearchQuery = { query: "test query" };
       await provider.search(query);
 
-      expect(capturedOptions?.headers?.Accept).toBe("application/json");
-      expect(capturedOptions?.headers?.["X-Forwarded-For"]).toBe("127.0.0.1");
+      const headers = capturedOptions?.headers as Record<string, string> | undefined;
+      expect(headers?.Accept).toBe("application/json");
+      expect(headers?.["X-Forwarded-For"]).toBe("127.0.0.1");
     });
 
     test("should build correct query parameters", async () => {
@@ -296,8 +307,8 @@ describe("SearchxngProvider", () => {
       const response = await provider.search(query);
 
       expect(response.items).toHaveLength(5);
-      expect(response.items[0].title).toBe("Result 0");
-      expect(response.items[4].title).toBe("Result 4");
+      expect(response.items[0]!.title).toBe("Result 0");
+      expect(response.items[4]!.title).toBe("Result 4");
     });
   });
 
@@ -321,7 +332,7 @@ describe("SearchxngProvider", () => {
       const result = await provider.search(query);
 
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].title).toBe("Test");
+      expect(result.items[0]!.title).toBe("Test");
     });
 
     test(
@@ -515,8 +526,8 @@ describe("SearchxngProvider", () => {
 
       // Invalid result without a URL should be dropped.
       expect(response.items).toHaveLength(1);
-      expect(response.items[0].title).toBe("Valid Result");
-      expect(response.items[0].url).toBe("https://example.com");
+      expect(response.items[0]!.title).toBe("Valid Result");
+      expect(response.items[0]!.url).toBe("https://example.com");
     });
   });
 
@@ -562,12 +573,12 @@ describe("SearchxngProvider", () => {
 
       expect(response.engineId).toBe("searchxng");
       expect(response.items).toHaveLength(2);
-      expect(response.items[0].title).toBe("SearXNG - Privacy-respecting metasearch engine");
-      expect(response.items[0].url).toBe("https://searx.github.io/searxng/");
-      expect(response.items[0].snippet).toContain("SearXNG is a free internet metasearch engine");
-      expect(response.items[0].score).toBe(0.98);
-      expect(response.items[0].sourceEngine).toBe("bing");
-      expect(response.items[1].sourceEngine).toBe("searchxng");
+      expect(response.items[0]!.title).toBe("SearXNG - Privacy-respecting metasearch engine");
+      expect(response.items[0]!.url).toBe("https://searx.github.io/searxng/");
+      expect(response.items[0]!.snippet).toContain("SearXNG is a free internet metasearch engine");
+      expect(response.items[0]!.score).toBe(0.98);
+      expect(response.items[0]!.sourceEngine).toBe("bing");
+      expect(response.items[1]!.sourceEngine).toBe("searchxng");
       expect(response.raw).toBeDefined();
       expect(response.tookMs).toBeGreaterThanOrEqual(0);
     });
@@ -747,7 +758,7 @@ describe("SearchxngProvider", () => {
       delete (config as any).autoStart;
 
       // The provider sets autoStart ?? true internally
-      const provider = new SearchxngProvider(config);
+      const provider = new SearxngProvider(config);
       expect(provider.id).toBe("searchxng");
     });
 
@@ -756,7 +767,7 @@ describe("SearchxngProvider", () => {
       // biome-ignore lint/suspicious/noExplicitAny: deleting optional field for testing defaults
       delete (config as any).autoStop;
 
-      const provider = new SearchxngProvider(config);
+      const provider = new SearxngProvider(config);
       expect(provider.id).toBe("searchxng");
     });
 
@@ -765,13 +776,13 @@ describe("SearchxngProvider", () => {
       // biome-ignore lint/suspicious/noExplicitAny: deleting optional field for testing defaults
       delete (config as any).initTimeoutMs;
 
-      const provider = new SearchxngProvider(config);
+      const provider = new SearxngProvider(config);
       expect(provider.id).toBe("searchxng");
     });
 
     test("should handle custom defaultLimit", async () => {
       const config = createTestSearchxngConfig({ defaultLimit: 25 });
-      const customProvider = new SearchxngProvider(config);
+      const customProvider = new SearxngProvider(config);
 
       process.env.SEARXNG_API_KEY = "test-key";
       spyOn(customProvider, "healthcheck").mockResolvedValue(true);
@@ -798,7 +809,7 @@ describe("SearchxngProvider", () => {
       const config = createTestSearchxngConfig({
         endpoint: "http://custom-searxng:9999/search",
       });
-      const customProvider = new SearchxngProvider(config);
+      const customProvider = new SearxngProvider(config);
 
       process.env.SEARXNG_API_KEY = "test-key";
       spyOn(customProvider, "healthcheck").mockResolvedValue(true);
@@ -821,7 +832,7 @@ describe("SearchxngProvider", () => {
       const config = createTestSearchxngConfig({
         apiKeyEnv: "CUSTOM_SEARXNG_KEY",
       });
-      const customProvider = new SearchxngProvider(config);
+      const customProvider = new SearxngProvider(config);
 
       process.env.CUSTOM_SEARXNG_KEY = "my-custom-key";
       spyOn(customProvider, "healthcheck").mockResolvedValue(true);
@@ -868,9 +879,9 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test" });
 
-      expect(response.items[0].sourceEngine).toBe("google");
-      expect(response.items[1].sourceEngine).toBe("bing");
-      expect(response.items[2].sourceEngine).toBe("searchxng"); // Fallback to provider id
+      expect(response.items[0]!.sourceEngine).toBe("google");
+      expect(response.items[1]!.sourceEngine).toBe("bing");
+      expect(response.items[2]!.sourceEngine).toBe("searchxng"); // Fallback to provider id
     });
 
     test("should prefer content over description for snippet", async () => {
@@ -890,7 +901,7 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test" });
 
-      expect(response.items[0].snippet).toBe("Content field");
+      expect(response.items[0]!.snippet).toBe("Content field");
     });
 
     test("should use description when content is missing", async () => {
@@ -909,7 +920,7 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test" });
 
-      expect(response.items[0].snippet).toBe("Description only");
+      expect(response.items[0]!.snippet).toBe("Description only");
     });
 
     test("should prefer score over rank", async () => {
@@ -930,7 +941,7 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test" });
 
-      expect(response.items[0].score).toBe(0.95);
+      expect(response.items[0]!.score).toBe(0.95);
     });
 
     test("should use rank as score when score is missing", async () => {
@@ -950,7 +961,7 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test" });
 
-      expect(response.items[0].score).toBe(3);
+      expect(response.items[0]!.score).toBe(3);
     });
 
     test("should handle null fields gracefully", async () => {
@@ -971,10 +982,10 @@ describe("SearchxngProvider", () => {
       const response = await provider.search({ query: "test" });
 
       // Should use fallbacks
-      expect(response.items[0].title).toBe("https://example.com");
-      expect(response.items[0].snippet).toBe("");
+      expect(response.items[0]!.title).toBe("https://example.com");
+      expect(response.items[0]!.snippet).toBe("");
       // null ?? undefined evaluates to undefined in the provider code
-      expect(response.items[0].score).toBeUndefined();
+      expect(response.items[0]!.score).toBeUndefined();
     });
 
     test("should handle response with extra fields", async () => {
@@ -1000,7 +1011,7 @@ describe("SearchxngProvider", () => {
 
       const response = await provider.search({ query: "test", includeRaw: true });
 
-      expect(response.items[0].title).toBe("Test");
+      expect(response.items[0]!.title).toBe("Test");
       expect(response.raw).toHaveProperty("infoboxes");
       expect(response.raw).toHaveProperty("number_of_results");
     });
@@ -1024,13 +1035,13 @@ describe("SearchxngProvider", () => {
       const { restore: restoreEnv } = setupTestEnv({ SEARXNG_API_KEY: "test-key" });
 
       try {
-        global.fetch = mockFetch as typeof fetch;
+        global.fetch = mockFetch as unknown as typeof fetch;
         spyOn(provider, "healthcheck").mockResolvedValue(true);
 
         const response = await provider.search({ query: "helper test" });
 
         expect(response.items).toHaveLength(5);
-        expect(response.items[0].score).toBeDefined();
+        expect(response.items[0]!.score).toBeDefined();
         expect(calls.some((c) => c.url.includes("localhost:8888"))).toBe(true);
       } finally {
         restore();

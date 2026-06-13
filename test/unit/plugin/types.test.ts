@@ -19,6 +19,14 @@ class BasicProvider implements SearchProvider {
     return { id: this.id, displayName: "Basic" };
   }
 
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
+  }
+
   async search(_query: SearchQuery): Promise<SearchResponse> {
     return { engineId: this.id, items: [], tookMs: 0 };
   }
@@ -35,6 +43,14 @@ class LifecycleProvider implements SearchProvider, ILifecycleProvider {
 
   getMetadata(): ProviderMetadata {
     return { id: this.id, displayName: "Lifecycle" };
+  }
+
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
   }
 
   async search(_query: SearchQuery): Promise<SearchResponse> {
@@ -60,6 +76,14 @@ class PartialLifecycleProvider implements SearchProvider {
 
   getMetadata(): ProviderMetadata {
     return { id: this.id, displayName: "Partial" };
+  }
+
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
   }
 
   async search(_query: SearchQuery): Promise<SearchResponse> {

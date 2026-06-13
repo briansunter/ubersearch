@@ -12,7 +12,7 @@ import {
   linkupPlugin,
   PluginRegistry,
   registerBuiltInPlugins,
-  searchxngPlugin,
+  searxngPlugin,
   tavilyPlugin,
 } from "../../../src/plugin";
 
@@ -51,11 +51,11 @@ describe("Built-in Plugins", () => {
       expect(typeof linkupPlugin.factory).toBe("function");
     });
 
-    test("searchxngPlugin should have correct properties", () => {
-      expect(searchxngPlugin.type).toBe("searchxng");
-      expect(searchxngPlugin.displayName).toBe("SearXNG (Local)");
-      expect(searchxngPlugin.hasLifecycle).toBe(true);
-      expect(typeof searchxngPlugin.factory).toBe("function");
+    test("searxngPlugin should have correct properties", () => {
+      expect(searxngPlugin.type).toBe("searchxng");
+      expect(searxngPlugin.displayName).toBe("SearXNG (Local)");
+      expect(searxngPlugin.hasLifecycle).toBe(true);
+      expect(typeof searxngPlugin.factory).toBe("function");
     });
   });
 
@@ -114,7 +114,9 @@ describe("Built-in Plugins", () => {
     });
 
     test("should return false when only some plugins registered", async () => {
-      registry.registerSync(tavilyPlugin);
+      registry.registerSync(
+        tavilyPlugin as unknown as import("../../../src/plugin/types").PluginDefinition,
+      );
       expect(areBuiltInPluginsRegistered(registry)).toBe(false);
     });
 
@@ -193,7 +195,7 @@ describe("Built-in Plugins", () => {
       expect(provider.getMetadata().displayName).toBe("Test Linkup");
     });
 
-    test("searchxngPlugin factory should create SearchxngProvider", () => {
+    test("searxngPlugin factory should create SearxngProvider", () => {
       const config = {
         type: "searchxng" as const,
         id: "test-searchxng",
@@ -207,7 +209,7 @@ describe("Built-in Plugins", () => {
         lowCreditThresholdPercent: 0,
       };
 
-      const provider = searchxngPlugin.factory(config);
+      const provider = searxngPlugin.factory(config);
       expect(provider.id).toBe("test-searchxng");
       expect(provider.getMetadata().displayName).toBe("SearXNG (Local)");
     });

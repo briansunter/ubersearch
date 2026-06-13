@@ -5,7 +5,7 @@
  */
 
 import { dirname } from "node:path";
-import type { SearchxngConfig as BaseSearchxngConfig } from "../config/types";
+import type { SearxngConfig } from "../config/types";
 import { createLogger } from "../core/logger";
 import type { ILifecycleProvider, ProviderMetadata } from "../core/provider";
 import type { SearchQuery, SearchResponse, SearchResultItem } from "../core/types";
@@ -23,14 +23,11 @@ import { buildUrl, fetchWithErrorHandling } from "./utils";
 
 const log = createLogger("SearXNG");
 
-export class SearchxngProvider
-  extends BaseProvider<BaseSearchxngConfig>
-  implements ILifecycleProvider
-{
+export class SearxngProvider extends BaseProvider<SearxngConfig> implements ILifecycleProvider {
   private lifecycleManager: ReturnType<typeof createDockerLifecycle>;
   private defaultLimit: number;
 
-  constructor(config: BaseSearchxngConfig) {
+  constructor(config: SearxngConfig) {
     super(config);
     this.defaultLimit = config.defaultLimit;
 
@@ -138,7 +135,7 @@ export class SearchxngProvider
     const items: SearchResultItem[] = mapSearchResults(
       results,
       this.id,
-      PROVIDER_MAPPINGS.searchxng,
+      PROVIDER_MAPPINGS.searxng,
       (r) => typeof r.url === "string" && r.url.trim().length > 0,
     );
 

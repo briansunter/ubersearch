@@ -8,10 +8,10 @@
  * - SearchXNG
  */
 
-import type { BraveConfig, LinkupConfig, SearchxngConfig, TavilyConfig } from "../config/types";
+import type { BraveConfig, LinkupConfig, SearxngConfig, TavilyConfig } from "../config/types";
 import { BraveProvider } from "../providers/brave";
 import { LinkupProvider } from "../providers/linkup";
-import { SearchxngProvider } from "../providers/searchxng";
+import { SearxngProvider } from "../providers/searxng";
 import { TavilyProvider } from "../providers/tavily";
 import { PluginRegistry } from "./PluginRegistry";
 import type { PluginDefinition } from "./types";
@@ -56,17 +56,22 @@ export const linkupPlugin: PluginDefinition<LinkupConfig, LinkupProvider> = {
 };
 
 /**
- * SearchXNG plugin definition
+ * SearXNG plugin definition
  */
-export const searchxngPlugin: PluginDefinition<SearchxngConfig, SearchxngProvider> = {
+export const searxngPlugin: PluginDefinition<SearxngConfig, SearxngProvider> = {
   type: "searchxng",
   displayName: "SearXNG (Local)",
   description: "Self-hosted meta search engine with Docker auto-start",
   docsUrl: "https://docs.searxng.org/",
   version: "1.0.0",
   hasLifecycle: true,
-  factory: (config) => new SearchxngProvider(config),
+  factory: (config) => new SearxngProvider(config),
 };
+
+/**
+ * @deprecated Use `searxngPlugin` instead.
+ */
+export const searchxngPlugin = searxngPlugin;
 
 /**
  * All built-in plugins
@@ -81,7 +86,7 @@ export const builtInPlugins = [
   tavilyPlugin,
   bravePlugin,
   linkupPlugin,
-  searchxngPlugin,
+  searxngPlugin,
 ] as unknown as PluginDefinition[];
 
 /**

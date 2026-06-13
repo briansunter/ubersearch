@@ -47,7 +47,7 @@ export const LinkupConfigSchema = EngineConfigBaseSchema.extend({
   endpoint: z.string().url(),
 }).merge(DockerConfigSchema);
 
-export const SearchxngConfigSchema = EngineConfigBaseSchema.extend({
+export const SearxngConfigSchema = EngineConfigBaseSchema.extend({
   type: z.literal("searchxng"),
   apiKeyEnv: z.string().optional(),
   endpoint: z.string().url(),
@@ -59,7 +59,7 @@ export const EngineConfigSchema = z.discriminatedUnion("type", [
   TavilyConfigSchema,
   BraveConfigSchema,
   LinkupConfigSchema,
-  SearchxngConfigSchema,
+  SearxngConfigSchema,
 ]);
 
 // Main configuration schema (uses passthrough to preserve extra fields)
@@ -116,7 +116,7 @@ export type ValidatedEngineConfig = z.infer<typeof EngineConfigSchema>;
 export type ValidatedTavilyConfig = z.infer<typeof TavilyConfigSchema>;
 export type ValidatedBraveConfig = z.infer<typeof BraveConfigSchema>;
 export type ValidatedLinkupConfig = z.infer<typeof LinkupConfigSchema>;
-export type ValidatedSearchxngConfig = z.infer<typeof SearchxngConfigSchema>;
+export type ValidatedSearxngConfig = z.infer<typeof SearxngConfigSchema>;
 export type ValidatedCliInput = z.infer<typeof CliInputSchema>;
 
 /**

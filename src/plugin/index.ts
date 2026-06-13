@@ -13,6 +13,7 @@ export {
   linkupPlugin,
   registerBuiltInPlugins,
   searchxngPlugin,
+  searxngPlugin,
   tavilyPlugin,
 } from "./builtin";
 // Registry

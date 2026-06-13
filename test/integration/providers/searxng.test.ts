@@ -1,7 +1,7 @@
 /**
- * Integration Tests for SearchxngProvider
+ * Integration Tests for SearxngProvider
  *
- * Tests the SearchxngProvider with actual Docker container management.
+ * Tests the SearxngProvider with actual Docker container management.
  * These tests require Docker to be running. They fail fast if Docker is unavailable.
  *
  * Note: These tests may take 30-60 seconds as they start/stop Docker containers.
@@ -12,7 +12,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from "bun:tes
 import { join } from "node:path";
 import { DockerComposeHelper } from "../../../src/core/docker/dockerComposeHelper";
 import { SearchError } from "../../../src/core/types";
-import { SearchxngProvider } from "../../../src/providers/searchxng";
+import { SearxngProvider } from "../../../src/providers/searxng";
 import { createTestSearchxngConfig } from "../../__helpers__/docker-mocks";
 
 // Skip all tests if SKIP_DOCKER_TESTS is set
@@ -28,7 +28,7 @@ const composeFilePath = join(projectRoot, "providers", "searxng", "docker-compos
 
 function assertDockerAvailable(): void {
   if (!dockerAvailable) {
-    throw new Error("Docker is required for SearchxngProvider integration tests.");
+    throw new Error("Docker is required for SearxngProvider integration tests.");
   }
 }
 
@@ -45,8 +45,8 @@ async function expectSearchSuccessOrApiError<T>(fn: () => Promise<T>): Promise<v
 }
 
 // Skip if SKIP_DOCKER_TESTS is set; otherwise fail fast if Docker unavailable
-describe.skipIf(skipDockerTests)("SearchxngProvider - Docker Integration Tests", () => {
-  let provider: SearchxngProvider;
+describe.skipIf(skipDockerTests)("SearxngProvider - Docker Integration Tests", () => {
+  let provider: SearxngProvider;
   let config: ReturnType<typeof createTestSearchxngConfig>;
 
   beforeAll(async () => {
@@ -70,7 +70,7 @@ describe.skipIf(skipDockerTests)("SearchxngProvider - Docker Integration Tests",
       initTimeoutMs: 120000, // 2 minutes for container startup
     });
 
-    provider = new SearchxngProvider(config);
+    provider = new SearxngProvider(config);
 
     // Set API key for tests (SearXNG typically doesn't require one for local)
     process.env.SEARXNG_API_KEY = process.env.SEARXNG_API_KEY || "test-key";
@@ -196,8 +196,8 @@ describe.skipIf(skipDockerTests)("SearchxngProvider - Docker Integration Tests",
 });
 
 // Tests that require a running SearXNG container
-describe.skipIf(skipDockerTests)("SearchxngProvider - Search Integration Tests", () => {
-  let provider: SearchxngProvider;
+describe.skipIf(skipDockerTests)("SearxngProvider - Search Integration Tests", () => {
+  let provider: SearxngProvider;
   let containerStarted = false;
 
   beforeAll(async () => {
@@ -213,7 +213,7 @@ describe.skipIf(skipDockerTests)("SearchxngProvider - Search Integration Tests",
       initTimeoutMs: 120000,
     });
 
-    provider = new SearchxngProvider(config);
+    provider = new SearxngProvider(config);
     process.env.SEARXNG_API_KEY = process.env.SEARXNG_API_KEY || "test-key";
 
     try {
