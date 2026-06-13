@@ -41,7 +41,7 @@ const uberSearchTool: ToolDefinition = {
         type: "string",
         enum: ["all", "first-success"],
         description: "Search strategy: 'all' (query all) or 'first-success' (stop after first)",
-        default: "all",
+        default: "first-success",
       },
       limit: {
         type: "number",

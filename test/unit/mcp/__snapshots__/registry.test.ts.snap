@@ -34,7 +34,7 @@ Example: "it,science" for tech and academic results"
           "type": "string",
         },
         "strategy": {
-          "default": "all",
+          "default": "first-success",
           "description": "Search strategy: 'all' (query all) or 'first-success' (stop after first)",
           "enum": [
             "all",

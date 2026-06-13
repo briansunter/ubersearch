@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { findTool, tools } from "../../../src/mcp/registry";
 
+// The tool-layer fallback default for strategy — must stay in sync with the
+// schema's declared default (see src/tool/uberSearchTool.ts).
+const TOOL_LAYER_STRATEGY_DEFAULT = "first-success" as const;
+
 describe("MCP tool registry", () => {
   test("exposes exactly the three documented tools", () => {
     const names = tools.map((t) => t.name).sort();
@@ -63,8 +67,16 @@ describe("MCP tool registry", () => {
     });
 
     test("strategy enumerates 'all' and 'first-success'", () => {
-      const strategy = schema.properties.strategy as { enum: string[] };
+      const strategy = schema.properties.strategy as unknown as { enum: string[] };
       expect(strategy.enum).toEqual(["all", "first-success"]);
+    });
+
+    // This test binds the schema's declared default to the tool layer's actual
+    // fallback so they can't silently drift. If this test fails, update both the
+    // registry schema and uberSearchTool.ts (line ~82: `strategy ?? "…"`) together.
+    test("schema default for strategy matches the tool-layer applied default", () => {
+      const strategy = schema.properties.strategy as unknown as { default: string };
+      expect(strategy.default).toBe(TOOL_LAYER_STRATEGY_DEFAULT);
     });
   });
 });

@@ -147,5 +147,8 @@ export async function serve(): Promise<void> {
   // compiled mode.
   await new Promise<void>((resolve) => {
     transport.onclose = () => resolve();
+    transport.onerror = (error: Error) => {
+      process.stderr.write(`[ubersearch] MCP transport error: ${error.message}\n`);
+    };
   });
 }
