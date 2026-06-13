@@ -50,6 +50,9 @@ export abstract class BaseProvider<T extends EngineConfigBase> implements Search
    */
   getMissingConfigMessage(): string {
     const apiKeyEnv = this.getApiKeyEnv();
+    if (!apiKeyEnv) {
+      return "Provider is not configured.";
+    }
     return `API key not configured. Set ${apiKeyEnv} environment variable.`;
   }
 

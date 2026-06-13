@@ -84,7 +84,7 @@ describe("TavilyProvider", () => {
       global.process.env = { TAVILY_API_KEY: "test-api-key" };
 
       // Mock fetch response
-      global.fetch = mock(async (_url: RequestInfo | URL, _options?: RequestInit) => ({
+      global.fetch = mock(async (_url: string | URL, _options?: RequestInit) => ({
         ok: true,
         json: async () => ({
           results: [
@@ -132,7 +132,7 @@ describe("TavilyProvider", () => {
       global.fetch = mock(async () => ({
         ok: true,
         json: async () => mockResponseData,
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "test query",
@@ -159,12 +159,12 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBeUndefined();
+      expect(response.items[0]!.score).toBeUndefined();
     });
 
     test("should handle result with missing title", async () => {
@@ -181,12 +181,12 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].title).toBe("https://example.com"); // Should fall back to URL
+      expect(response.items[0]!.title).toBe("https://example.com"); // Should fall back to URL
     });
 
     test("should handle result with content vs snippet", async () => {
@@ -204,12 +204,12 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Content field"); // Should prefer content
+      expect(response.items[0]!.snippet).toBe("Content field"); // Should prefer content
     });
 
     test("should handle result with only snippet", async () => {
@@ -226,12 +226,12 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Only snippet field");
+      expect(response.items[0]!.snippet).toBe("Only snippet field");
     });
 
     test("should handle result with empty fields", async () => {
@@ -249,13 +249,13 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].title).toBe("");
-      expect(response.items[0].snippet).toBe("");
+      expect(response.items[0]!.title).toBe("");
+      expect(response.items[0]!.snippet).toBe("");
     });
 
     test("should handle multiple results", async () => {
@@ -282,15 +282,15 @@ describe("TavilyProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
       expect(response.items).toHaveLength(3);
-      expect(response.items[0].title).toBe("Result 1");
-      expect(response.items[1].title).toBe("Result 2");
-      expect(response.items[2].title).toBe("Result 3");
+      expect(response.items[0]!.title).toBe("Result 1");
+      expect(response.items[1]!.title).toBe("Result 2");
+      expect(response.items[2]!.title).toBe("Result 3");
     });
 
     test("should respect limit parameter", async () => {
@@ -307,7 +307,7 @@ describe("TavilyProvider", () => {
             { title: "Result 5", url: "https://example5.com", content: "Content 5" },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: 3 };
       const response = await provider.search(query);
@@ -329,7 +329,7 @@ describe("TavilyProvider", () => {
             results: [{ title: "Result", url: "https://example.com", content: "Test" }],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       await provider.search(query);
@@ -347,7 +347,7 @@ describe("TavilyProvider", () => {
             results: [{ title: "Result", url: "https://example.com", content: "Test" }],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "specific test query" };
       await provider.search(query);
@@ -379,13 +379,22 @@ describe("TavilyProvider", () => {
         apiKeyEnv: "CUSTOM_TAVILY_KEY",
         searchDepth: "basic" as const,
         endpoint: "https://api.tavily.com/search",
-      };
+      } as unknown as TavilyConfig;
 
       const customProvider = new TavilyProvider(customConfig);
 
       // Provider should report it's not configured
       expect(customProvider.isConfigured()).toBe(false);
       expect(customProvider.getMissingConfigMessage()).toContain("CUSTOM_TAVILY_KEY");
+    });
+
+    // Verify getMissingConfigMessage produces a well-formed message when an env var name IS set.
+    // This guards against the empty-apiKeyEnv regression introduced by Fix 2.
+    test("getMissingConfigMessage includes env var name when apiKeyEnv is non-empty", () => {
+      delete process.env.TAVILY_API_KEY;
+      const msg = provider.getMissingConfigMessage();
+      expect(msg).toContain("TAVILY_API_KEY");
+      expect(msg).not.toBe("Provider is not configured.");
     });
 
     test("should report not configured when API key environment variable is whitespace", () => {
@@ -397,7 +406,7 @@ describe("TavilyProvider", () => {
         apiKeyEnv: "CUSTOM_TAVILY_KEY",
         searchDepth: "basic" as const,
         endpoint: "https://api.tavily.com/search",
-      };
+      } as unknown as TavilyConfig;
 
       const customProvider = new TavilyProvider(customConfig);
 
@@ -418,7 +427,7 @@ describe("TavilyProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("Network error: connection refused");
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -434,7 +443,7 @@ describe("TavilyProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("Request timeout");
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -446,7 +455,7 @@ describe("TavilyProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("getaddrinfo ENOTFOUND api.tavily.com");
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -460,7 +469,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 400,
         statusText: "Bad Request",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -478,7 +487,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 401,
         statusText: "Unauthorized",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -492,7 +501,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 403,
         statusText: "Forbidden",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -506,7 +515,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 429,
         statusText: "Too Many Requests",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -520,7 +529,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 500,
         statusText: "Internal Server Error",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -534,7 +543,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 502,
         statusText: "Bad Gateway",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -548,7 +557,7 @@ describe("TavilyProvider", () => {
         ok: false,
         status: 503,
         statusText: "Service Unavailable",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -563,7 +572,7 @@ describe("TavilyProvider", () => {
         json: async () => {
           throw new SyntaxError("Unexpected token in JSON");
         },
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -577,7 +586,7 @@ describe("TavilyProvider", () => {
       global.fetch = mock(async () => ({
         ok: true,
         json: async () => ({}),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -593,7 +602,7 @@ describe("TavilyProvider", () => {
         json: async () => ({
           results: [],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -610,7 +619,7 @@ describe("TavilyProvider", () => {
         json: async () => ({
           results: "not an array",
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -631,14 +640,14 @@ describe("TavilyProvider", () => {
             { title: "Valid Title", url: "https://valid.com", content: "Valid content" },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
       // Should handle gracefully and map valid results
       const response = await provider.search(query);
       expect(response.items).toHaveLength(1);
-      expect(response.items[0].title).toBe("Valid Title");
+      expect(response.items[0]!.title).toBe("Valid Title");
     });
   });
 
@@ -657,7 +666,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: longQuery };
       await provider.search(query);
@@ -674,7 +683,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: specialQuery };
       await provider.search(query);
@@ -691,7 +700,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: unicodeQuery };
       await provider.search(query);
@@ -707,7 +716,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "" };
       await provider.search(query);
@@ -723,7 +732,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "   " };
       await provider.search(query);
@@ -740,7 +749,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: newlineQuery };
       await provider.search(query);
@@ -756,7 +765,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: 0 };
       await provider.search(query);
@@ -772,7 +781,7 @@ describe("TavilyProvider", () => {
           ok: true,
           json: async () => ({ results: [validResult] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: -1 };
       await provider.search(query);
@@ -814,7 +823,7 @@ describe("TavilyProvider", () => {
             ],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "TypeScript ORM",
@@ -825,11 +834,11 @@ describe("TavilyProvider", () => {
 
       expect(response.engineId).toBe("tavily");
       expect(response.items).toHaveLength(2);
-      expect(response.items[0].title).toBe("TypeORM - Amazing ORM for TypeScript");
-      expect(response.items[0].url).toBe("https://typeorm.io");
-      expect(response.items[0].snippet).toContain("TypeORM is an ORM");
-      expect(response.items[0].score).toBe(0.98);
-      expect(response.items[0].sourceEngine).toBe("tavily");
+      expect(response.items[0]!.title).toBe("TypeORM - Amazing ORM for TypeScript");
+      expect(response.items[0]!.url).toBe("https://typeorm.io");
+      expect(response.items[0]!.snippet).toContain("TypeORM is an ORM");
+      expect(response.items[0]!.score).toBe(0.98);
+      expect(response.items[0]!.sourceEngine).toBe("tavily");
       expect(response.raw).toBeDefined();
       expect(response.tookMs).toBeGreaterThanOrEqual(0);
     });
@@ -842,7 +851,7 @@ describe("TavilyProvider", () => {
         json: async () => ({
           results: [{ title: "Result", url: "https://example.com", content: "Content" }],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const promises = [
         provider.search({ query: "query 1" }),
@@ -877,7 +886,7 @@ describe("TavilyProvider", () => {
             ],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       for (let i = 0; i < 10; i++) {
         await provider.search({ query: `query ${i}` });
@@ -900,7 +909,7 @@ describe("TavilyProvider", () => {
             results: [{ title: "Result", url: "https://example.com", content: "Content" }],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
@@ -926,14 +935,14 @@ describe("TavilyProvider", () => {
         json: async () => ({
           results: largeResults,
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
       expect(response.items).toHaveLength(1000);
-      expect(response.items[0].title).toBe("Result 0");
-      expect(response.items[999].title).toBe("Result 999");
+      expect(response.items[0]!.title).toBe("Result 0");
+      expect(response.items[999]!.title).toBe("Result 999");
     });
   });
 });

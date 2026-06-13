@@ -40,7 +40,7 @@
       "apiKeyEnv": "BRAVE_API_KEY",
       "endpoint": "https://api.search.brave.com/res/v1/web/search",
       "defaultLimit": 15,
-      "monthlyQuota": 1000,
+      "monthlyQuota": 2000,
       "creditCostPerSearch": 1,
       "lowCreditThresholdPercent": 80
     },
