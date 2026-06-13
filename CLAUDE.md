@@ -9,6 +9,7 @@ bun install                    # Install deps
 bun run lint                   # Biome lint check
 bun run lint:fix               # Biome auto-fix
 bun run test                   # All tests (skips Docker)
+bun run typecheck              # TypeScript type check
 bun run test:unit              # Unit tests only
 bun run test:integration       # Integration tests
 bun run test:docker            # Integration with Docker (needs Docker running)
@@ -32,7 +33,7 @@ bun run build:binary           # Compile standalone binary
 - **Providers**: `src/providers/` — each implements `ISearchProvider` (search method + id)
 - **Strategies**: `src/core/strategy/` — `AllProvidersStrategy` (merge all) and `FirstSuccessStrategy` (stop on first success)
 - **Plugin system**: `src/plugin/` — `definePlugin`/`PluginRegistry` for custom providers
-- **MCP Server**: `src/mcp-server.ts` — custom JSON-RPC over stdio (no SDK)
+- **MCP Server**: `src/mcp-server.ts` — stdio server via `@modelcontextprotocol/sdk`; tool registry in `src/mcp/`
 - **Config**: Zod-validated, XDG-aware resolution (`./` → `$XDG_CONFIG_HOME/ubersearch/`)
 - **Docker lifecycle**: `src/core/docker/` manages SearXNG auto-start/health
 
@@ -46,8 +47,7 @@ bun run build:binary           # Compile standalone binary
 ## Git
 
 - Development branch: `master`
-- PR target: `main`
-- Pre-commit hook runs `bun run lint` and `bun run test:unit`
+- Pre-commit hook runs `bun run lint`, `bun run test:unit`, and `bun run typecheck`
 - Hooks path: `scripts/hooks/` (set via `bun run prepare`)
 
 ## Gotchas
