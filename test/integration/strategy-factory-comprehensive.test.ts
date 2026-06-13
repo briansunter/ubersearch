@@ -297,9 +297,9 @@ describe("StrategyFactory", () => {
       );
 
       expect(result.results).toHaveLength(1);
-      expect(result.results[0].title).toBe("Custom Result");
+      expect(result.results[0]!.title).toBe("Custom Result");
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].engineId).toBe("custom");
+      expect(result.attempts[0]!.engineId).toBe("custom");
     });
   });
 
@@ -364,7 +364,12 @@ describe("StrategyFactory", () => {
     test("should handle strategies with different constructor signatures", () => {
       // This tests that the factory can handle different constructor patterns
       // In a real scenario, you'd register strategies that actually use the parameters
-      StrategyFactory.registerStrategy("alternative", AlternativeCustomStrategy);
+      StrategyFactory.registerStrategy(
+        "alternative",
+        AlternativeCustomStrategy as unknown as new (
+          options?: StrategyOptions,
+        ) => ISearchStrategy,
+      );
 
       const strategy = StrategyFactory.createStrategy("alternative");
       expect(strategy).toBeInstanceOf(AlternativeCustomStrategy);

@@ -42,11 +42,11 @@ function setupProcessMock(argv: string[]) {
   // Mock stderr and stdout
   newProcess.stderr = {
     write: mock<(chunk: string | Uint8Array) => unknown>(),
-  };
+  } as unknown as ProcessMock["stderr"];
 
   newProcess.stdout = {
     write: mock<(chunk: string | Uint8Array) => unknown>(),
-  };
+  } as unknown as ProcessMock["stdout"];
 
   // Replace global process
   global.process = newProcess;

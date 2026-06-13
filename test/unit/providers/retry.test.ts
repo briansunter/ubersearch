@@ -135,7 +135,7 @@ describe("withRetry", () => {
         });
 
         expect(result).toBe("recovered");
-        expect(String(warnMock.mock.calls[0]?.[0])).toContain("Retrying in 5ms");
+        expect(String((warnMock.mock.calls as unknown[][])[0]?.[0])).toContain("Retrying in 5ms");
       } finally {
         console.warn = originalWarn;
       }

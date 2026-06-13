@@ -122,10 +122,10 @@ describe("AllProvidersStrategy - Unit Tests", () => {
     expect(result.attempts[1]).toEqual({ engineId: "bing", success: true });
 
     // Results should be in order from providers (not sorted by score in AllProvidersStrategy)
-    expect(result.results[0].title).toBe("Google Result 1");
-    expect(result.results[1].title).toBe("Google Result 2");
-    expect(result.results[2].title).toBe("Bing Result 1");
-    expect(result.results[3].title).toBe("Bing Result 2");
+    expect(result.results[0]!.title).toBe("Google Result 1");
+    expect(result.results[1]!.title).toBe("Google Result 2");
+    expect(result.results[2]!.title).toBe("Bing Result 1");
+    expect(result.results[3]!.title).toBe("Bing Result 2");
   });
 
   test("should handle provider errors gracefully", async () => {
@@ -183,7 +183,7 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     // Assert
     expect(result.results).toHaveLength(1);
-    expect(result.results[0].title).toBe("Working Result");
+    expect(result.results[0]!.title).toBe("Working Result");
     expect(result.attempts).toHaveLength(2);
     expect(result.attempts[0]).toEqual({ engineId: "working", success: true });
     expect(result.attempts[1]).toEqual({ engineId: "failing", success: false, reason: "unknown" });
@@ -288,8 +288,8 @@ describe("AllProvidersStrategy - Unit Tests", () => {
 
     // Verify that limit was passed to providers (same limit to all)
     expect(searchCalls).toHaveLength(2);
-    expect(searchCalls[0].params.limit).toBe(3);
-    expect(searchCalls[1].params.limit).toBe(3); // Same limit passed to all providers
+    expect(searchCalls[0]!.params.limit).toBe(3);
+    expect(searchCalls[1]!.params.limit).toBe(3); // Same limit passed to all providers
   });
 
   test("should handle out of credit situations", async () => {

@@ -249,7 +249,7 @@ describe("FirstSuccessStrategy", () => {
       );
 
       expect(result.results).toHaveLength(1);
-      expect(result.results[0].title).toBe("Google Result 1");
+      expect(result.results[0]!.title).toBe("Google Result 1");
     });
 
     test("should handle empty results from first provider", async () => {
@@ -428,8 +428,8 @@ describe("FirstSuccessStrategy", () => {
 
       expect(result.results).toHaveLength(0);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(false);
-      expect(result.attempts[0].reason).toBe("unknown");
+      expect(result.attempts[0]!.success).toBe(false);
+      expect(result.attempts[0]!.reason).toBe("unknown");
     });
 
     test("should handle missing providers", async () => {
@@ -443,8 +443,8 @@ describe("FirstSuccessStrategy", () => {
 
       expect(result.results).toHaveLength(0);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(false);
-      expect(result.attempts[0].reason).toBe("no_provider");
+      expect(result.attempts[0]!.success).toBe(false);
+      expect(result.attempts[0]!.reason).toBe("no_provider");
     });
 
     test("should handle all providers failing", async () => {
@@ -543,8 +543,8 @@ describe("FirstSuccessStrategy", () => {
       googleProvider.search = async (params) => {
         searchCalls.push(params);
         return {
-          items: mockResults.google,
-          totalResults: mockResults.google.length,
+          items: mockResults.google!,
+          totalResults: mockResults.google!.length,
           query: params.query,
         };
       };
@@ -567,8 +567,8 @@ describe("FirstSuccessStrategy", () => {
       googleProvider.search = async (params) => {
         searchCalls.push(params);
         return {
-          items: mockResults.google,
-          totalResults: mockResults.google.length,
+          items: mockResults.google!,
+          totalResults: mockResults.google!.length,
           query: params.query,
         };
       };
@@ -588,14 +588,13 @@ describe("FirstSuccessStrategy", () => {
 
   describe("strategy options", () => {
     test("should accept strategy options in constructor", () => {
-      const options = { timeout: 30000, maxConcurrent: 5 };
-      const strategyWithOptions = new FirstSuccessStrategy(options);
+      const strategyWithOptions = new FirstSuccessStrategy();
 
       expect(strategyWithOptions).toBeDefined();
     });
 
     test("should work with empty options", async () => {
-      const strategyWithEmptyOptions = new FirstSuccessStrategy({});
+      const strategyWithEmptyOptions = new FirstSuccessStrategy();
       providerRegistry.set(
         "google" as EngineId,
         new MockSearchProvider("Google", mockResults.google),
@@ -611,11 +610,11 @@ describe("FirstSuccessStrategy", () => {
 
       expect(result.results).toHaveLength(2);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(true);
+      expect(result.attempts[0]!.success).toBe(true);
     });
 
     test("should work with undefined options", async () => {
-      const strategyWithUndefinedOptions = new FirstSuccessStrategy(undefined);
+      const strategyWithUndefinedOptions = new FirstSuccessStrategy();
       providerRegistry.set(
         "google" as EngineId,
         new MockSearchProvider("Google", mockResults.google),
@@ -631,7 +630,7 @@ describe("FirstSuccessStrategy", () => {
 
       expect(result.results).toHaveLength(2);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(true);
+      expect(result.attempts[0]!.success).toBe(true);
     });
   });
 
@@ -642,8 +641,8 @@ describe("FirstSuccessStrategy", () => {
       slowProvider.search = async (params) => {
         await new Promise((resolve) => setTimeout(resolve, 50)); // 50ms delay
         return {
-          items: mockResults.google,
-          totalResults: mockResults.google.length,
+          items: mockResults.google!,
+          totalResults: mockResults.google!.length,
           query: params.query,
         };
       };
@@ -652,8 +651,8 @@ describe("FirstSuccessStrategy", () => {
       fastProvider.search = async (params) => {
         await new Promise((resolve) => setTimeout(resolve, 10)); // 10ms delay
         return {
-          items: mockResults.bing,
-          totalResults: mockResults.bing.length,
+          items: mockResults.bing!,
+          totalResults: mockResults.bing!.length,
           query: params.query,
         };
       };
@@ -673,9 +672,9 @@ describe("FirstSuccessStrategy", () => {
 
       // Should get slow provider results and not try fast provider
       expect(result.results).toHaveLength(2);
-      expect(result.results[0].title).toBe("Google Result 1"); // From slow provider
+      expect(result.results[0]!.title).toBe("Google Result 1"); // From slow provider
       expect(result.attempts).toHaveLength(1); // Only slow provider attempted
-      expect(result.attempts[0].engineId).toBe("slow");
+      expect(result.attempts[0]!.engineId).toBe("slow");
 
       // Should take around 50ms (slow provider time)
       const duration = endTime - startTime;
@@ -713,8 +712,8 @@ describe("FirstSuccessStrategy", () => {
       expect(result.attempts).toHaveLength(engineCount); // All providers attempted
 
       // Last attempt should be successful
-      expect(result.attempts[engineCount - 1].success).toBe(true);
-      expect(result.attempts[engineCount - 1].engineId).toBe(lastEngineId);
+      expect(result.attempts[engineCount - 1]!.success).toBe(true);
+      expect(result.attempts[engineCount - 1]!.engineId).toBe(lastEngineId);
     });
   });
 });

@@ -40,6 +40,14 @@ class FakeProvider implements SearchProvider {
   getMetadata(): ProviderMetadata {
     return { id: this.id, displayName: `${this.id} Display` };
   }
+
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
+  }
 }
 
 describe("UberSearchOrchestrator", () => {

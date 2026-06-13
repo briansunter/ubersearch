@@ -31,6 +31,9 @@ describe("LinkupProvider", () => {
       composeFile: "./docker-compose.yml",
       healthEndpoint: "http://localhost:8080/health",
       initTimeoutMs: 30000,
+      monthlyQuota: 1000,
+      creditCostPerSearch: 1,
+      lowCreditThresholdPercent: 80,
     };
     provider = new LinkupProvider(mockConfig);
   });
@@ -73,7 +76,7 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: 5 };
       const response = await provider.search(query);
@@ -107,7 +110,7 @@ describe("LinkupProvider", () => {
       global.fetch = mock(async () => ({
         ok: true,
         json: async () => mockResponseData,
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "test query",
@@ -133,12 +136,12 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].title).toBe("Title field");
+      expect(response.items[0]!.title).toBe("Title field");
     });
 
     test("should handle result with snippet field", async () => {
@@ -155,12 +158,12 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Snippet field");
+      expect(response.items[0]!.snippet).toBe("Snippet field");
     });
 
     test("should handle result with description field", async () => {
@@ -177,12 +180,12 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Description field");
+      expect(response.items[0]!.snippet).toBe("Description field");
     });
 
     test("should handle result with score field", async () => {
@@ -200,12 +203,12 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(0.95);
+      expect(response.items[0]!.score).toBe(0.95);
     });
 
     test("should handle result with relevance field", async () => {
@@ -223,12 +226,12 @@ describe("LinkupProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(0.88);
+      expect(response.items[0]!.score).toBe(0.88);
     });
 
     test("should use default limit when not specified", async () => {
@@ -241,7 +244,7 @@ describe("LinkupProvider", () => {
           ok: true,
           json: async () => ({ results: [] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       await expect(provider.search(query)).rejects.toThrow();
@@ -261,7 +264,7 @@ describe("LinkupProvider", () => {
           ok: true,
           json: async () => ({ results: [] }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "specific test query", limit: 10 };
       await expect(provider.search(query)).rejects.toThrow();
@@ -288,7 +291,7 @@ describe("LinkupProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("Network error: connection refused");
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -307,7 +310,7 @@ describe("LinkupProvider", () => {
         status: 401,
         statusText: "Unauthorized",
         text: async () => "Invalid API key",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -323,7 +326,7 @@ describe("LinkupProvider", () => {
         json: async () => {
           throw new SyntaxError("Unexpected token in JSON");
         },
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -342,7 +345,7 @@ describe("LinkupProvider", () => {
         json: async () => ({
           results: [],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -357,7 +360,7 @@ describe("LinkupProvider", () => {
         json: async () => ({
           results: "not an array",
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -410,7 +413,7 @@ describe("LinkupProvider", () => {
             ],
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "TypeScript ORM",
@@ -421,11 +424,11 @@ describe("LinkupProvider", () => {
 
       expect(response.engineId).toBe("linkup");
       expect(response.items).toHaveLength(2);
-      expect(response.items[0].title).toBe("TypeORM - Amazing ORM for TypeScript");
-      expect(response.items[0].url).toBe("https://typeorm.io");
-      expect(response.items[0].snippet).toContain("TypeORM is an ORM");
-      expect(response.items[0].score).toBe(0.98);
-      expect(response.items[0].sourceEngine).toBe("linkup");
+      expect(response.items[0]!.title).toBe("TypeORM - Amazing ORM for TypeScript");
+      expect(response.items[0]!.url).toBe("https://typeorm.io");
+      expect(response.items[0]!.snippet).toContain("TypeORM is an ORM");
+      expect(response.items[0]!.score).toBe(0.98);
+      expect(response.items[0]!.sourceEngine).toBe("linkup");
       expect(response.raw).toBeDefined();
       expect(response.tookMs).toBeGreaterThanOrEqual(0);
     });

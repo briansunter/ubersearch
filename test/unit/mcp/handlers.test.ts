@@ -46,6 +46,15 @@ class StubSearchProvider implements SearchProvider {
   constructor(id: string) {
     this.id = id;
   }
+  getMetadata() {
+    return { id: this.id as import("../../../src/core/types").EngineId, displayName: this.id };
+  }
+  isConfigured(): boolean {
+    return true;
+  }
+  getMissingConfigMessage(): string {
+    return "";
+  }
   async search(): Promise<never> {
     throw new Error("search not used in these tests");
   }
@@ -58,6 +67,15 @@ class StubLifecycleProvider implements SearchProvider, ILifecycleProvider {
     this.id = id;
     this.healthy = opts.healthy;
   }
+  getMetadata() {
+    return { id: this.id as import("../../../src/core/types").EngineId, displayName: this.id };
+  }
+  isConfigured(): boolean {
+    return true;
+  }
+  getMissingConfigMessage(): string {
+    return "";
+  }
   async search(): Promise<never> {
     throw new Error("search not used in these tests");
   }
@@ -69,6 +87,12 @@ class StubLifecycleProvider implements SearchProvider, ILifecycleProvider {
     return true;
   }
   async shutdown(): Promise<void> {}
+  async validateConfig(): Promise<{ valid: boolean; errors: string[]; warnings: string[] }> {
+    return { valid: true, errors: [], warnings: [] };
+  }
+  isLifecycleManaged(): boolean {
+    return true;
+  }
 }
 
 // ---------------------------------------------------------------------------

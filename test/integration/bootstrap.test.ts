@@ -282,7 +282,7 @@ describe("Container Service Resolution", () => {
 
   test("should resolve credit manager state correctly", async () => {
     const creditManager = await container?.get<CreditManager>("creditManager");
-    const snapshots = creditManager.listSnapshots();
+    const snapshots = creditManager!.listSnapshots();
 
     expect(snapshots).toHaveLength(2); // Only enabled engines
     expect(snapshots[0]).toMatchObject({
@@ -307,7 +307,7 @@ describe("Container Service Resolution", () => {
 
     // This would normally make actual API calls
     // For testing, we'd need to mock the providers
-    expect(orchestrator.run).toBeDefined();
-    expect(typeof orchestrator.run).toBe("function");
+    expect(orchestrator!.run).toBeDefined();
+    expect(typeof orchestrator!.run).toBe("function");
   });
 });

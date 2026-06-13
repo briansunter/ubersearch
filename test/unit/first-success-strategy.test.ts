@@ -121,8 +121,8 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
     expect(result.attempts).toHaveLength(1); // Only first attempt recorded
     expect(result.attempts[0]).toEqual({ engineId: "google", success: true });
 
-    expect(result.results[0].title).toBe("Google Result 1");
-    expect(result.results[1].title).toBe("Google Result 2");
+    expect(result.results[0]!.title).toBe("Google Result 1");
+    expect(result.results[1]!.title).toBe("Google Result 2");
   });
 
   test("should try next provider when first fails", async () => {
@@ -179,7 +179,7 @@ describe("FirstSuccessStrategy - Unit Tests", () => {
 
     // Assert
     expect(result.results).toHaveLength(1);
-    expect(result.results[0].title).toBe("Working Result");
+    expect(result.results[0]!.title).toBe("Working Result");
     expect(result.attempts).toHaveLength(2); // Both attempts recorded
     expect(result.attempts[0]).toEqual({ engineId: "failing", success: false, reason: "unknown" });
     expect(result.attempts[1]).toEqual({ engineId: "working", success: true });

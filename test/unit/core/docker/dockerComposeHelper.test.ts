@@ -100,8 +100,8 @@ describe("DockerComposeHelper", () => {
         await helper.up();
         expect.unreachable("Should have thrown");
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker Compose command failed");
-        expect(error.message).toContain("docker compose");
+        expect((error as Error).message).toContain("Docker Compose command failed");
+        expect((error as Error).message).toContain("docker compose");
       }
     });
 
@@ -110,7 +110,7 @@ describe("DockerComposeHelper", () => {
         await helper.up();
         expect.unreachable("Should have thrown");
       } catch (error: unknown) {
-        expect(error.message).toContain("/nonexistent/docker-compose.yml");
+        expect((error as Error).message).toContain("/nonexistent/docker-compose.yml");
       }
     });
   });
@@ -145,7 +145,7 @@ describe("DockerComposeHelper", () => {
         await helper.up(["service1", "service2"]);
       } catch (error: unknown) {
         // Expect Docker error, not type error
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -153,7 +153,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.up(undefined, { cwd: "/tmp" });
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -161,7 +161,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.stop(["service1"]);
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -169,7 +169,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.stop(undefined, { cwd: "/tmp" });
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -177,7 +177,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.down({ cwd: "/tmp" });
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -185,7 +185,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.logs(["service1"], 100);
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -193,7 +193,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.logs(undefined, 50, { cwd: "/tmp" });
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -201,7 +201,7 @@ describe("DockerComposeHelper", () => {
       try {
         await helper.ps({ cwd: "/tmp" });
       } catch (error: unknown) {
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
 
@@ -264,7 +264,7 @@ describe("DockerComposeHelper", () => {
         await helper.logs();
       } catch (error: unknown) {
         // The error should contain the tail parameter from the command
-        expect(error.message).toContain("Docker");
+        expect((error as Error).message).toContain("Docker");
       }
     });
   });

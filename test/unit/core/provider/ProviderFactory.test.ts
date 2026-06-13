@@ -94,8 +94,8 @@ describe("ProviderFactory", () => {
       expect(provider.getMetadata().id).toBe("linkup");
     });
 
-    test("should create SearchxngProvider instance", () => {
-      const searchxngConfig: EngineConfig = {
+    test("should create SearxngProvider instance", () => {
+      const searxngConfig: EngineConfig = {
         type: "searchxng",
         id: "searchxng",
         enabled: true,
@@ -109,7 +109,7 @@ describe("ProviderFactory", () => {
         autoStart: true,
       };
 
-      const provider = ProviderFactory.createProvider(searchxngConfig, container);
+      const provider = ProviderFactory.createProvider(searxngConfig, container);
 
       expect(provider).toBeDefined();
       expect(provider.id).toBe("searchxng");
@@ -281,8 +281,8 @@ describe("ProviderFactory", () => {
 
       const providers = ProviderFactory.createProviders(configs, container);
       expect(providers).toHaveLength(2);
-      expect(providers[0].id).toBe("multi-tavily");
-      expect(providers[1].id).toBe("multi-brave");
+      expect(providers[0]!.id).toBe("multi-tavily");
+      expect(providers[1]!.id).toBe("multi-brave");
     });
   });
 });

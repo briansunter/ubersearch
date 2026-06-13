@@ -26,6 +26,9 @@ describe("BraveProvider", () => {
       apiKeyEnv: "BRAVE_API_KEY",
       endpoint: "https://api.search.brave.com/res/v1/web/search",
       defaultLimit: 10,
+      monthlyQuota: 1000,
+      creditCostPerSearch: 1,
+      lowCreditThresholdPercent: 80,
     };
     provider = new BraveProvider(mockConfig);
   });
@@ -54,10 +57,15 @@ describe("BraveProvider", () => {
 
       const customConfig = {
         id: "custom-brave",
+        type: "brave" as const,
+        enabled: true,
         displayName: "Custom Brave",
         apiKeyEnv: "CUSTOM_BRAVE_KEY",
         endpoint: "https://custom.api.com/search",
         defaultLimit: 20,
+        monthlyQuota: 1000,
+        creditCostPerSearch: 1,
+        lowCreditThresholdPercent: 80,
       };
       const customProvider = new BraveProvider(customConfig);
 
@@ -87,7 +95,7 @@ describe("BraveProvider", () => {
             ],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: 5 };
       const response = await provider.search(query);
@@ -124,7 +132,7 @@ describe("BraveProvider", () => {
       global.fetch = mock(async () => ({
         ok: true,
         json: async () => mockResponseData,
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "test query",
@@ -150,7 +158,7 @@ describe("BraveProvider", () => {
             },
           ],
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
@@ -174,12 +182,12 @@ describe("BraveProvider", () => {
             ],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Snippet field");
+      expect(response.items[0]!.snippet).toBe("Snippet field");
     });
 
     test("should handle result with abstract field", async () => {
@@ -198,12 +206,12 @@ describe("BraveProvider", () => {
             ],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].snippet).toBe("Abstract field");
+      expect(response.items[0]!.snippet).toBe("Abstract field");
     });
 
     test("should handle result with rank field", async () => {
@@ -223,12 +231,12 @@ describe("BraveProvider", () => {
             ],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(1);
+      expect(response.items[0]!.score).toBe(1);
     });
 
     test("should handle result with score field", async () => {
@@ -248,12 +256,12 @@ describe("BraveProvider", () => {
             ],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       const response = await provider.search(query);
 
-      expect(response.items[0].score).toBe(0.95);
+      expect(response.items[0]!.score).toBe(0.95);
     });
 
     test("should use default limit when not specified", async () => {
@@ -265,7 +273,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
       await expect(provider.search(query)).rejects.toThrow();
@@ -280,7 +288,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query", limit: 5 };
       await expect(provider.search(query)).rejects.toThrow();
@@ -295,7 +303,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "specific test query" };
       await expect(provider.search(query)).rejects.toThrow();
@@ -330,7 +338,7 @@ describe("BraveProvider", () => {
 
       global.fetch = mock(async () => {
         throw new Error("Network error: connection refused");
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -348,7 +356,7 @@ describe("BraveProvider", () => {
         ok: false,
         status: 401,
         statusText: "Unauthorized",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -362,7 +370,7 @@ describe("BraveProvider", () => {
         ok: false,
         status: 429,
         statusText: "Too Many Requests",
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -377,7 +385,7 @@ describe("BraveProvider", () => {
         json: async () => {
           throw new SyntaxError("Unexpected token in JSON");
         },
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -398,7 +406,7 @@ describe("BraveProvider", () => {
             results: [],
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -415,7 +423,7 @@ describe("BraveProvider", () => {
             results: "not an array",
           },
         }),
-      }));
+      })) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "test query" };
 
@@ -434,7 +442,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: longQuery };
       await expect(provider.search(query)).rejects.toThrow();
@@ -450,7 +458,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: specialQuery };
       await expect(provider.search(query)).rejects.toThrow();
@@ -465,7 +473,7 @@ describe("BraveProvider", () => {
           ok: true,
           json: async () => ({ web: { results: [] } }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = { query: "" };
       await expect(provider.search(query)).rejects.toThrow();
@@ -501,7 +509,7 @@ describe("BraveProvider", () => {
             },
           }),
         };
-      });
+      }) as unknown as typeof fetch;
 
       const query: SearchQuery = {
         query: "TypeScript ORM",
@@ -512,11 +520,11 @@ describe("BraveProvider", () => {
 
       expect(response.engineId).toBe("brave");
       expect(response.items).toHaveLength(2);
-      expect(response.items[0].title).toBe("TypeORM - Amazing ORM for TypeScript");
-      expect(response.items[0].url).toBe("https://typeorm.io");
-      expect(response.items[0].snippet).toContain("TypeORM is an ORM");
-      expect(response.items[0].score).toBe(1);
-      expect(response.items[0].sourceEngine).toBe("brave");
+      expect(response.items[0]!.title).toBe("TypeORM - Amazing ORM for TypeScript");
+      expect(response.items[0]!.url).toBe("https://typeorm.io");
+      expect(response.items[0]!.snippet).toContain("TypeORM is an ORM");
+      expect(response.items[0]!.score).toBe(1);
+      expect(response.items[0]!.sourceEngine).toBe("brave");
       expect(response.raw).toBeDefined();
       expect(response.tookMs).toBeGreaterThanOrEqual(0);
     });

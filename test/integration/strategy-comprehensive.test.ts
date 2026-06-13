@@ -35,6 +35,14 @@ class MockSearchProvider implements SearchProvider {
     };
   }
 
+  isConfigured(): boolean {
+    return true;
+  }
+
+  getMissingConfigMessage(): string {
+    return "";
+  }
+
   async search(
     _query: SearchQuery,
   ): Promise<{ engineId: string; items: SearchResultItem[]; tookMs: number }> {
@@ -71,6 +79,7 @@ class MockCreditManager extends CreditManager {
     // Initialize with default state for testing
     const state: CreditState = {};
     // Create initial credit records for all engines
+    // @ts-expect-error - accessing private property for testing
     for (const engine of this.engines.values()) {
       state[engine.id] = {
         used: 0,
@@ -162,7 +171,7 @@ describe("AllProvidersStrategy", () => {
 
   describe("constructor", () => {
     test("should create strategy instance with optional options", () => {
-      const strategyWithOptions = new AllProvidersStrategy({ timeout: 30000 });
+      const strategyWithOptions = new AllProvidersStrategy();
       expect(strategyWithOptions).toBeInstanceOf(AllProvidersStrategy);
     });
 
@@ -280,7 +289,7 @@ describe("AllProvidersStrategy", () => {
         search: async () => {
           throw new Error("Unknown error");
         },
-      } as SearchProvider;
+      } as unknown as SearchProvider;
 
       const context = createTestContext([mockProvider]);
 
@@ -521,7 +530,7 @@ describe("FirstSuccessStrategy", () => {
         search: async () => {
           throw new Error("Unknown error");
         },
-      } as SearchProvider;
+      } as unknown as SearchProvider;
       const successProvider = new MockSearchProvider("never-called");
 
       // Create custom context with all required engines
@@ -623,8 +632,8 @@ describe("StrategyFactory", () => {
       try {
         StrategyFactory.createStrategy("invalid");
       } catch (error: unknown) {
-        expect(error.message).toContain("all");
-        expect(error.message).toContain("first-success");
+        expect((error as Error).message).toContain("all");
+        expect((error as Error).message).toContain("first-success");
       }
     });
   });
@@ -637,12 +646,17 @@ describe("StrategyFactory", () => {
           _engineIds: string[],
           _options: UberSearchOptions,
           _context: StrategyContext,
-        ): Promise<{ results: unknown[]; attempts: unknown[] }> {
+        ): Promise<StrategyResult> {
           return { results: [], attempts: [] };
         }
       }
 
-      StrategyFactory.registerStrategy("custom", CustomStrategy);
+      StrategyFactory.registerStrategy(
+        "custom",
+        CustomStrategy as unknown as new (
+          options?: StrategyOptions,
+        ) => ISearchStrategy,
+      );
       const strategy = StrategyFactory.createStrategy("custom");
       expect(strategy).toBeInstanceOf(CustomStrategy);
     });
@@ -654,13 +668,18 @@ describe("StrategyFactory", () => {
           _engineIds: string[],
           _options: UberSearchOptions,
           _context: StrategyContext,
-        ): Promise<{ results: unknown[]; attempts: unknown[] }> {
+        ): Promise<StrategyResult> {
           return { results: [], attempts: [] };
         }
       }
 
       expect(() => {
-        StrategyFactory.registerStrategy("all", DuplicateStrategy);
+        StrategyFactory.registerStrategy(
+          "all",
+          DuplicateStrategy as unknown as new (
+            options?: StrategyOptions,
+          ) => ISearchStrategy,
+        );
       }).toThrow('Strategy "all" is already registered');
     });
   });
@@ -681,12 +700,17 @@ describe("StrategyFactory", () => {
           _engineIds: string[],
           _options: UberSearchOptions,
           _context: StrategyContext,
-        ): Promise<{ results: unknown[]; attempts: unknown[] }> {
+        ): Promise<StrategyResult> {
           return { results: [], attempts: [] };
         }
       }
 
-      StrategyFactory.registerStrategy("test", TestStrategy);
+      StrategyFactory.registerStrategy(
+        "test",
+        TestStrategy as unknown as new (
+          options?: StrategyOptions,
+        ) => ISearchStrategy,
+      );
       const strategies = StrategyFactory.getAvailableStrategies();
       expect(strategies).toContain("test");
     });
@@ -714,7 +738,12 @@ describe("StrategyFactory", () => {
         }
       }
 
-      StrategyFactory.registerStrategy("test-strategy", TestStrategy);
+      StrategyFactory.registerStrategy(
+        "test-strategy",
+        TestStrategy as unknown as new (
+          options?: StrategyOptions,
+        ) => ISearchStrategy,
+      );
       expect(StrategyFactory.hasStrategy("test-strategy")).toBe(true);
     });
   });

@@ -238,7 +238,7 @@ describe("DockerLifecycleManager", () => {
 
     test("should return true when health endpoint returns 200", async () => {
       const { mockFetch, restore } = setupMockFetch({ healthStatus: 200 });
-      global.fetch = mockFetch as typeof fetch;
+      global.fetch = mockFetch as unknown as typeof fetch;
 
       const config: DockerLifecycleConfig = {
         autoStart: false,
@@ -255,7 +255,7 @@ describe("DockerLifecycleManager", () => {
 
     test("should return false when health endpoint returns 500", async () => {
       const { mockFetch, restore } = setupMockFetch({ healthStatus: 500 });
-      global.fetch = mockFetch as typeof fetch;
+      global.fetch = mockFetch as unknown as typeof fetch;
 
       const config: DockerLifecycleConfig = {
         autoStart: false,
@@ -272,7 +272,7 @@ describe("DockerLifecycleManager", () => {
 
     test("should return false when health endpoint times out", async () => {
       const { mockFetch, restore } = setupMockFetch({ healthTimeout: true });
-      global.fetch = mockFetch as typeof fetch;
+      global.fetch = mockFetch as unknown as typeof fetch;
 
       const config: DockerLifecycleConfig = {
         autoStart: false,
@@ -289,7 +289,7 @@ describe("DockerLifecycleManager", () => {
 
     test("should call health endpoint with correct URL", async () => {
       const { mockFetch, calls, restore } = setupMockFetch({ healthStatus: 200 });
-      global.fetch = mockFetch as typeof fetch;
+      global.fetch = mockFetch as unknown as typeof fetch;
 
       const config: DockerLifecycleConfig = {
         autoStart: false,

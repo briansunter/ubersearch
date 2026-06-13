@@ -57,26 +57,23 @@ class MockCreditStateProvider implements CreditStateProvider {
 describe("CreditManager", () => {
   let provider: MockCreditStateProvider;
   let manager: CreditManager;
-  const mockEngines: EngineConfig[] = [
+  const mockEngines = [
     {
       id: "google" as EngineId,
-      name: "Google",
       monthlyQuota: 100,
       creditCostPerSearch: 1,
     },
     {
       id: "bing" as EngineId,
-      name: "Bing",
       monthlyQuota: 50,
       creditCostPerSearch: 2,
     },
     {
       id: "brave" as EngineId,
-      name: "Brave",
       monthlyQuota: 200,
       creditCostPerSearch: 1,
     },
-  ];
+  ] as unknown as EngineConfig[];
 
   beforeEach(() => {
     provider = new MockCreditStateProvider();
@@ -257,7 +254,7 @@ describe("CreditManager", () => {
       expect(result).toBe(true);
 
       const savedState = provider.getState();
-      expect(savedState.google.used).toBe(1);
+      expect(savedState.google!.used).toBe(1);
     });
 
     test("should not save state when charge fails", async () => {
@@ -397,8 +394,8 @@ describe("CreditManager", () => {
       await manager.saveState();
 
       const savedState = provider.getState();
-      expect(savedState.google.used).toBe(1);
-      expect(savedState.bing.used).toBe(2);
+      expect(savedState.google!.used).toBe(1);
+      expect(savedState.bing!.used).toBe(2);
     });
 
     test("should handle save errors", async () => {
@@ -410,20 +407,18 @@ describe("CreditManager", () => {
 
   describe("edge cases and error handling", () => {
     test("should handle multiple engines with same credit cost", async () => {
-      const enginesWithSameCost: EngineConfig[] = [
+      const enginesWithSameCost = [
         {
           id: "engine1" as EngineId,
-          name: "Engine 1",
           monthlyQuota: 100,
           creditCostPerSearch: 1,
         },
         {
           id: "engine2" as EngineId,
-          name: "Engine 2",
           monthlyQuota: 150,
           creditCostPerSearch: 1,
         },
-      ];
+      ] as unknown as EngineConfig[];
 
       const testManager = new CreditManager(enginesWithSameCost, provider);
       await testManager.initialize();
@@ -441,14 +436,13 @@ describe("CreditManager", () => {
     });
 
     test("should handle zero quota engines", async () => {
-      const zeroQuotaEngines: EngineConfig[] = [
+      const zeroQuotaEngines = [
         {
           id: "zeroQuota" as EngineId,
-          name: "Zero Quota Engine",
           monthlyQuota: 0,
           creditCostPerSearch: 1,
         },
-      ];
+      ] as unknown as EngineConfig[];
 
       const testManager = new CreditManager(zeroQuotaEngines, provider);
       await testManager.initialize();
@@ -462,14 +456,13 @@ describe("CreditManager", () => {
     });
 
     test("should handle engines with zero credit cost", async () => {
-      const freeEngines: EngineConfig[] = [
+      const freeEngines = [
         {
           id: "free" as EngineId,
-          name: "Free Engine",
           monthlyQuota: 100,
           creditCostPerSearch: 0,
         },
-      ];
+      ] as unknown as EngineConfig[];
 
       const testManager = new CreditManager(freeEngines, provider);
       await testManager.initialize();

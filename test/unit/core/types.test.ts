@@ -201,8 +201,8 @@ describe("Core Types", () => {
       };
 
       expect(response.items).toHaveLength(2);
-      expect(response.items[0].title).toBe("Result 1");
-      expect(response.items[1].score).toBe(0.8);
+      expect(response.items[0]!.title).toBe("Result 1");
+      expect(response.items[1]!.score).toBe(0.8);
     });
 
     test("should create response with raw data", () => {
@@ -220,7 +220,7 @@ describe("Core Types", () => {
       };
 
       expect(response.raw).toBe(rawData);
-      expect(response.raw?.status).toBe("success");
+      expect((response.raw as typeof rawData)?.status).toBe("success");
     });
 
     test("should handle zero timing", () => {
@@ -438,6 +438,6 @@ describe("Type Utilities", () => {
     };
 
     expect(response.engineId).toBe("brave");
-    expect(response.items[0].sourceEngine).toBe("brave");
+    expect(response.items[0]!.sourceEngine).toBe("brave");
   });
 });

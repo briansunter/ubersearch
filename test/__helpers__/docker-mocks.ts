@@ -75,7 +75,7 @@ export function createMockExec(options: MockDockerHelperOptions = {}): {
   const dockerAvailable = options.dockerAvailable ?? true;
 
   const mockExec = mock(async (cmd: string, opts?: ExecOptions): Promise<MockExecResult> => {
-    calls.push({ command: cmd, options: opts });
+    calls.push({ command: cmd, options: opts as { cwd?: string; timeout?: number } | undefined });
 
     // Docker version check
     if (cmd.includes("docker version")) {
@@ -146,7 +146,7 @@ export interface MockFetchOptions {
  * Creates a mock fetch function for testing health checks and API calls
  */
 export function createMockFetch(options: MockFetchOptions = {}): {
-  mockFetch: Mock<typeof fetch>;
+  mockFetch: Mock<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>;
   calls: { url: string; init?: RequestInit }[];
 } {
   const calls: { url: string; init?: RequestInit }[] = [];
@@ -154,7 +154,7 @@ export function createMockFetch(options: MockFetchOptions = {}): {
   const healthTimeout = options.healthTimeout ?? false;
 
   const mockFetch = mock(
-    async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
       const url = typeof input === "string" ? input : input.toString();
       calls.push({ url, init });
 
@@ -498,13 +498,13 @@ let originalEnv: NodeJS.ProcessEnv | undefined;
  * Set up mocked fetch for a test
  */
 export function setupMockFetch(options: MockFetchOptions = {}): {
-  mockFetch: Mock<typeof fetch>;
+  mockFetch: Mock<(input: string | URL | Request, init?: RequestInit) => Promise<Response>>;
   calls: { url: string; init?: RequestInit }[];
   restore: () => void;
 } {
   originalFetch = global.fetch;
   const { mockFetch, calls } = createMockFetch(options);
-  global.fetch = mockFetch as typeof fetch;
+  global.fetch = mockFetch as unknown as typeof fetch;
 
   return {
     mockFetch,

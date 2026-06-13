@@ -233,7 +233,7 @@ describe("AllProvidersStrategy", () => {
       );
 
       expect(result.results).toHaveLength(1);
-      expect(result.results[0].title).toBe("Google Result 1");
+      expect(result.results[0]!.title).toBe("Google Result 1");
     });
 
     test("should handle empty results from providers", async () => {
@@ -398,8 +398,8 @@ describe("AllProvidersStrategy", () => {
 
       expect(result.results).toHaveLength(0);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(false);
-      expect(result.attempts[0].reason).toBe("unknown");
+      expect(result.attempts[0]!.success).toBe(false);
+      expect(result.attempts[0]!.reason).toBe("unknown");
     });
 
     test("should handle missing providers", async () => {
@@ -413,8 +413,8 @@ describe("AllProvidersStrategy", () => {
 
       expect(result.results).toHaveLength(0);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(false);
-      expect(result.attempts[0].reason).toBe("no_provider");
+      expect(result.attempts[0]!.success).toBe(false);
+      expect(result.attempts[0]!.reason).toBe("no_provider");
     });
 
     test("should continue after provider failures", async () => {
@@ -442,13 +442,13 @@ describe("AllProvidersStrategy", () => {
       expect(result.results).toHaveLength(2); // Only Brave results
       expect(result.attempts).toHaveLength(3);
 
-      expect(result.attempts[0].success).toBe(false); // Google
-      expect(result.attempts[0].reason).toBe("api_error");
+      expect(result.attempts[0]!.success).toBe(false); // Google
+      expect(result.attempts[0]!.reason).toBe("api_error");
 
-      expect(result.attempts[1].success).toBe(false); // Bing
-      expect(result.attempts[1].reason).toBe("network_error");
+      expect(result.attempts[1]!.success).toBe(false); // Bing
+      expect(result.attempts[1]!.reason).toBe("network_error");
 
-      expect(result.attempts[2].success).toBe(true); // Brave
+      expect(result.attempts[2]!.success).toBe(true); // Brave
     });
   });
 
@@ -563,14 +563,13 @@ describe("AllProvidersStrategy", () => {
 
   describe("strategy options", () => {
     test("should accept strategy options in constructor", () => {
-      const options = { timeout: 30000, maxConcurrent: 5 };
-      const strategyWithOptions = new AllProvidersStrategy(options);
+      const strategyWithOptions = new AllProvidersStrategy();
 
       expect(strategyWithOptions).toBeDefined();
     });
 
     test("should work with empty options", async () => {
-      const strategyWithEmptyOptions = new AllProvidersStrategy({});
+      const strategyWithEmptyOptions = new AllProvidersStrategy();
       providerRegistry.set(
         "google" as EngineId,
         new MockSearchProvider("Google", mockResults.google || []),
@@ -586,11 +585,11 @@ describe("AllProvidersStrategy", () => {
 
       expect(result.results).toHaveLength(2);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(true);
+      expect(result.attempts[0]!.success).toBe(true);
     });
 
     test("should work with undefined options", async () => {
-      const strategyWithUndefinedOptions = new AllProvidersStrategy(undefined);
+      const strategyWithUndefinedOptions = new AllProvidersStrategy();
       providerRegistry.set(
         "google" as EngineId,
         new MockSearchProvider("Google", mockResults.google || []),
@@ -606,7 +605,7 @@ describe("AllProvidersStrategy", () => {
 
       expect(result.results).toHaveLength(2);
       expect(result.attempts).toHaveLength(1);
-      expect(result.attempts[0].success).toBe(true);
+      expect(result.attempts[0]!.success).toBe(true);
     });
   });
 

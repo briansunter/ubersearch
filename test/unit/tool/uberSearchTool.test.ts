@@ -92,21 +92,21 @@ function createMockContainer(
               // Support dynamic engine override
               if (opts?.engineOrderOverride?.length) {
                 return {
-                  ...response,
+                  ...response!,
                   query,
-                  results: response.results.map((r: SearchResultItem) => ({
+                  results: response!.results.map((r: SearchResultItem) => ({
                     ...r,
-                    sourceEngine: opts.engineOrderOverride[0],
+                    sourceEngine: opts.engineOrderOverride![0],
                   })),
                   engineAttempts: [
                     {
-                      engineId: opts.engineOrderOverride[0],
+                      engineId: opts.engineOrderOverride![0],
                       success: true,
                     },
                   ],
                 };
               }
-              return { ...response, query };
+              return { ...response!, query };
             }),
           };
         case "creditManager":
@@ -125,7 +125,7 @@ function createMockContainer(
           return null;
       }
     },
-  };
+  } as unknown as { get<T>(serviceId: string): T };
 }
 
 describe("Tool Module Tests", () => {
@@ -167,8 +167,8 @@ describe("Tool Module Tests", () => {
 
       expect(result.query).toBe("test query");
       expect(result.items).toHaveLength(2);
-      expect(result.items[0].sourceEngine).toBe("brave");
-      expect(result.enginesTried[0].engineId).toBe("brave");
+      expect(result.items[0]!.sourceEngine).toBe("brave");
+      expect(result.enginesTried[0]!.engineId).toBe("brave");
     });
 
     test("should execute search with first-success strategy", async () => {
@@ -220,7 +220,7 @@ describe("Tool Module Tests", () => {
 
       expect(result.query).toBe("complex test query");
       expect(result.items).toHaveLength(2);
-      expect(result.items[0].sourceEngine).toBe("brave");
+      expect(result.items[0]!.sourceEngine).toBe("brave");
     });
 
     test("should validate and pass parallel and categories options", async () => {
@@ -237,7 +237,7 @@ describe("Tool Module Tests", () => {
       });
       const container = {
         get: (serviceId: string) => (serviceId === "orchestrator" ? { run } : null),
-      };
+      } as unknown as { get<T>(serviceId: string): T };
 
       const result = await uberSearch(
         {
@@ -404,7 +404,7 @@ describe("Tool Module Tests", () => {
       const container = createMockContainer({ orchestratorResponse: customResponse });
       const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
-      expect(result.items[0].score).toBeUndefined();
+      expect(result.items[0]!.score).toBeUndefined();
     });
 
     test("should handle empty results from orchestrator", async () => {
@@ -419,13 +419,13 @@ describe("Tool Module Tests", () => {
           },
         ],
         credits: [],
-      };
+      } as unknown as OrchestratorResult;
       const container = createMockContainer({ orchestratorResponse: customResponse });
       const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
       expect(result.items).toHaveLength(0);
       expect(result.enginesTried).toHaveLength(1);
-      expect(result.enginesTried[0].success).toBe(false);
+      expect(result.enginesTried[0]!.success).toBe(false);
     });
 
     test("should preserve undefined reason in engine attempts", async () => {
@@ -444,7 +444,7 @@ describe("Tool Module Tests", () => {
       const container = createMockContainer({ orchestratorResponse: customResponse });
       const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
-      expect(result.enginesTried[0].reason).toBeUndefined();
+      expect(result.enginesTried[0]!.reason).toBeUndefined();
     });
 
     test("should handle undefined credits from orchestrator", async () => {
@@ -453,7 +453,7 @@ describe("Tool Module Tests", () => {
         results: [],
         engineAttempts: [],
         credits: undefined,
-      };
+      } as unknown as OrchestratorResult;
       const container = createMockContainer({ orchestratorResponse: customResponse });
       const result = await uberSearch({ query: "test query" }, { containerOverride: container });
 
@@ -519,7 +519,8 @@ describe("Tool Module Tests", () => {
     });
 
     test("should handle null credit status", async () => {
-      const container = createMockContainer({ creditManagerResponse: null });
+      // biome-ignore lint/suspicious/noExplicitAny: testing null response
+      const container = createMockContainer({ creditManagerResponse: null as any });
       const credits = await getCreditStatus({ containerOverride: container });
 
       expect(credits).toBeNull();
@@ -542,7 +543,7 @@ describe("Tool Module Tests", () => {
 
       expect(result.query).toBe("TypeScript ORM 2025");
       expect(result.items).toHaveLength(2);
-      expect(result.items[0].sourceEngine).toBe("tavily");
+      expect(result.items[0]!.sourceEngine).toBe("tavily");
       expect(result.enginesTried).toHaveLength(1);
       expect(result.credits).toBeDefined();
     });
@@ -574,9 +575,9 @@ describe("Tool Module Tests", () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(3);
-      expect(results[0].query).toBe("query 1");
-      expect(results[1].query).toBe("query 2");
-      expect(results[2].query).toBe("query 3");
+      expect(results[0]!.query).toBe("query 1");
+      expect(results[1]!.query).toBe("query 2");
+      expect(results[2]!.query).toBe("query 3");
     });
 
     test("should handle concurrent getCreditStatus calls", async () => {
@@ -636,7 +637,7 @@ describe("Tool Module Tests", () => {
           { engineId: "linkup", success: false, reason: "Container not healthy" },
         ],
         credits: [],
-      };
+      } as unknown as OrchestratorResult;
       const container = createMockContainer({ orchestratorResponse: customResponse });
       const result = await uberSearch(
         { query: "partial failure test" },
@@ -646,11 +647,13 @@ describe("Tool Module Tests", () => {
       expect(result.query).toBe("partial failure test");
       expect(result.items).toHaveLength(1);
       expect(result.enginesTried).toHaveLength(3);
-      expect(result.enginesTried[0].success).toBe(true);
-      expect(result.enginesTried[1].success).toBe(false);
-      expect(result.enginesTried[1].reason).toBe("API rate limited");
-      expect(result.enginesTried[2].success).toBe(false);
-      expect(result.enginesTried[2].reason).toBe("Container not healthy");
+      expect(result.enginesTried[0]!.success).toBe(true);
+      expect(result.enginesTried[1]!.success).toBe(false);
+      // biome-ignore lint/suspicious/noExplicitAny: testing with non-standard reason strings from mock
+      expect(result.enginesTried[1]!.reason as any).toBe("API rate limited");
+      expect(result.enginesTried[2]!.success).toBe(false);
+      // biome-ignore lint/suspicious/noExplicitAny: testing with non-standard reason strings from mock
+      expect(result.enginesTried[2]!.reason as any).toBe("Container not healthy");
     });
 
     test("should handle large result sets", async () => {
