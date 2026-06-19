@@ -304,6 +304,53 @@ describe("DockerLifecycleManager", () => {
       expect(calls.some((c) => c.url.includes("custom-health"))).toBe(true);
       restore();
     });
+
+    test("should return false when endpoint unreachable, even if container is running", async () => {
+      const { mockFetch, restore } = setupMockFetch({ healthTimeout: true });
+      global.fetch = mockFetch as unknown as typeof fetch;
+
+      // Container is up but the configured endpoint is unreachable: healthcheck
+      // must NOT fall back to container status and report healthy.
+      const isRunningSpy = spyOn(DockerComposeHelper.prototype, "isRunning").mockResolvedValue(
+        true,
+      );
+
+      const config: DockerLifecycleConfig = {
+        composeFile: "./docker-compose.yml",
+        containerName: "searxng",
+        healthEndpoint: "http://localhost:8888/healthz",
+        autoStart: false,
+        autoStop: false,
+      };
+
+      const manager = new DockerLifecycleManager(config);
+      const result = await manager.healthcheck();
+
+      expect(result).toBe(false);
+      expect(isRunningSpy).not.toHaveBeenCalled();
+      isRunningSpy.mockRestore();
+      restore();
+    });
+
+    test("should fall back to container status when no health endpoint configured", async () => {
+      const isRunningSpy = spyOn(DockerComposeHelper.prototype, "isRunning").mockResolvedValue(
+        true,
+      );
+
+      const config: DockerLifecycleConfig = {
+        composeFile: "./docker-compose.yml",
+        containerName: "searxng",
+        autoStart: false,
+        autoStop: false,
+      };
+
+      const manager = new DockerLifecycleManager(config);
+      const result = await manager.healthcheck();
+
+      expect(result).toBe(true);
+      expect(isRunningSpy).toHaveBeenCalledTimes(1);
+      isRunningSpy.mockRestore();
+    });
   });
 
   describe("concurrent init calls", () => {

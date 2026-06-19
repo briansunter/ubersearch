@@ -169,8 +169,8 @@ export class DockerLifecycleManager {
    * @returns true if container is healthy, false otherwise
    */
   async healthcheck(): Promise<boolean> {
-    // Try health endpoint first - works for any running instance
-    // (even if started manually, via different docker-compose, or k8s, etc.)
+    // When a health endpoint is configured, it is the source of truth.
+    // (works for any running instance - manual, different compose, k8s, etc.)
     if (this.config.healthEndpoint) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
@@ -186,13 +186,19 @@ export class DockerLifecycleManager {
       } catch (error) {
         const msg = getErrorMessage(error);
         log.debug(`Health endpoint check failed: ${msg}`);
-        // Fall through to Docker status check
       } finally {
         clearTimeout(timeoutId);
       }
+
+      // Endpoint configured but unreachable/not-ok: report unhealthy.
+      // Do NOT fall back to container status - a running container with an
+      // unreachable endpoint cannot serve searches, and masking that as
+      // "healthy" makes the `health` command misleading.
+      return false;
     }
 
-    // Fall back to Docker container check (needed for auto-start capability)
+    // No endpoint configured: fall back to Docker container status
+    // (needed for auto-start when no HTTP endpoint is available).
     if (this.dockerHelper) {
       const projectRoot = this.config.projectRoot || process.cwd();
       return await this.dockerHelper.isRunning(this.config.containerName, {

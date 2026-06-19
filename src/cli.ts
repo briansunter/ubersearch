@@ -346,13 +346,24 @@ async function runHealthChecks(configPath?: string) {
       // Check if provider implements lifecycle methods
       if (isLifecycleProvider(provider)) {
         try {
-          await provider.healthcheck();
-          results.push({
-            engineId,
-            status: "healthy",
-            message: "Health check passed",
-          });
-          console.log(`✓ ${engineId.padEnd(15)} Healthy`);
+          // healthcheck() returns a boolean (false = unhealthy); it does not
+          // throw on unhealthy, so the return value must be honored.
+          const isHealthy = await provider.healthcheck();
+          if (isHealthy) {
+            results.push({
+              engineId,
+              status: "healthy",
+              message: "Health check passed",
+            });
+            console.log(`✓ ${engineId.padEnd(15)} Healthy`);
+          } else {
+            results.push({
+              engineId,
+              status: "unhealthy",
+              message: "Health check returned unhealthy",
+            });
+            console.log(`✗ ${engineId.padEnd(15)} Unhealthy - health check failed`);
+          }
         } catch (error) {
           const message = getErrorMessage(error);
           results.push({
