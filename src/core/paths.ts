@@ -150,28 +150,25 @@ function getBundledSearxngAssetCandidates(relativePath: string): string[] {
   return [...candidates];
 }
 
-function resolveBundledSearxngAsset(relativePath: string): string {
+function resolveBundledSearxngAsset(relativePath: string): string | undefined {
   const candidates = getBundledSearxngAssetCandidates(relativePath);
-  const existing = candidates.find((candidate) => existsSync(candidate));
-
-  if (existing) {
-    return existing;
-  }
-
-  return candidates[0] ?? join(getPackageRoot(), "providers", "searxng", relativePath);
+  // Return undefined when no bundled asset is present (e.g. running from a
+  // package/checkout that did not ship providers/). Returning a nonexistent
+  // path here would cause a cryptic "no such file" from docker compose later.
+  return candidates.find((candidate) => existsSync(candidate));
 }
 
 /**
  * Get the bundled SearXNG docker-compose file path.
  */
-export function getBundledSearxngComposePath(): string {
+export function getBundledSearxngComposePath(): string | undefined {
   return resolveBundledSearxngAsset("docker-compose.yml");
 }
 
 /**
  * Get the bundled default settings.yml path
  */
-export function getDefaultSettingsPath(): string {
+export function getDefaultSettingsPath(): string | undefined {
   return resolveBundledSearxngAsset(join("config", "settings.yml"));
 }
 
@@ -185,10 +182,11 @@ export function bootstrapSearxngConfig(): boolean {
 
   const defaultSettings = getDefaultSettingsPath();
 
-  // If default settings don't exist, we can't bootstrap
-  if (!existsSync(defaultSettings)) {
+  // If default settings are not bundled, we can't bootstrap
+  if (!defaultSettings || !existsSync(defaultSettings)) {
+    const location = defaultSettings ?? "bundled providers/searxng/config/settings.yml";
     console.warn(
-      `[SearXNG] Default settings not found at ${defaultSettings}. ` +
+      `[SearXNG] Default settings not found at ${location}. ` +
         `Please create ${targetSettings} manually.`,
     );
     return false;

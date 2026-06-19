@@ -12,15 +12,17 @@ describe("core/paths", () => {
   test("should resolve the bundled SearXNG compose file", () => {
     const composePath = getBundledSearxngComposePath();
 
+    expect(composePath).toBeDefined();
     expect(composePath).toContain("providers/searxng/docker-compose.yml");
-    expect(existsSync(composePath)).toBe(true);
+    expect(existsSync(composePath ?? "")).toBe(true);
   });
 
   test("should resolve the bundled SearXNG default settings file", () => {
     const settingsPath = getDefaultSettingsPath();
 
+    expect(settingsPath).toBeDefined();
     expect(settingsPath).toContain("providers/searxng/config/settings.yml");
-    expect(existsSync(settingsPath)).toBe(true);
+    expect(existsSync(settingsPath ?? "")).toBe(true);
   });
 
   test("should expand leading tilde paths", () => {
