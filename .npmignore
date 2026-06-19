@@ -51,8 +51,9 @@ yarn.lock
 .DS_Store
 Thumbs.db
 
-# Provider-specific
-providers/
+# Local dev config (not published). NOTE: providers/ IS published via
+# package.json "files" — do not re-add it here; excluding it would strip the
+# bundled SearXNG docker-compose.yml from releases.
 ubersearch.config.json
 
 # Scripts
