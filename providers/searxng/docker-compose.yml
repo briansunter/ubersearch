@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   searxng:
     image: docker.io/searxng/searxng:latest
@@ -14,8 +12,12 @@ services:
       # Enable JSON API
       - SEARXNG_ENABLE_JSON_API=true
     volumes:
-      - ${SEARXNG_CONFIG}:/etc/searxng:rw
-      - ${SEARXNG_DATA}:/var/cache/searxng:rw
+      # Default to ubersearch's XDG locations so manual `docker compose` invocations
+      # work even when the launcher isn't the one injecting these env vars.
+      # Without a default, an unset variable interpolates to "" and produces a
+      # malformed spec (:/etc/searxng:rw) that fails parsing on every subcommand.
+      - ${SEARXNG_CONFIG:-${HOME}/.config/ubersearch/searxng/config}:/etc/searxng:rw
+      - ${SEARXNG_DATA:-${HOME}/.local/share/ubersearch/searxng/data}:/var/cache/searxng:rw
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/healthz"]
       interval: 30s
